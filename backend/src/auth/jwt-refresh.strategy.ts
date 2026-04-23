@@ -9,11 +9,14 @@ export class JwtRefreshStrategy extends PassportStrategy(
   Strategy,
   'jwt-refresh',
 ) {
-  constructor(private readonly configService: ConfigService) {
+  constructor(configService: ConfigService) {
+    const secret = configService.getOrThrow<string>('jwt.secret');
+
     super({
-      jwtFromRequest: ExtractJwt.fromBodyField('refresh_token'),
-      ignoreExpiration: false,
-      secretOrKey: configService.get<string>('jwt.refreshSecret'),
+      // Đọc access token từ Authorization header (kể cả đã expired)
+      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      ignoreExpiration: true, // Bắt buộc: access token có thể đã hết hạn
+      secretOrKey: secret,
       passReqToCallback: true,
     } as StrategyOptionsWithRequest);
   }
@@ -23,8 +26,15 @@ export class JwtRefreshStrategy extends PassportStrategy(
     payload: { sub: number; username: string },
   ): { sub: number; username: string; refreshToken: string } {
     const refreshToken = (req.body as { refresh_token?: string }).refresh_token;
-    if (!refreshToken)
+
+    if (!refreshToken) {
       throw new UnauthorizedException('Refresh token không tồn tại');
-    return { ...payload, refreshToken };
+    }
+
+    return {
+      sub: payload.sub,
+      username: payload.username,
+      refreshToken,
+    };
   }
 }

@@ -41,10 +41,11 @@ export class AuthController {
   }
 
   // POST /auth/refresh  { refresh_token: "..." }
+  // Dùng custom guard với passport-custom strategy
+  // Strategy sẽ tự extract userId từ access token (kể cả đã expired) + refresh_token từ body
   @UseGuards(AuthGuard('jwt-refresh'))
   @Post('refresh')
   refresh(@Req() req: RequestWithRefresh) {
-    console.log('Refresh token payload:', req.user);
     return this.authService.refreshToken(req.user.sub, req.user.refreshToken);
   }
 

@@ -21,13 +21,16 @@ export const setupInterceptors = (authStore, router) => {
   // REQUEST
   // =========================
   http.interceptors.request.use((config) => {
-    // Đọc từ store trước, fallback localStorage
-    // (phòng trường hợp store chưa restore kịp)
     const token = authStore.accessToken ?? localStorage.getItem('access_token')
+
+    // Khi gọi /auth/refresh: KHÔNG gắn access token (để strategy tự lấy từ header riêng)
+    // Thực ra với strategy mới ta CẦN gửi access token (dù hết hạn) để lấy userId
+    // → Luôn gắn token nếu có, kể cả với /auth/refresh
     if (token) {
       config.headers = config.headers || {}
       config.headers.Authorization = `Bearer ${token}`
     }
+
     return config
   })
 
@@ -39,27 +42,23 @@ export const setupInterceptors = (authStore, router) => {
     async (error) => {
       const original = error.config
 
-      // Lỗi mạng (không có response)
       if (!error.response) return Promise.reject(error)
 
       const status = error.response.status
 
-      //Chính endpoint refresh bị lỗi → logout, không retry vô tận
+      // Refresh fail → logout
       if (original?.url?.includes('/auth/refresh')) {
         authStore.logout(true)
         return Promise.reject(error)
       }
 
-      // Không phải 401 → trả lỗi bình thường
       if (status !== 401) return Promise.reject(error)
 
-      // Đã retry rồi vẫn 401 → logout
       if (original._retry) {
         authStore.logout(true)
         return Promise.reject(error)
       }
 
-      // ✅ Lấy refresh token từ store hoặc localStorage
       const storedRefresh = authStore.refreshToken ?? localStorage.getItem('refresh_token')
 
       if (!storedRefresh) {
@@ -67,16 +66,13 @@ export const setupInterceptors = (authStore, router) => {
         return Promise.reject(error)
       }
 
-      // =========================
-      // ĐANG REFRESH → queue lại
-      // =========================
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject })
         })
           .then((token) => {
-            original.headers = original.headers || {}
-            original.headers.Authorization = `Bearer ${token}`
+            // Fix: dùng spread thay vì gán trực tiếp để tránh lỗi nếu headers undefined
+            original.headers = { ...(original.headers || {}), Authorization: `Bearer ${token}` }
             return http(original)
           })
           .catch((err) => Promise.reject(err))
@@ -86,18 +82,14 @@ export const setupInterceptors = (authStore, router) => {
       isRefreshing = true
 
       try {
-        // ✅ Đảm bảo store có refreshToken trước khi gọi
-        if (!authStore.refreshToken) {
-          authStore.refreshToken = storedRefresh
-        }
-
         const newToken = await authStore.refresh()
-        if (!newToken) throw new Error('Refresh failed: no token returned')
+
+        if (!newToken) throw new Error('Refresh failed')
 
         processQueue(null, newToken)
 
-        original.headers = original.headers || {}
-        original.headers.Authorization = `Bearer ${newToken}`
+        // Fix: dùng spread thay vì gán trực tiếp
+        original.headers = { ...(original.headers || {}), Authorization: `Bearer ${newToken}` }
         return http(original)
       } catch (err) {
         processQueue(err, null)
