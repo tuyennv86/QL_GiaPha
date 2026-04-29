@@ -5,7 +5,10 @@ import {
   ManyToOne,
   OneToMany,
   JoinColumn,
+  ManyToMany,
+  JoinTable,
 } from 'typeorm';
+import { Permission } from './permission.entity';
 
 @Entity('menu_items')
 export class MenuItem {
@@ -27,6 +30,7 @@ export class MenuItem {
   @Column({ nullable: false })
   icon: string;
 
+  // TREE
   @ManyToOne(() => MenuItem, (m) => m.children, {
     nullable: true,
     onDelete: 'SET NULL',
@@ -36,4 +40,19 @@ export class MenuItem {
 
   @OneToMany(() => MenuItem, (m) => m.parent)
   children: MenuItem[];
+
+  // QUAN TRỌNG NHẤT
+  @ManyToMany(() => Permission, (p) => p.menus)
+  @JoinTable({
+    name: 'menu_permissions',
+    joinColumn: {
+      name: 'menu_id',
+      referencedColumnName: 'id',
+    },
+    inverseJoinColumn: {
+      name: 'permission_id',
+      referencedColumnName: 'id',
+    },
+  })
+  permissions: Permission[];
 }

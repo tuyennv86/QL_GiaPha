@@ -12,8 +12,11 @@ import { User } from '../entities/user.entity';
 import { UserRole } from '../entities/user-role.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { UserResponse, UserResponseList } from 'src/response/users.respones';
-import { UserViewResponse } from 'src/response/user.view.response';
+import {
+  UserResponse,
+  UserResponseList,
+} from 'src/response/users/user.respones';
+import { UserViewResponse } from 'src/response/users/user.view.response';
 
 @Injectable()
 export class UsersService {

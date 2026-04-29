@@ -16,7 +16,7 @@ import { StringValue } from 'ms';
 import { User } from '../entities/user.entity';
 import { UserRole } from '../entities/user-role.entity';
 import { RolePermission } from '../entities/role-permission.entity';
-import { UserBranchPermission } from '../entities/user-branch-permission.entity';
+import { UserBranchRoles } from '../entities/user-branch-roles.entity';
 import { RefreshToken } from '../entities/refresh-token.entity';
 
 import { LoginDto } from './dto/login.dto';
@@ -40,8 +40,8 @@ export class AuthService {
     @InjectRepository(RolePermission)
     private readonly rolePermRepo: Repository<RolePermission>,
 
-    @InjectRepository(UserBranchPermission)
-    private readonly branchPermRepo: Repository<UserBranchPermission>,
+    @InjectRepository(UserBranchRoles)
+    private readonly branchPermRepo: Repository<UserBranchRoles>,
 
     @InjectRepository(RefreshToken)
     private readonly refreshTokenRepo: Repository<RefreshToken>,

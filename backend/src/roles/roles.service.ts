@@ -9,6 +9,10 @@ import { Role } from '../entities/role.entity';
 import { RolePermission } from '../entities/role-permission.entity';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
+import {
+  RoleResponse,
+  RoleResponseList,
+} from 'src/response/roles/role.response';
 
 @Injectable()
 export class RolesService {
@@ -20,8 +24,57 @@ export class RolesService {
     private readonly rolePermRepo: Repository<RolePermission>,
   ) {}
 
-  findAll(): Promise<Role[]> {
-    return this.roleRepo.find({ order: { id: 'ASC' } });
+  async findAll(): Promise<Role[]> {
+    return await this.roleRepo.find({ order: { id: 'ASC' } });
+  }
+
+  async search(
+    page: number,
+    limit: number,
+    search?: string,
+  ): Promise<RoleResponseList> {
+    // COUNT riêng (không join)
+    const countQuery = this.roleRepo.createQueryBuilder('role');
+
+    if (search) {
+      countQuery
+        .where('role.role_name LIKE :search', { search: `%${search}%` })
+        .orWhere('role.description LIKE :search', { search: `%${search}%` });
+    }
+
+    const total = await countQuery.getCount();
+
+    // DATA query
+    const query = this.roleRepo
+      .createQueryBuilder('role')
+      .leftJoinAndSelect('role.role_permissions', 'rp')
+      .leftJoinAndSelect('rp.permission', 'permission');
+
+    if (search) {
+      query
+        .where('role.role_name LIKE :search', { search: `%${search}%` })
+        .orWhere('role.description LIKE :search', { search: `%${search}%` });
+    }
+
+    const roles = await query
+      .orderBy('role.id', 'ASC')
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getMany();
+
+    // MAP DTO
+    const items: RoleResponse[] = roles.map((r) => ({
+      id: r.id,
+      role_name: r.role_name,
+      description: r.description,
+      permissions: (r.role_permissions || []).map((rp) => ({
+        id: rp.permission?.id,
+        permission_code: rp.permission?.permission_code,
+        permission_name: rp.permission?.permission_name,
+      })),
+    }));
+
+    return { items, total, page, limit };
   }
 
   async findOne(id: number): Promise<Role> {

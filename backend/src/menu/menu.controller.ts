@@ -26,6 +26,7 @@ export class MenuController {
   // Menu được lọc theo quyền của user hiện tại
   @Get('my-menu')
   getMyMenu(@Req() req: RequestWithUser) {
+    // console.log('User login:', req.user);
     return this.menuService.getMenuForUser(
       req.user.permissions,
       req.user.roles,

@@ -1,12 +1,20 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  OneToMany,
+  ManyToMany,
+} from 'typeorm';
 import { RolePermission } from './role-permission.entity';
+import { MenuItem } from './menu-item.entity';
+import { PermissionScope } from 'src/permissions/require-permissions.decorator';
 
 @Entity('permissions')
 export class Permission {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ unique: true, length: 100, nullable: true })
+  @Column({ unique: true, length: 100 })
   permission_code: string;
 
   @Column({ length: 200, nullable: true })
@@ -15,6 +23,19 @@ export class Permission {
   @Column({ length: 500, nullable: true })
   description: string;
 
+  // 🔥 QUAN TRỌNG
+  @Column({
+    type: 'enum',
+    enum: PermissionScope,
+    default: PermissionScope.BRANCH,
+  })
+  scope: PermissionScope;
+
+  // role mapping
   @OneToMany(() => RolePermission, (rp) => rp.permission)
   role_permissions: RolePermission[];
+
+  // map menu_permissions
+  @ManyToMany(() => MenuItem, (menu) => menu.permissions)
+  menus: MenuItem[];
 }

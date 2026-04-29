@@ -12,7 +12,7 @@ import { JwtRefreshStrategy } from './jwt-refresh.strategy';
 import { User } from '../entities/user.entity';
 import { UserRole } from '../entities/user-role.entity';
 import { RolePermission } from '../entities/role-permission.entity';
-import { UserBranchPermission } from '../entities/user-branch-permission.entity';
+import { UserBranchRoles } from '../entities/user-branch-roles.entity';
 import { RefreshToken } from '../entities/refresh-token.entity';
 
 @Module({
@@ -32,7 +32,7 @@ import { RefreshToken } from '../entities/refresh-token.entity';
       User,
       UserRole,
       RolePermission,
-      UserBranchPermission,
+      UserBranchRoles,
       RefreshToken,
     ]),
   ],

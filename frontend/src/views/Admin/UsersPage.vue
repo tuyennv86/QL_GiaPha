@@ -204,8 +204,8 @@ const openEdit = async (user) => {
 
 //save user
 const handleSave = async ({ form, isEdit }) => {
-    console.log("Edit :", isEdit);
-    console.log('Form', form);
+    // console.log("Edit :", isEdit);
+    // console.log('Form', form);
     if (isEdit) {
         try {
             // remote password và username

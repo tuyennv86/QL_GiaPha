@@ -4,7 +4,7 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { Permission } from '../entities/permission.entity';
 import { CreatePermissionDto } from './dto/create-permission.dto';
 import { UpdatePermissionDto } from './dto/update-permission.dto';
@@ -16,8 +16,8 @@ export class PermissionsService {
     private readonly permRepo: Repository<Permission>,
   ) {}
 
-  findAll(): Promise<Permission[]> {
-    return this.permRepo.find({ order: { permission_code: 'ASC' } });
+  async findAll(): Promise<Permission[]> {
+    return this.permRepo.find({ order: { id: 'ASC' } });
   }
 
   async findOne(id: number): Promise<Permission> {
@@ -44,5 +44,34 @@ export class PermissionsService {
     const perm = await this.findOne(id);
     await this.permRepo.remove(perm);
     return { message: 'Xoá permission thành công' };
+  }
+
+  // mở rộng quyền: nếu có create/edit/delete thì tự động thêm view
+  expand(perms: string[]): string[] {
+    const result = new Set(perms);
+
+    for (const perm of perms) {
+      const parts = perm.split('.');
+      if (parts.length !== 2) continue;
+
+      const [resource, action] = parts;
+
+      if (['create', 'edit', 'delete'].includes(action)) {
+        result.add(`${resource}.view`);
+      }
+    }
+
+    return Array.from(result);
+  }
+
+  async getScopesByCodes(codes: string[]): Promise<string[]> {
+    if (!codes?.length) return [];
+
+    const perms = await this.permRepo.find({
+      where: { scope: In(codes) },
+      select: ['scope'],
+    });
+
+    return perms.map((p) => p.scope);
   }
 }

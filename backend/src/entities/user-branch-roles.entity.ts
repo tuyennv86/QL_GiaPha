@@ -5,11 +5,11 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { User } from './user.entity';
+// import { User } from './user.entity';
 import { Role } from './role.entity';
 
-@Entity('user_branch_permissions')
-export class UserBranchPermission {
+@Entity('user_branch_roles')
+export class UserBranchRoles {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -22,9 +22,9 @@ export class UserBranchPermission {
   @Column()
   role_id: number;
 
-  @ManyToOne(() => User, (u) => u.branch_permissions)
-  @JoinColumn({ name: 'user_id' })
-  user: User;
+  // @ManyToOne(() => User, (u) => u.branch_roles)
+  // @JoinColumn({ name: 'user_id' })
+  // user: User;
 
   @ManyToOne(() => Role)
   @JoinColumn({ name: 'role_id' })

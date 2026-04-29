@@ -8,7 +8,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { UserRole } from './user-role.entity';
-import { UserBranchPermission } from './user-branch-permission.entity';
+// import { UserBranchRoles } from './user-branch-roles.entity';
 import { RefreshToken } from './refresh-token.entity';
 import { Family } from './family.entity';
 
@@ -51,8 +51,8 @@ export class User {
   @OneToMany(() => UserRole, (ur) => ur.user)
   user_roles: UserRole[];
 
-  @OneToMany(() => UserBranchPermission, (ubp) => ubp.user)
-  branch_permissions: UserBranchPermission[];
+  // @OneToMany(() => UserBranchRoles, (ubp) => ubp.user)
+  // branch_roles: UserBranchRoles[];
 
   @OneToMany(() => RefreshToken, (rt) => rt.user)
   refresh_tokens: RefreshToken[];

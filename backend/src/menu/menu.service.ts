@@ -6,6 +6,8 @@ import { MenuPermission } from '../entities/menu-permission.entity';
 import { CreateMenuItemDto } from './dto/create-menu-item.dto';
 import { UpdateMenuItemDto } from './dto/update-menu-item.dto';
 import { TreeUtil } from './tree-builder.util';
+import { PermissionsService } from 'src/permissions/permissions.service';
+import { PermissionScope } from 'src/permissions/require-permissions.decorator';
 
 type MenuNode = MenuItem & { children: MenuNode[] };
 
@@ -17,6 +19,7 @@ export class MenuService {
 
     @InjectRepository(MenuPermission)
     private readonly menuPermRepo: Repository<MenuPermission>,
+    private readonly permissionService: PermissionsService,
   ) {}
 
   findAll(): Promise<MenuItem[]> {
@@ -38,23 +41,51 @@ export class MenuService {
     permissionCodes: string[],
     roles: string[],
   ): Promise<MenuItem[]> {
-    const isAdmin =
-      roles.some((role) => role?.toLowerCase() === 'admin') ?? false;
+    const isAdmin = roles?.some((r) => r?.toLowerCase() === 'admin');
+    const isBranchAdmin = roles?.some(
+      (r) => r?.toLowerCase() === 'branch admin',
+    );
+
+    // load full menu + permissions
+    const menus = await this.menuRepo.find({
+      relations: ['permissions'],
+      order: { sort_order: 'ASC' },
+    });
+
+    // ADMIN → full
     if (isAdmin) {
-      const menus = await this.menuRepo.find({});
       return TreeUtil.buildTree(menus);
     }
 
-    const menus = await this.menuRepo
-      .createQueryBuilder('m')
-      .leftJoin('menu_permissions', 'mp', 'mp.menu_id = m.id')
-      .leftJoin('permissions', 'p', 'p.id = mp.permission_id')
-      .where('mp.id IS NULL OR p.permission_code IN (:...codes)', {
-        codes: permissionCodes,
-      })
-      .orderBy('m.sort_order', 'ASC')
-      .getMany();
-    return TreeUtil.buildTree(menus);
+    // Nếu có các quyền nào đó → mở rộng ra full list quyền (ví dụ: có 'user.create' → thêm quyền 'user.view')
+    const userPerms = new Set(
+      this.permissionService.expand(permissionCodes ?? []),
+    );
+
+    // FILTER
+    const filtered = menus.filter((menu) => {
+      // menu public
+      if (!menu.permissions || menu.permissions.length === 0) {
+        return true;
+      }
+
+      // BRANCH ADMIN: chặn global
+      if (isBranchAdmin) {
+        const hasGlobal = menu.permissions.some(
+          (p) => p.scope === PermissionScope.GLOBAL,
+        );
+
+        if (hasGlobal) return false;
+
+        // branch admin có full branch → không cần check permissionCodes
+        return true;
+      }
+
+      // USER thường → phải có permission
+      return menu.permissions.some((p) => userPerms.has(p.permission_code));
+    });
+
+    return TreeUtil.buildTree(filtered);
   }
 
   async create(dto: CreateMenuItemDto): Promise<MenuItem> {

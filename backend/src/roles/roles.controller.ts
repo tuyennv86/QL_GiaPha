@@ -7,6 +7,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { RolesService } from './roles.service';
@@ -26,6 +27,16 @@ export class RolesController {
   @RequirePermissions('role.view')
   findAll() {
     return this.rolesService.findAll();
+  }
+
+  @Get('search')
+  @RequirePermissions('role.view')
+  search(
+    @Query('page') page: string = '1',
+    @Query('limit') limit: string = '10',
+    @Query('search') search?: string,
+  ) {
+    return this.rolesService.search(Number(page), Number(limit), search);
   }
 
   @Get(':id')
