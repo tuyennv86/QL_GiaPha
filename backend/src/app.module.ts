@@ -13,8 +13,8 @@ import { RolesModule } from './roles/roles.module';
 import { PermissionsModule } from './permissions/permissions.module';
 import { MenuModule } from './menu/menu.module';
 import { FamilyModule } from './family/family.module';
-import { PersionModule } from './persion/persion.module';
 import { MariageModule } from './mariage/mariage.module';
+import { PersonModule } from './person/person.module';
 
 @Module({
   imports: [
@@ -36,8 +36,8 @@ import { MariageModule } from './mariage/mariage.module';
     PermissionsModule,
     MenuModule,
     FamilyModule,
-    PersionModule,
     MariageModule,
+    PersonModule,
   ],
   // controllers: [AppController],
   // providers: [AppService],

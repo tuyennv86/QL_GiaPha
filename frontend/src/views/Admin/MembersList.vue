@@ -12,11 +12,12 @@
                 </div>
                 <div class="flex gap-8">
                     <button class="btn btn-secondary btn-sm">
-                        ⬇ Xuất Excel
+                        <i class="far fa-file-excel text-red"></i>⬇ Xuất Excel
                     </button>
-                    <button class="btn btn-secondary btn-sm">📤 Import</button>
+                    <button class="btn btn-secondary btn-sm"><i class="fas fa-file-import text-green"></i>
+                        Import</button>
                     <button class="btn btn-primary btn-sm">
-                        + Thêm Thành Viên
+                        <i class="fas fa-plus"></i> Thêm Thành Viên
                     </button>
                 </div>
             </div>
@@ -42,14 +43,15 @@
                         <option value="">Tất cả giới tính</option>
                         <option>Nam</option>
                         <option>Nữ</option>
+                        <option>Khác</option>
                     </select>
                     <select class="f-select" style="width: auto; padding: 8px 12px">
                         <option value="">Tất cả tình trạng</option>
                         <option value="living">Còn sống</option>
                         <option value="deceased">Đã mất</option>
                     </select>
-                    <button class="btn btn-ghost btn-sm">
-                        ↺ Reset
+                    <button class="btn btn-secondary btn-sm">
+                        <i class="fas fa-search"></i> Tìm kiếm
                     </button>
                 </div>
             </div>
@@ -60,12 +62,13 @@
             <div class="card-body" style="padding: 12px 20px">
                 <div class="flex-center gap-12">
                     <span class="text-gold fw-6">10 đã chọn</span>
-                    <button class="btn btn-secondary btn-sm">📋 Xuất Chọn</button>
+                    <button class="btn btn-secondary btn-sm"><i class="far fa-file-excel"></i> Xuất
+                        Chọn</button>
                     <button class="btn btn-danger btn-sm">
-                        🗑 Xoá Chọn
+                        <i class="fas fa-trash"></i> Xoá Chọn
                     </button>
                     <button class="btn btn-ghost btn-sm">
-                        Bỏ chọn
+                        <i class="fas fa-tasks"></i> Bỏ chọn
                     </button>
                 </div>
             </div>
@@ -105,9 +108,15 @@
                         <td class="text-secondary">Nông dân</td>
                         <td><span class="badge b-gray">○ Mất</span></td>
                         <td>
-                            <div class="flex gap-4"><button class="btn btn-ghost btn-xs"> ✏️ </button><button
+                            <!-- <div class="flex gap-4"><button class="btn btn-ghost btn-xs"> ✏️ </button><button
                                     class="btn btn-ghost btn-xs"> 👁 </button><button class="btn btn-danger btn-xs"> 🗑
-                                </button></div>
+                                </button></div> -->
+                            <button class="btn btn-ghost btn-xs text-gold" @click.prevent="openEdit(user)"> <i
+                                    class="fas fa-pen"></i> </button>
+                            <button class="btn btn-ghost btn-xs text-green" @click.prevent="openView(user)"> <i
+                                    class="fas fa-eye"></i> </button>
+                            <button class="btn btn-danger btn-xs" @click.prevent="deleteUser(user.id)"><i
+                                    class="fas fa-trash"></i></button>
                         </td>
                     </tr>
                     <tr>

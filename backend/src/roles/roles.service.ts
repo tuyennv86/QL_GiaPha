@@ -9,8 +9,9 @@ import { Role } from 'src/roles/entities/role.entity';
 import { RolePermission } from 'src/roles/entities/role-permission.entity';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
-import { RoleResponse, RoleResponseList } from './response/role.response';
+import { RoleResponseList } from './response/role.response';
 import { RoleSumUserResponse } from 'src/roles/response/role.sumuser.response';
+import { RoleMapper } from './mapper/role.mapper';
 
 @Injectable()
 export class RolesService {
@@ -75,19 +76,7 @@ export class RolesService {
       .take(limit)
       .getMany();
 
-    // MAP DTO
-    const items: RoleResponse[] = roles.map((r) => ({
-      id: r.id,
-      role_name: r.role_name,
-      description: r.description,
-      permissions: (r.role_permissions || []).map((rp) => ({
-        id: rp.permission?.id,
-        permission_code: rp.permission?.permission_code,
-        permission_name: rp.permission?.permission_name,
-      })),
-    }));
-
-    return { items, total, page, limit };
+    return RoleMapper.toResponseList(roles, total, page, limit);
   }
 
   async findOne(id: number): Promise<Role> {
