@@ -4,13 +4,15 @@ import { ExtractJwt, Strategy, StrategyOptions } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from '../entities/user.entity';
+import { User } from '../users/entities/user.entity';
 import { JwtPayload } from '../common/interfaces/request-with-user.interface';
+import { AuthService } from './auth.service';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor(
-    private readonly configService: ConfigService,
+    configService: ConfigService,
+    private readonly authService: AuthService,
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
   ) {
@@ -44,11 +46,15 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       ],
     });
 
-    if (!user || !user.is_active) {
+    if (!user || !user.is_active)
       throw new UnauthorizedException(
         'Tài khoản không hợp lệ hoặc đã bị vô hiệu hóa',
       );
-    }
+
+    // Query branch permissions mỗi request
+    const branchPermissions = await this.authService.getBranchPermissions(
+      payload.sub,
+    );
 
     return {
       id: user.id,
@@ -59,6 +65,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       family_id: user.family_id,
       roles: payload.roles,
       permissions: payload.permissions,
+      branch_permissions: branchPermissions,
     };
   }
 }

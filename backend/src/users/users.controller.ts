@@ -33,6 +33,22 @@ export class UsersController {
     return this.usersService.findAll(Number(page), Number(limit), search);
   }
 
+  @Get('getAllByRole')
+  @RequirePermissions('user.view')
+  getAllByRole(
+    @Query('roleId') roleId: string = '0',
+    @Query('page') page: string = '1',
+    @Query('limit') limit: string = '10',
+    @Query('search') search?: string,
+  ) {
+    return this.usersService.getAllByRole(
+      Number(roleId),
+      Number(page),
+      Number(limit),
+      search,
+    );
+  }
+
   @Get(':id')
   @RequirePermissions('user.view')
   findOne(@Param('id', ParseIntPipe) id: number) {

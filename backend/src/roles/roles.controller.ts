@@ -39,6 +39,12 @@ export class RolesController {
     return this.rolesService.search(Number(page), Number(limit), search);
   }
 
+  @Get('rolesWithUserCount')
+  @RequirePermissions('role.view')
+  getRolesWithUserCount() {
+    return this.rolesService.getRolesWithUserCount();
+  }
+
   @Get(':id')
   @RequirePermissions('role.view')
   findOne(@Param('id', ParseIntPipe) id: number) {

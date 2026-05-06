@@ -7,7 +7,6 @@ export const useUserStore = defineStore('user', () => {
   const error = ref(null)
 
   const users = ref([])
-  //const user = ref(null)
   const total = ref(0)
 
   const getAll = async (page, limit, search) => {
@@ -24,6 +23,19 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
+  const getAllByRole = async (roleId, page, limit, search) => {
+    loading.value = true
+    error.value = null
+    try {
+      const data = await userService.getAllByRole(roleId, page, limit, search)
+      total.value = data.total
+      users.value = data.items
+    } catch (err) {
+      error.value = err.message
+    } finally {
+      loading.value = false
+    }
+  }
   const updateActive = async (id) => {
     loading.value = true
     error.value = null
@@ -112,7 +124,9 @@ export const useUserStore = defineStore('user', () => {
     error,
     users,
     total,
+
     getAll,
+    getAllByRole,
     updateActive,
     deleteUser,
     getById,

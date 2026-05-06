@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
-import { Permission } from '../entities/permission.entity';
+import { Permission } from './entities/permission.entity';
 import { CreatePermissionDto } from './dto/create-permission.dto';
 import { UpdatePermissionDto } from './dto/update-permission.dto';
 
@@ -68,7 +68,7 @@ export class PermissionsService {
     if (!codes?.length) return [];
 
     const perms = await this.permRepo.find({
-      where: { scope: In(codes) },
+      where: { permission_code: In(codes) },
       select: ['scope'],
     });
 

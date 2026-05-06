@@ -7,12 +7,28 @@ const routes = [
     path: '/',
     component: LayoutLoader,
     children: [
-      // Admin
+      // ── Admin ────────────────────────────────────────────────────────────────
       {
         path: '/admin/dashboard',
         name: 'Dashboard',
         component: () => import('@/views/Admin/DashboardPage.vue'),
-        meta: { requiresAuth: true, layout: 'admin', title: 'Admin Panel - Gia phả số' },
+        meta: {
+          requiresAuth: true,
+          layout: 'admin',
+          title: 'Admin Panel - Gia phả số',
+          // Dashboard: ai login cũng xem được, không cần permission riêng
+        },
+      },
+      {
+        path: '/admin/events',
+        name: 'Events',
+        component: () => import('@/views/Admin/EvensPage.vue'),
+        meta: {
+          requiresAuth: true,
+          layout: 'admin',
+          title: 'Admin Panel - Danh sách các sự kiện',
+          permissions: ['event.view'],
+        },
       },
       {
         path: '/admin/members',
@@ -22,55 +38,74 @@ const routes = [
           requiresAuth: true,
           layout: 'admin',
           title: 'Admin Panel - Danh sách các thành viên',
+          permissions: ['member.view'],
         },
-      },
-      {
-        path: '/admin/events',
-        name: 'Events',
-        component: () => import('@/views/Admin/EvensPage.vue'),
-        meta: { requiresAuth: true, layout: 'admin', title: 'Admin Panel - Danh sách các sự kiện' },
-      },
-      {
-        path: '/admin/activity',
-        name: 'Activity',
-        component: () => import('@/views/Admin/ActivityLogPage.vue'),
-        meta: { requiresAuth: true, layout: 'admin', title: 'Admin Panel - Nhật ký hoạt động' },
       },
       {
         path: '/admin/media',
         name: 'Media',
         component: () => import('@/views/Admin/MediasPage.vue'),
-        meta: { requiresAuth: true, layout: 'admin', title: 'Admin Panel - Media' },
+        meta: {
+          requiresAuth: true,
+          layout: 'admin',
+          title: 'Admin Panel - Media',
+          permissions: ['media.view'],
+        },
       },
       {
         path: '/admin/users',
         name: 'Users',
         component: () => import('@/views/Admin/UsersPage.vue'),
-        meta: { requiresAuth: true, layout: 'admin', title: 'Admin Panel - Quản trị người dùng' },
+        meta: {
+          requiresAuth: true,
+          layout: 'admin',
+          title: 'Admin Panel - Quản trị người dùng',
+          permissions: ['user.view'],
+        },
       },
       {
         path: '/admin/roles',
         name: 'Roles',
         component: () => import('@/views/Admin/RolesPage.vue'),
-        meta: { requiresAuth: true, layout: 'admin', title: 'Admin Panel - Vai trò người dùng' },
+        meta: {
+          requiresAuth: true,
+          layout: 'admin',
+          title: 'Admin Panel - Vai trò người dùng',
+          permissions: ['role.view'],
+        },
       },
       {
         path: '/admin/premissions',
         name: 'premissions',
         component: () => import('@/views/Admin/PremissionsPage.vue'),
-        meta: { requiresAuth: true, layout: 'admin', title: 'Admin Panel - Phân quyền người dùng' },
+        meta: {
+          requiresAuth: true,
+          layout: 'admin',
+          title: 'Admin Panel - Phân quyền người dùng',
+          permissions: ['permission.view'],
+        },
       },
       {
         path: '/admin/approval',
         name: 'Approval',
         component: () => import('@/views/Admin/ApprovalPage.vue'),
-        meta: { requiresAuth: true, layout: 'admin', title: 'Admin Panel - Duyệt yêu cầu' },
+        meta: {
+          requiresAuth: true,
+          layout: 'admin',
+          title: 'Admin Panel - Duyệt yêu cầu',
+          permissions: ['approval.view'],
+        },
       },
       {
         path: '/admin/settings',
         name: 'Settings',
         component: () => import('@/views/Admin/SettingsPage.vue'),
-        meta: { requiresAuth: true, layout: 'admin', title: 'Admin Panel - Cài đặt hệ thống' },
+        meta: {
+          requiresAuth: true,
+          layout: 'admin',
+          title: 'Admin Panel - Cài đặt hệ thống',
+          roles: ['Admin'], // Cài đặt hệ thống: chỉ Admin
+        },
       },
       {
         path: '/admin/backup',
@@ -80,13 +115,19 @@ const routes = [
           requiresAuth: true,
           layout: 'admin',
           title: 'Admin Panel - Sao lưu và phục hồi hệ thống',
+          roles: ['Admin'], // Backup: chỉ Admin
         },
       },
       {
         path: '/admin/security',
         name: 'Security',
         component: () => import('@/views/Admin/SecurityPage.vue'),
-        meta: { requiresAuth: true, layout: 'admin', title: 'Admin Panel - Bảo mật hệ thống' },
+        meta: {
+          requiresAuth: true,
+          layout: 'admin',
+          title: 'Admin Panel - Bảo mật hệ thống',
+          roles: ['Admin'], // Security: chỉ Admin
+        },
       },
       {
         path: '/admin/403',
@@ -95,7 +136,7 @@ const routes = [
         meta: { layout: 'admin', requiresAuth: true, title: '403 bạn không có quyền truy cập' },
       },
 
-      // Auth
+      // ── Auth ─────────────────────────────────────────────────────────────────
       {
         path: '/auth/login',
         name: 'Login',
@@ -103,7 +144,7 @@ const routes = [
         meta: { layout: 'auth', title: 'Đăng nhập' },
       },
 
-      // Home
+      // ── Home ─────────────────────────────────────────────────────────────────
       {
         path: '',
         name: 'Home',
@@ -111,7 +152,7 @@ const routes = [
         meta: { layout: 'home', title: 'Trang chủ gia phả dòng họ' },
       },
 
-      // Redirects
+      // ── Redirects ─────────────────────────────────────────────────────────────
       { path: '/auth', redirect: { name: 'Login' } },
       { path: '/admin', redirect: { name: 'Dashboard' } },
       { path: '/:pathMatch(.*)*', redirect: '/auth/login' },
@@ -124,9 +165,9 @@ const router = createRouter({
   routes,
 })
 
-// =========================
+// =============================================================================
 // NAVIGATION GUARD
-// =========================
+// =============================================================================
 router.beforeEach((to) => {
   const auth = useAuthStore()
 
@@ -135,21 +176,26 @@ router.beforeEach((to) => {
     return '/admin'
   }
 
-  //Route cần login: check accessToken (đã restore từ localStorage)
-  //KHÔNG cần check auth.user vì initAuth() đã chạy xong trước khi
-  //router được mount (xem main.js)
+  // Route cần login: check accessToken (đã restore từ localStorage)
   if (to.meta.requiresAuth && !auth.accessToken) {
     return '/auth/login'
   }
 
-  //Check global permission
-  if (to.meta.permissions) {
-    if (!auth.hasPermission(to.meta.permissions)) {
-      return '/admin/403'
-    }
+  // ── Check role (ví dụ: roles: ['Admin']) ──────────────────────────────────
+  // Nếu route yêu cầu role cụ thể, user phải có ít nhất 1 trong số đó
+  if (to.meta.roles?.length) {
+    const hasRequiredRole = to.meta.roles.some((r) => auth.hasRole(r))
+    if (!hasRequiredRole) return '/admin/403'
   }
 
-  //Check branch permission
+  // ── Check global permission ───────────────────────────────────────────────
+  // Nếu route yêu cầu permission, user phải có TẤT CẢ (every)
+  if (to.meta.permissions?.length) {
+    const hasAll = to.meta.permissions.every((p) => auth.hasPermission(p))
+    if (!hasAll) return '/admin/403'
+  }
+
+  // ── Check branch permission ───────────────────────────────────────────────
   if (to.meta.branchPermission) {
     if (!auth.hasBranchPermission(to.meta.branchPermission)) {
       return '/admin/403'

@@ -23,6 +23,11 @@
                         <span style="color: var(--text-dim)">🔍</span>
                         <input placeholder="Nhập thông tin tìm kiếm..." v-model="search" />
                     </div>
+                    <select class="f-select" style="width: auto; padding: 8px 12px" v-model="roleId">
+                        <option :value="0">Tất cả các vai trò</option>
+                        <option v-for="role in roleStore.roles" :key="role.id" :value="role.id">{{ role.role_name }}
+                        </option>
+                    </select>
                     <button class="btn btn-danger btn-sm" @click="loadData">
                         <i class="fas fa-search"></i> Tìm kiếm
                     </button>
@@ -122,6 +127,7 @@ const { showConfirm } = useConfirm();
 const page = ref(1);
 const limit = ref(10);// tổng số trang trên 1 bản ghi
 const search = ref("");
+const roleId = ref("0");
 
 const showPanel = ref(false);
 const selectedUser = ref(null);
@@ -134,7 +140,7 @@ const roleStore = useRoleStore();
 const familyStore = useFamilyStore();
 
 const loadData = async () => {
-    await userStore.getAll(page.value, limit.value, search.value);
+    await userStore.getAllByRole(roleId.value, page.value, limit.value, search.value);
 }
 
 watch(search, () => {

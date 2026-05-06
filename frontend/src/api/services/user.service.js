@@ -6,6 +6,12 @@ const getAll = async (page, limit, search) => {
   })
   return res.data
 }
+const getAllByRole = async (roleId, page, limit, search) => {
+  const res = await http.get('users/getAllByRole', {
+    params: { roleId, page, limit, search },
+  })
+  return res.data
+}
 const updateActive = async (id) => {
   const res = await http.patch(`users/${id}/updateActive`)
   return res.data
@@ -37,11 +43,13 @@ const saveUser = async (id, user) => {
 }
 
 export default {
-  updateActive,
   getAll,
-  deleteUser,
+  getAllByRole,
   getById,
   viewUser,
+
+  deleteUser,
+  updateActive,
   saveUser,
   addUser,
 }

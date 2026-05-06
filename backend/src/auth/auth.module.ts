@@ -9,11 +9,11 @@ import { AuthService } from './auth.service';
 import { JwtStrategy } from './jwt.strategy';
 import { JwtRefreshStrategy } from './jwt-refresh.strategy';
 
-import { User } from '../entities/user.entity';
-import { UserRole } from '../entities/user-role.entity';
-import { RolePermission } from '../entities/role-permission.entity';
-import { UserBranchRoles } from '../entities/user-branch-roles.entity';
-import { RefreshToken } from '../entities/refresh-token.entity';
+import { User } from '../users/entities/user.entity';
+import { UserRole } from '../users/entities/user-role.entity';
+import { RolePermission } from '../roles/entities/role-permission.entity';
+import { UserBranchRoles } from '../users/entities/user-branch-roles.entity';
+import { RefreshToken } from './entities/refresh-token.entity';
 
 @Module({
   imports: [
@@ -38,6 +38,6 @@ import { RefreshToken } from '../entities/refresh-token.entity';
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy, JwtRefreshStrategy],
-  exports: [AuthService],
+  exports: [AuthService, JwtStrategy],
 })
 export class AuthModule {}

@@ -13,11 +13,11 @@ import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { StringValue } from 'ms';
 
-import { User } from '../entities/user.entity';
-import { UserRole } from '../entities/user-role.entity';
-import { RolePermission } from '../entities/role-permission.entity';
-import { UserBranchRoles } from '../entities/user-branch-roles.entity';
-import { RefreshToken } from '../entities/refresh-token.entity';
+import { User } from '../users/entities/user.entity';
+import { UserRole } from '../users/entities/user-role.entity';
+import { RolePermission } from '../roles/entities/role-permission.entity';
+import { UserBranchRoles } from '../users/entities/user-branch-roles.entity';
+import { RefreshToken } from './entities/refresh-token.entity';
 
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
@@ -82,7 +82,7 @@ export class AuthService {
     };
   }
 
-  // ─── Login ────────────────────────────────────────────────────────────────
+  // ─── Login ─────────────────────────────────────────────────────────────────
   async login(dto: LoginDto) {
     const user = await this.userRepo.findOne({
       where: { username: dto.username },

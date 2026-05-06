@@ -8,15 +8,12 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Brackets, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 
-import { User } from '../entities/user.entity';
-import { UserRole } from '../entities/user-role.entity';
+import { User } from './entities/user.entity';
+import { UserRole } from './entities/user-role.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import {
-  UserResponse,
-  UserResponseList,
-} from 'src/response/users/user.respones';
-import { UserViewResponse } from 'src/response/users/user.view.response';
+import { UserViewResponse } from 'src/users/response/user.view.response';
+import { UserResponse, UserResponseList } from './response/user.respones';
 
 @Injectable()
 export class UsersService {
@@ -50,6 +47,85 @@ export class UsersService {
             .orWhere('users.phone ILIKE :keyword', { keyword });
         }),
       );
+    }
+
+    const total = await db.getCount();
+
+    const users = await db
+      .select([
+        'users.id',
+        'users.username',
+        'users.full_name',
+        'users.email',
+        'users.phone',
+        'users.family_id',
+        'users.is_active',
+        'users.created_at',
+        'users.last_login',
+        'ur.id',
+        'roles.id',
+        'roles.role_name',
+        'family.id',
+        'family.family_name',
+      ])
+      .orderBy('users.created_at', 'DESC')
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getMany();
+
+    const items: UserResponse[] = users.map((u) => ({
+      id: u.id,
+      username: u.username,
+      full_name: u.full_name,
+      email: u.email,
+      phone: u.phone,
+      is_active: u.is_active,
+      created_at: u.created_at,
+      last_login: u.last_login,
+      family: u.family
+        ? {
+            id: u.family.id,
+            family_name: u.family.family_name,
+          }
+        : null,
+      roles: u.user_roles.map((ur) => ur.role),
+    }));
+
+    return {
+      items,
+      total,
+      page,
+      limit,
+    };
+  }
+
+  async getAllByRole(
+    roleId: number = 0,
+    page: number = 1,
+    limit: number = 10,
+    search?: string,
+  ): Promise<UserResponseList> {
+    const db = this.userRepo
+      .createQueryBuilder('users')
+      .leftJoinAndSelect('users.user_roles', 'ur')
+      .leftJoinAndSelect('ur.role', 'roles')
+      .leftJoinAndSelect('users.family', 'family');
+
+    if (search?.trim()) {
+      const keyword = `%${search.trim()}%`;
+
+      db.andWhere(
+        new Brackets((qb) => {
+          qb.where('users.username ILIKE :keyword', { keyword })
+            .orWhere('users.full_name ILIKE :keyword', { keyword })
+            .orWhere('users.email ILIKE :keyword', { keyword })
+            .orWhere('users.phone ILIKE :keyword', { keyword });
+        }),
+      );
+    }
+
+    if (roleId > 0) {
+      db.andWhere('roles.id = :roleId', { roleId });
     }
 
     const total = await db.getCount();

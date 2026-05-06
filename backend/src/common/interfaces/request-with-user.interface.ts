@@ -9,6 +9,7 @@ export interface JwtPayload {
   family_id: number | null;
   roles: string[];
   permissions: string[];
+  branch_permissions: { branch_id: number; role_name: string }[];
 }
 
 export interface RequestWithUser extends Request {

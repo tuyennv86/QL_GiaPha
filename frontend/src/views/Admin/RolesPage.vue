@@ -121,71 +121,41 @@
         </div>
 
         <div class="grid-2" style="gap: 2px;">
-            <div class="card">
+
+            <div class="card" v-for="role in roleStore.roles" :key="role.id">
                 <div class="card-head">
-                    <div class="flex-center gap-8"><span style="font-size: 20px;">👑</span>
+                    <div class="flex-center gap-8"><span style="font-size: 20px;"><i
+                                class="fas fa-pencil-alt"></i></span>
                         <div>
-                            <div class="card-title">Super Admin</div>
-                            <div class="card-sub">1 tài khoản</div>
+                            <div class="card-title">{{ role.role_name }}</div>
+                            <div class="card-sub">{{ role.users_count }} tài khoản</div>
                         </div>
-                    </div><span class="badge role-superadmin">Super Admin</span>
+                    </div><span class="badge role-superadmin">{{ role.role_name }}</span>
                 </div>
                 <div class="card-body">
-                    <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 12px;">Toàn quyền trên hệ
-                        thống. Có thể thực hiện mọi thao tác bao gồm xoá dữ liệu và quản lý tài khoản.</div>
-                    <div class="tag-list"><span class="chip">Toàn quyền</span><span class="chip">Quản lý
-                            users</span><span class="chip">Cài đặt hệ thống</span><span class="chip">Sao lưu</span>
-                    </div>
+                    <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 12px;">{{ role.description
+                        }}</div>
                 </div>
             </div>
-            <div class="card">
-                <div class="card-head">
-                    <div class="flex-center gap-8"><span style="font-size: 20px;">🛡️</span>
-                        <div>
-                            <div class="card-title">Admin</div>
-                            <div class="card-sub">2 tài khoản</div>
-                        </div>
-                    </div><span class="badge role-admin">Admin</span>
-                </div>
-                <div class="card-body">
-                    <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 12px;">Quản lý nội dung và
-                        người dùng ở mức hạn chế. Không thể thay đổi cấu hình hệ thống lõi.</div>
-                    <div class="tag-list"><span class="chip">Quản lý nội dung</span><span class="chip">Duyệt yêu
-                            cầu</span><span class="chip">Xuất dữ liệu</span><span class="chip">Sao lưu</span></div>
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-head">
-                    <div class="flex-center gap-8"><span style="font-size: 20px;">✏️</span>
-                        <div>
-                            <div class="card-title">Biên tập viên</div>
-                            <div class="card-sub">2 tài khoản</div>
-                        </div>
-                    </div><span class="badge role-editor">Editor</span>
-                </div>
-                <div class="card-body">
-                    <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 12px;">Biên tập viên có
-                        thể thêm và sửa nội dung nhưng không thể xoá hoặc truy cập tính năng quản trị.</div>
-                    <div class="tag-list"><span class="chip">Thêm thành viên</span><span class="chip">Sửa nội
-                            dung</span><span class="chip">Quản lý sự kiện</span></div>
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-head">
-                    <div class="flex-center gap-8"><span style="font-size: 20px;">👁️</span>
-                        <div>
-                            <div class="card-title">Xem</div>
-                            <div class="card-sub">1 tài khoản</div>
-                        </div>
-                    </div><span class="badge role-viewer">Viewer</span>
-                </div>
-                <div class="card-body">
-                    <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 12px;">Chỉ có quyền xem dữ
-                        liệu. Dành cho thành viên gia đình muốn tra cứu thông tin.</div>
-                    <div class="tag-list"><span class="chip">Xem thành viên</span><span class="chip">Xem sự kiện</span>
-                    </div>
-                </div>
-            </div>
+
         </div>
     </div>
 </template>
+<script setup>
+import { onMounted } from 'vue';
+import { useRoleStore } from '@/stores/role.store';
+
+const roleStore = useRoleStore();
+
+
+const loadData = async () => {
+    await roleStore.rolesWithUserCount();
+};
+
+onMounted(async () => {
+    await loadData();
+    //    document.title = 'Vai Trò & Phân Quyền - Quản Trị Hệ Thống';
+
+});
+
+</script>

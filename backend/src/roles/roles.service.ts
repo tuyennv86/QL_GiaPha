@@ -5,14 +5,12 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Role } from '../entities/role.entity';
-import { RolePermission } from '../entities/role-permission.entity';
+import { Role } from 'src/roles/entities/role.entity';
+import { RolePermission } from 'src/roles/entities/role-permission.entity';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
-import {
-  RoleResponse,
-  RoleResponseList,
-} from 'src/response/roles/role.response';
+import { RoleResponse, RoleResponseList } from './response/role.response';
+import { RoleSumUserResponse } from 'src/roles/response/role.sumuser.response';
 
 @Injectable()
 export class RolesService {
@@ -26,6 +24,21 @@ export class RolesService {
 
   async findAll(): Promise<Role[]> {
     return await this.roleRepo.find({ order: { id: 'ASC' } });
+  }
+
+  async getRolesWithUserCount(): Promise<RoleSumUserResponse[]> {
+    return await this.roleRepo
+      .createQueryBuilder('role')
+      .leftJoin('role.user_roles', 'ur')
+      .leftJoin('ur.user', 'user')
+      .select('role.id', 'id')
+      .addSelect('role.role_name', 'role_name')
+      .addSelect('role.description', 'description')
+      .addSelect('COUNT(user.id)', 'users_count')
+      .groupBy('role.id')
+      .addGroupBy('role.role_name')
+      .orderBy('role.id', 'ASC')
+      .getRawMany();
   }
 
   async search(

@@ -1,8 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { MenuItem } from '../entities/menu-item.entity';
-import { MenuPermission } from '../entities/menu-permission.entity';
+import { MenuItem } from 'src/menu/entities/menu-item.entity';
+import { MenuPermission } from 'src/menu/entities/menu-permission.entity';
 import { CreateMenuItemDto } from './dto/create-menu-item.dto';
 import { UpdateMenuItemDto } from './dto/update-menu-item.dto';
 import { TreeUtil } from './tree-builder.util';

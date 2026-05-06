@@ -25,7 +25,7 @@
                 {{ authStore.user?.full_name.split(' ').slice(-1)[0][0] }}
             </div>
             <div>
-                <div class="user-info-name">{{ authStore.user?.full_name }}</div>
+                <div class="user-info-name">{{ authStore.user?.full_name }} - {{ authStore.user?.username }} </div>
                 <div class="user-info-role">{{ authStore.user?.email }}</div>
             </div>
             <div class="user-logout"><i class="fas fa-power-off"></i></div>

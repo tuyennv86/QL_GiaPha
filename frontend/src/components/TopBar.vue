@@ -14,7 +14,7 @@
             <div class="tb-user">
                 <div class="tb-user-ava">{{ authStore.user?.full_name.split(' ')[0][0] }}
                     {{ authStore.user?.full_name.split(' ').slice(-1)[0][0] }}</div>
-                <div class="tb-user-name">{{ authStore.user?.full_name }}</div>
+                <div class="tb-user-name">{{ authStore.user?.full_name }} - {{ authStore.user?.username }}</div>
             </div>
         </div>
     </div>
