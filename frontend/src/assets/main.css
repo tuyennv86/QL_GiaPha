@@ -697,15 +697,15 @@ body {
 }
 .b-gray {
   background: #3d3d3d;
-  color: var(--text-dim);
+  color: silver;
 }
 
 /* role badges */
-.role-superadmin {
+.role-admin {
   background: rgba(218, 30, 40, 0.15);
   color: #ff8389;
 }
-.role-admin {
+.role-branch-admin {
   background: rgba(201, 168, 76, 0.15);
   color: var(--gold);
 }
@@ -721,25 +721,152 @@ body {
 /* gen badges */
 .gen-1 {
   background: rgba(201, 168, 76, 0.12);
-  color: var(--gold);
-}
-.gen-2 {
-  background: rgba(120, 169, 255, 0.12);
-  color: var(--blue);
-}
-.gen-3 {
-  background: rgba(66, 190, 101, 0.12);
-  color: var(--green);
-}
-.gen-4 {
-  background: rgba(190, 149, 255, 0.12);
-  color: var(--purple);
-}
-.gen-5 {
-  background: rgba(255, 131, 43, 0.12);
-  color: var(--orange);
+  color: #c9a84c;
 }
 
+.gen-2 {
+  background: rgba(120, 169, 255, 0.12);
+  color: #78a9ff;
+}
+
+.gen-3 {
+  background: rgba(66, 190, 101, 0.12);
+  color: #42be65;
+}
+
+.gen-4 {
+  background: rgba(190, 149, 255, 0.12);
+  color: #be95ff;
+}
+
+.gen-5 {
+  background: rgba(255, 131, 43, 0.12);
+  color: #ff832b;
+}
+
+.gen-6 {
+  background: rgba(255, 99, 132, 0.12);
+  color: #ff6384;
+}
+
+.gen-7 {
+  background: rgba(54, 162, 235, 0.12);
+  color: #36a2eb;
+}
+
+.gen-8 {
+  background: rgba(255, 206, 86, 0.12);
+  color: #ffce56;
+}
+
+.gen-9 {
+  background: rgba(75, 192, 192, 0.12);
+  color: #4bc0c0;
+}
+
+.gen-10 {
+  background: rgba(153, 102, 255, 0.12);
+  color: #9966ff;
+}
+
+.gen-11 {
+  background: rgba(255, 159, 64, 0.12);
+  color: #ff9f40;
+}
+
+.gen-12 {
+  background: rgba(233, 30, 99, 0.12);
+  color: #e91e63;
+}
+
+.gen-13 {
+  background: rgba(0, 188, 212, 0.12);
+  color: #00bcd4;
+}
+
+.gen-14 {
+  background: rgba(139, 195, 74, 0.12);
+  color: #8bc34a;
+}
+
+.gen-15 {
+  background: rgba(255, 87, 34, 0.12);
+  color: #ff5722;
+}
+
+.gen-16 {
+  background: rgba(63, 81, 181, 0.12);
+  color: #3f51b5;
+}
+
+.gen-17 {
+  background: rgba(121, 85, 72, 0.12);
+  color: #795548;
+}
+
+.gen-18 {
+  background: rgba(0, 150, 136, 0.12);
+  color: #009688;
+}
+
+.gen-19 {
+  background: rgba(156, 39, 176, 0.12);
+  color: #9c27b0;
+}
+
+.gen-20 {
+  background: rgba(244, 67, 54, 0.12);
+  color: #f44336;
+}
+.gen-21 {
+  background: rgba(255, 193, 7, 0.12);
+  color: #ffc107;
+}
+
+.gen-22 {
+  background: rgba(0, 230, 118, 0.12);
+  color: #00e676;
+}
+
+.gen-23 {
+  background: rgba(41, 121, 255, 0.12);
+  color: #2979ff;
+}
+
+.gen-24 {
+  background: rgba(213, 0, 249, 0.12);
+  color: #d500f9;
+}
+
+.gen-25 {
+  background: rgba(255, 23, 68, 0.12);
+  color: #ff1744;
+}
+
+.gen-26 {
+  background: rgba(0, 229, 255, 0.12);
+  color: #00e5ff;
+}
+
+.gen-27 {
+  background: rgba(118, 255, 3, 0.12);
+  color: #76ff03;
+}
+
+.gen-28 {
+  background: rgba(255, 61, 0, 0.12);
+  color: #ff3d00;
+}
+
+.gen-29 {
+  background: rgba(101, 31, 255, 0.12);
+  color: #651fff;
+}
+
+.gen-30 {
+  background: rgba(29, 233, 182, 0.12);
+  color: #1de9b6;
+}
 /* ====== BUTTONS ====== */
 .btn {
   display: inline-flex;

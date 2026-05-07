@@ -45,9 +45,9 @@
                 </div>
                 <div class="divider"></div>
 
-                <div class="f-group">Ngày tạo : {{ fomartFull(user.created_at) }}</div>
+                <div class="f-group">Ngày tạo : {{ formatDateTime(user.created_at) }}</div>
                 <div class="divider"></div>
-                <div class="f-group">Đăng nhập cuối : {{ fomartFull(user.last_login) }}</div>
+                <div class="f-group">Đăng nhập cuối : {{ formatDateTime(user.last_login) }}</div>
             </div>
         </form>
 
@@ -61,7 +61,7 @@
 <script setup>
 import { computed } from 'vue';
 import SlidePanel from './SlidePanel.vue';
-import dayjs from 'dayjs';
+import { formatDateTime } from '@/utils/formatDate';
 
 const props = defineProps({
     modelValue: Boolean,
@@ -82,9 +82,5 @@ const visible = computed({
 const close = () => {
     visible.value = false
 }
-const fomartFull = (dateStr) => {
-    if (dateStr !== null)
-        return dayjs(dateStr).format('DD/MM/YYYY HH:mm');
-    else return ''
-}
+
 </script>

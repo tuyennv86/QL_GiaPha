@@ -5,6 +5,7 @@ import personService from '@/api/services/person.service'
 export const usePersonStore = defineStore('person', () => {
   const persons = ref([])
   const total = ref(0)
+  const generations = ref([])
 
   const loading = ref(false)
   const error = ref(null)
@@ -36,13 +37,26 @@ export const usePersonStore = defineStore('person', () => {
     }
   }
 
-  const searchPersons = async (page, limit, gender, generation, search, is_alive) => {
+  const searchPersons = async (page, limit, gender, generation, is_alive, search) => {
     loading.value = true
     error.value = null
     try {
-      const response = await personService.search(page, limit, gender, generation, search, is_alive)
+      const response = await personService.search(page, limit, gender, generation, is_alive, search)
       total.value = response.total
       persons.value = response.items
+    } catch (err) {
+      error.value = err.message
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const getGenerations = async () => {
+    loading.value = true
+    error.value = null
+
+    try {
+      generations.value = await personService.generation()
     } catch (err) {
       error.value = err.message
     } finally {
@@ -57,7 +71,7 @@ export const usePersonStore = defineStore('person', () => {
     try {
       const newPerson = await personService.create(person)
       persons.value.push(newPerson)
-      total.value++
+      // total.value++
     } catch (err) {
       error.value = err.message
     } finally {
@@ -87,9 +101,9 @@ export const usePersonStore = defineStore('person', () => {
     error.value = null
 
     try {
-      await personService.delete(id)
+      const message = await personService.delete(id)
       persons.value = persons.value.filter((p) => p.id !== id)
-      total.value--
+      return message
     } catch (err) {
       error.value = err.message
     } finally {
@@ -99,6 +113,7 @@ export const usePersonStore = defineStore('person', () => {
 
   return {
     persons,
+    generations,
     total,
     loading,
     error,
@@ -106,6 +121,8 @@ export const usePersonStore = defineStore('person', () => {
     getAllPersons,
     getPersonById,
     searchPersons,
+    getGenerations,
+
     addPerson,
     updatePerson,
     deletePerson,

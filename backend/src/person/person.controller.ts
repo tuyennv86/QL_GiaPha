@@ -31,18 +31,25 @@ export class PersonController {
     @Query('page') page: string = '1',
     @Query('limit') limit: string = '10',
     @Query('gender') gender: string = '-1',
-    @Query('generation') generation: string = '-1',
+    @Query('generation') generation: string = '0',
+    @Query('is_alive') is_alive: string = '-1',
     @Query('search') search?: string,
-    @Query('is_alive') is_alive?: string,
   ) {
     return this.personService.findSearch(
       Number(page),
       Number(limit),
       Number(gender),
       Number(generation),
+      Number(is_alive),
       search,
-      is_alive !== undefined ? is_alive === 'true' : undefined,
     );
+  }
+
+  @Get('generation')
+  @RequirePermissions('person.view')
+  @UseGuards(JwtAuthGuard)
+  findGeneration() {
+    return this.personService.findGeneration();
   }
 
   @Get(':id')

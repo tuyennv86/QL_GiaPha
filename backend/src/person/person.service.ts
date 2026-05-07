@@ -14,8 +14,18 @@ export class PersonService {
     private readonly personRepo: Repository<Person>,
   ) {}
 
-  findAll() {
-    return this.personRepo.find();
+  async findAll() {
+    return await this.personRepo.find();
+  }
+
+  async findGeneration() {
+    const generations = await this.personRepo
+      .createQueryBuilder('persons')
+      .select('DISTINCT persons.generation', 'generation')
+      .orderBy('persons.generation', 'ASC')
+      .getRawMany();
+
+    return generations.map((g: { generation: string }) => g.generation);
   }
 
   async findSearch(
@@ -23,27 +33,31 @@ export class PersonService {
     limit: number,
     gender: number,
     generation: number,
+    is_alive: number,
     search?: string,
-    is_alive?: boolean,
   ): Promise<PersonResponseList> {
     const query = this.personRepo.createQueryBuilder('persons');
 
     if (search) {
-      query.andWhere('LOWER(persons.full_name) LIKE LOWER(:search)', {
-        search: `%${search}%`,
-      });
+      query.andWhere(
+        'unaccent(LOWER(persons.full_name)) LIKE unaccent(LOWER(:search))',
+        {
+          search: `%${search}%`,
+        },
+      );
     }
 
     if (gender >= 0) {
       query.andWhere('persons.gender = :gender', { gender });
     }
 
-    if (generation >= 0) {
+    if (generation > 0) {
       query.andWhere('persons.generation = :generation', { generation });
     }
 
-    if (is_alive !== undefined) {
-      query.andWhere('persons.is_alive = :is_alive', { is_alive });
+    if (is_alive !== -1) {
+      const isAliveBool = is_alive === 1 ? true : false;
+      query.andWhere('persons.is_alive = :is_alive', { is_alive: isAliveBool });
     }
 
     const [entities, total] = await query
@@ -73,7 +87,12 @@ export class PersonService {
     return await this.personRepo.update(id, updatePersonDto);
   }
 
-  async remove(id: number) {
-    return await this.personRepo.delete(id);
+  async remove(id: number): Promise<{ message: string }> {
+    const person = await this.findOne(id);
+    if (!person) {
+      return { message: 'Không tìm thấy người này' };
+    }
+    await this.personRepo.remove(person);
+    return { message: 'Xoá người thành công' };
   }
 }

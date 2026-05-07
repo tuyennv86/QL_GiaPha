@@ -52,8 +52,7 @@
                     <tr v-for="user in userStore.users" :key="user.id">
                         <td>
                             <div class="tbl-name">
-                                <div class="tbl-ava"
-                                    style="background: rgba(201, 168, 76, 0.133); color: rgb(201, 168, 76);">
+                                <div class="tbl-ava">
                                     {{ user.full_name.split(' ')[0][0] }}{{ user.full_name.split(' ').slice(-1)[0][0] }}
                                 </div>
                                 <div>
@@ -65,8 +64,9 @@
                         <td>
                             {{ user.username }}
                         </td>
-                        <td><span class="badge role-editor" v-for="role in user.roles" :key="role.id">{{
-                            role.role_name }} </span></td>
+                        <td><span class="badge" :class="'role-' + role.role_name.toLowerCase().replace(/\s+/g, '-')"
+                                v-for="role in user.roles" :key="role.id">{{
+                                    role.role_name }} </span></td>
                         <td class="text-secondary"><span v-if="user.family">{{ user.family.family_name }}</span></td>
                         <td @click.prevent="updateActive(user.id)">
                             <div class="flex-center gap-6" v-if="user.is_active">
@@ -78,8 +78,8 @@
                                     chỉ</span>
                             </div>
                         </td>
-                        <td class="font-mono text-sm text-secondary">{{ fomartFull(user.last_login) }}</td>
-                        <td class="font-mono text-sm text-secondary">{{ fomartddMMyy(user.created_at) }}</td>
+                        <td class="font-mono text-sm text-secondary">{{ formatDateTime(user.last_login) }}</td>
+                        <td class="font-mono text-sm text-secondary">{{ formatDate(user.created_at) }}</td>
                         <td>
                             <div class="flex gap-4">
                                 <button class="btn btn-ghost btn-xs text-gold" @click.prevent="openEdit(user)"> <i
@@ -119,7 +119,7 @@ import { useConfirm } from '@/components/confirm/useConfirm';
 import { useRoleStore } from '@/stores/role.store';
 import { useFamilyStore } from '@/stores/family.store';
 import { onMounted, ref, watch } from 'vue';
-import dayjs from 'dayjs';
+import { formatDate, formatDateTime } from '@/utils/formatDate';
 
 const { showToast } = useToast()
 const { showConfirm } = useConfirm();
@@ -157,18 +157,6 @@ onMounted(async () => {
 const onPageChange = (newPage) => {
     page.value = newPage;
     loadData();
-}
-
-const fomartddMMyy = (dateStr) => {
-    if (dateStr !== null)
-        return dayjs(dateStr).format('DD-MM-YYYY');
-    else return '';
-}
-
-const fomartFull = (dateStr) => {
-    if (dateStr !== null)
-        return dayjs(dateStr).format('DD-MM-YYYY HH:mm');
-    else return ''
 }
 
 const updateActive = async (userId) => {

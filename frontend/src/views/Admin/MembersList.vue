@@ -29,28 +29,24 @@
                 <div class="select-bar">
                     <div class="search-bar" style="max-width: 260px">
                         <span style="color: var(--text-dim)">🔍</span>
-                        <input placeholder="Tìm kiếm tên, quê quán..." />
+                        <input placeholder="Tìm kiếm tên, quê quán..." v-model="search" />
                     </div>
-                    <select class="f-select" style="width: auto; padding: 8px 12px">
-                        <option value="">Tất cả đời</option>
-                        <option>Đời 1</option>
-                        <option>Đời 2</option>
-                        <option>Đời 3</option>
-                        <option>Đời 4</option>
-                        <option>Đời 5</option>
+                    <select class="f-select" style="width: auto; padding: 8px 12px" v-model="generation">
+                        <option :value="0">Tất cả đời</option>
+                        <option v-for="gen in personStore.generations" :key="gen" :value="gen">Đời {{ gen }}</option>
                     </select>
-                    <select class="f-select" style="width: auto; padding: 8px 12px">
-                        <option value="">Tất cả giới tính</option>
-                        <option>Nam</option>
-                        <option>Nữ</option>
-                        <option>Khác</option>
+                    <select class="f-select" style="width: auto; padding: 8px 12px" v-model="gender">
+                        <option :value="-1">Tất cả giới tính</option>
+                        <option :value="1">Nam</option>
+                        <option :value="0">Nữ</option>
+                        <option :value="2">Khác</option>
                     </select>
-                    <select class="f-select" style="width: auto; padding: 8px 12px">
-                        <option value="">Tất cả tình trạng</option>
-                        <option value="living">Còn sống</option>
-                        <option value="deceased">Đã mất</option>
+                    <select class="f-select" style="width: auto; padding: 8px 12px" v-model="is_alive">
+                        <option :value="-1">Tất cả tình trạng</option>
+                        <option :value="1">Còn sống</option>
+                        <option :value="0">Đã mất</option>
                     </select>
-                    <button class="btn btn-secondary btn-sm">
+                    <button class="btn btn-secondary btn-sm" @click.prevent="loadPersons">
                         <i class="fas fa-search"></i> Tìm kiếm
                     </button>
                 </div>
@@ -83,6 +79,7 @@
                         <th>Giới Tính</th>
                         <th>Thế Hệ</th>
                         <th>Năm Sinh</th>
+                        <th>Năm Mất</th>
                         <th>Quê Quán</th>
                         <th>Nghề Nghiệp</th>
                         <th>Tình Trạng</th>
@@ -90,349 +87,120 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td><input type="checkbox" value="1" style="cursor: pointer;"></td>
+                    <tr v-for="person in personStore.persons" :key="person.id">
+                        <td><input type="checkbox" :value="person.id" style="cursor: pointer;"></td>
                         <td>
                             <div class="tbl-name">
-                                <div class="tbl-ava b-blue" style="width: 28px; height: 28px;">T</div>
+                                <div class="tbl-ava" :class="'gen-' + person.generation"
+                                    style="width: 28px; height: 28px;">{{
+                                        person.full_name.split(' ').slice(-1)[0][0] }}</div>
                                 <div>
-                                    <div class="tbl-name-val">Nguyễn Văn Tổ</div>
-                                    <div class="tbl-name-sub">Tổ tiên</div>
+                                    <div class="tbl-name-val">{{ person.full_name }}</div>
+                                    <div class="tbl-name-sub">{{ person.biography }}</div>
                                 </div>
                             </div>
                         </td>
-                        <td><span class="badge b-blue">♂ Nam</span></td>
-                        <td><span class="badge gen-1">Đời 1</span></td>
-                        <td class="font-mono text-sm">1820</td>
-                        <td class="text-secondary">Hà Nam</td>
-                        <td class="text-secondary">Nông dân</td>
-                        <td><span class="badge b-gray">○ Mất</span></td>
                         <td>
-                            <!-- <div class="flex gap-4"><button class="btn btn-ghost btn-xs"> ✏️ </button><button
-                                    class="btn btn-ghost btn-xs"> 👁 </button><button class="btn btn-danger btn-xs"> 🗑
-                                </button></div> -->
-                            <button class="btn btn-ghost btn-xs text-gold" @click.prevent="openEdit(user)"> <i
+                            <span class="badge b-blue" v-if="person.gender === 1"><i class="fas fa-mars"></i> Nam</span>
+                            <span class="badge b-purple" v-else-if="person.gender === 0"><i class="fas fa-venus"></i>
+                                Nữ</span>
+                            <span class="badge b-gray" v-else><i class="fas fa-venus-mars"></i> Khác</span>
+                        </td>
+                        <td><span class="badge" :class="'gen-' + person.generation">Đời {{ person.generation }}</span>
+                        </td>
+                        <td class="font-mono text-sm">{{ formatDate(person.birth_date) }}</td>
+                        <td class="font-mono text-sm">{{ formatDate(person.death_date) }}</td>
+                        <td class="text-secondary">{{ person.place_of_brith }}</td>
+                        <td class="text-secondary">{{ person.job }}</td>
+                        <td>
+                            <span class="badge b-green" v-if="person.is_alive"><i class="fas fa-heart"></i> Sống</span>
+                            <span class="badge b-gray" v-else><i class="fas fa-skull"></i> Mất</span>
+                        </td>
+                        <td>
+                            <button class="btn btn-ghost btn-xs text-gold" @click.prevent="openEdit(person)"> <i
                                     class="fas fa-pen"></i> </button>
-                            <button class="btn btn-ghost btn-xs text-green" @click.prevent="openView(user)"> <i
+                            <button class="btn btn-ghost btn-xs text-green" @click.prevent="openView(person)"> <i
                                     class="fas fa-eye"></i> </button>
-                            <button class="btn btn-danger btn-xs" @click.prevent="deleteUser(user.id)"><i
+                            <button class="btn btn-danger btn-xs" @click.prevent="deletePerson(person.id)"><i
                                     class="fas fa-trash"></i></button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><input type="checkbox" value="2" style="cursor: pointer;"></td>
-                        <td>
-                            <div class="tbl-name">
-                                <div class="tbl-ava b-blue" style="width: 28px; height: 28px;">H</div>
-                                <div>
-                                    <div class="tbl-name-val">Nguyễn Văn Hai</div>
-                                    <div class="tbl-name-sub">Con trai cả</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td><span class="badge b-blue">♂ Nam</span></td>
-                        <td><span class="badge gen-2">Đời 2</span></td>
-                        <td class="font-mono text-sm">1845</td>
-                        <td class="text-secondary">Hà Nam</td>
-                        <td class="text-secondary">Thương nhân</td>
-                        <td><span class="badge b-gray">○ Mất</span></td>
-                        <td>
-                            <div class="flex gap-4"><button class="btn btn-ghost btn-xs"> ✏️ </button><button
-                                    class="btn btn-ghost btn-xs"> 👁 </button><button class="btn btn-danger btn-xs"> 🗑
-                                </button></div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><input type="checkbox" value="3" style="cursor: pointer;"></td>
-                        <td>
-                            <div class="tbl-name">
-                                <div class="tbl-ava b-blue" style="width: 28px; height: 28px;">B</div>
-                                <div>
-                                    <div class="tbl-name-val">Nguyễn Văn Ba</div>
-                                    <div class="tbl-name-sub">Con trai thứ</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td><span class="badge b-blue">♂ Nam</span></td>
-                        <td><span class="badge gen-2">Đời 2</span></td>
-                        <td class="font-mono text-sm">1850</td>
-                        <td class="text-secondary">Nam Định</td>
-                        <td class="text-secondary">Giáo học</td>
-                        <td><span class="badge b-gray">○ Mất</span></td>
-                        <td>
-                            <div class="flex gap-4"><button class="btn btn-ghost btn-xs"> ✏️ </button><button
-                                    class="btn btn-ghost btn-xs"> 👁 </button><button class="btn btn-danger btn-xs"> 🗑
-                                </button></div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><input type="checkbox" value="4" style="cursor: pointer;"></td>
-                        <td>
-                            <div class="tbl-name">
-                                <div class="tbl-ava b-purple" style="width: 28px; height: 28px;">T</div>
-                                <div>
-                                    <div class="tbl-name-val">Nguyễn Thị Tư</div>
-                                    <div class="tbl-name-sub">Con gái</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td><span class="badge b-purple">♀ Nữ</span></td>
-                        <td><span class="badge gen-2">Đời 2</span></td>
-                        <td class="font-mono text-sm">1855</td>
-                        <td class="text-secondary">Hà Nam</td>
-                        <td class="text-secondary">Nội trợ</td>
-                        <td><span class="badge b-gray">○ Mất</span></td>
-                        <td>
-                            <div class="flex gap-4"><button class="btn btn-ghost btn-xs"> ✏️ </button><button
-                                    class="btn btn-ghost btn-xs"> 👁 </button><button class="btn btn-danger btn-xs"> 🗑
-                                </button></div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><input type="checkbox" value="5" style="cursor: pointer;"></td>
-                        <td>
-                            <div class="tbl-name">
-                                <div class="tbl-ava b-blue" style="width: 28px; height: 28px;">N</div>
-                                <div>
-                                    <div class="tbl-name-val">Nguyễn Văn Năm</div>
-                                    <div class="tbl-name-sub">Cháu đích tôn</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td><span class="badge b-blue">♂ Nam</span></td>
-                        <td><span class="badge gen-3">Đời 3</span></td>
-                        <td class="font-mono text-sm">1878</td>
-                        <td class="text-secondary">Hà Nội</td>
-                        <td class="text-secondary">Công chức</td>
-                        <td><span class="badge b-gray">○ Mất</span></td>
-                        <td>
-                            <div class="flex gap-4"><button class="btn btn-ghost btn-xs"> ✏️ </button><button
-                                    class="btn btn-ghost btn-xs"> 👁 </button><button class="btn btn-danger btn-xs"> 🗑
-                                </button></div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><input type="checkbox" value="6" style="cursor: pointer;"></td>
-                        <td>
-                            <div class="tbl-name">
-                                <div class="tbl-ava b-purple" style="width: 28px; height: 28px;">S</div>
-                                <div>
-                                    <div class="tbl-name-val">Nguyễn Thị Sáu</div>
-                                    <div class="tbl-name-sub">Cháu gái</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td><span class="badge b-purple">♀ Nữ</span></td>
-                        <td><span class="badge gen-3">Đời 3</span></td>
-                        <td class="font-mono text-sm">1882</td>
-                        <td class="text-secondary">Hà Nội</td>
-                        <td class="text-secondary">Giáo viên</td>
-                        <td><span class="badge b-gray">○ Mất</span></td>
-                        <td>
-                            <div class="flex gap-4"><button class="btn btn-ghost btn-xs"> ✏️ </button><button
-                                    class="btn btn-ghost btn-xs"> 👁 </button><button class="btn btn-danger btn-xs"> 🗑
-                                </button></div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><input type="checkbox" value="7" style="cursor: pointer;"></td>
-                        <td>
-                            <div class="tbl-name">
-                                <div class="tbl-ava b-blue" style="width: 28px; height: 28px;">B</div>
-                                <div>
-                                    <div class="tbl-name-val">Nguyễn Văn Bảy</div>
-                                    <div class="tbl-name-sub">Cháu trai</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td><span class="badge b-blue">♂ Nam</span></td>
-                        <td><span class="badge gen-3">Đời 3</span></td>
-                        <td class="font-mono text-sm">1890</td>
-                        <td class="text-secondary">Nam Định</td>
-                        <td class="text-secondary">Bác sĩ</td>
-                        <td><span class="badge b-gray">○ Mất</span></td>
-                        <td>
-                            <div class="flex gap-4"><button class="btn btn-ghost btn-xs"> ✏️ </button><button
-                                    class="btn btn-ghost btn-xs"> 👁 </button><button class="btn btn-danger btn-xs"> 🗑
-                                </button></div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><input type="checkbox" value="8" style="cursor: pointer;"></td>
-                        <td>
-                            <div class="tbl-name">
-                                <div class="tbl-ava b-blue" style="width: 28px; height: 28px;">M</div>
-                                <div>
-                                    <div class="tbl-name-val">Nguyễn Đức Minh</div>
-                                    <div class="tbl-name-sub">Chắt trai</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td><span class="badge b-blue">♂ Nam</span></td>
-                        <td><span class="badge gen-4">Đời 4</span></td>
-                        <td class="font-mono text-sm">1920</td>
-                        <td class="text-secondary">Hà Nội</td>
-                        <td class="text-secondary">Kỹ sư</td>
-                        <td><span class="badge b-gray">○ Mất</span></td>
-                        <td>
-                            <div class="flex gap-4"><button class="btn btn-ghost btn-xs"> ✏️ </button><button
-                                    class="btn btn-ghost btn-xs"> 👁 </button><button class="btn btn-danger btn-xs"> 🗑
-                                </button></div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><input type="checkbox" value="9" style="cursor: pointer;"></td>
-                        <td>
-                            <div class="tbl-name">
-                                <div class="tbl-ava b-purple" style="width: 28px; height: 28px;">L</div>
-                                <div>
-                                    <div class="tbl-name-val">Nguyễn Thị Lan</div>
-                                    <div class="tbl-name-sub">Chắt gái</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td><span class="badge b-purple">♀ Nữ</span></td>
-                        <td><span class="badge gen-4">Đời 4</span></td>
-                        <td class="font-mono text-sm">1925</td>
-                        <td class="text-secondary">Hà Nội</td>
-                        <td class="text-secondary">Y tá</td>
-                        <td><span class="badge b-gray">○ Mất</span></td>
-                        <td>
-                            <div class="flex gap-4"><button class="btn btn-ghost btn-xs"> ✏️ </button><button
-                                    class="btn btn-ghost btn-xs"> 👁 </button><button class="btn btn-danger btn-xs"> 🗑
-                                </button></div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><input type="checkbox" value="10" style="cursor: pointer;"></td>
-                        <td>
-                            <div class="tbl-name">
-                                <div class="tbl-ava b-blue" style="width: 28px; height: 28px;">H</div>
-                                <div>
-                                    <div class="tbl-name-val">Nguyễn Đức Hùng</div>
-                                    <div class="tbl-name-sub">Con trai</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td><span class="badge b-blue">♂ Nam</span></td>
-                        <td><span class="badge gen-4">Đời 4</span></td>
-                        <td class="font-mono text-sm">1950</td>
-                        <td class="text-secondary">Hà Nội</td>
-                        <td class="text-secondary">Giáo sư</td>
-                        <td><span class="badge b-green">● Sống</span></td>
-                        <td>
-                            <div class="flex gap-4"><button class="btn btn-ghost btn-xs"> ✏️ </button><button
-                                    class="btn btn-ghost btn-xs"> 👁 </button><button class="btn btn-danger btn-xs"> 🗑
-                                </button></div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><input type="checkbox" value="11" style="cursor: pointer;"></td>
-                        <td>
-                            <div class="tbl-name">
-                                <div class="tbl-ava b-purple" style="width: 28px; height: 28px;">H</div>
-                                <div>
-                                    <div class="tbl-name-val">Nguyễn Thị Hoa</div>
-                                    <div class="tbl-name-sub">Con gái</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td><span class="badge b-purple">♀ Nữ</span></td>
-                        <td><span class="badge gen-4">Đời 4</span></td>
-                        <td class="font-mono text-sm">1955</td>
-                        <td class="text-secondary">TP.HCM</td>
-                        <td class="text-secondary">Doanh nhân</td>
-                        <td><span class="badge b-green">● Sống</span></td>
-                        <td>
-                            <div class="flex gap-4"><button class="btn btn-ghost btn-xs"> ✏️ </button><button
-                                    class="btn btn-ghost btn-xs"> 👁 </button><button class="btn btn-danger btn-xs"> 🗑
-                                </button></div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><input type="checkbox" value="12" style="cursor: pointer;"></td>
-                        <td>
-                            <div class="tbl-name">
-                                <div class="tbl-ava b-blue" style="width: 28px; height: 28px;">T</div>
-                                <div>
-                                    <div class="tbl-name-val">Nguyễn Minh Tuấn</div>
-                                    <div class="tbl-name-sub">Chắt</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td><span class="badge b-blue">♂ Nam</span></td>
-                        <td><span class="badge gen-5">Đời 5</span></td>
-                        <td class="font-mono text-sm">1980</td>
-                        <td class="text-secondary">Hà Nội</td>
-                        <td class="text-secondary">Lập trình viên</td>
-                        <td><span class="badge b-green">● Sống</span></td>
-                        <td>
-                            <div class="flex gap-4"><button class="btn btn-ghost btn-xs"> ✏️ </button><button
-                                    class="btn btn-ghost btn-xs"> 👁 </button><button class="btn btn-danger btn-xs"> 🗑
-                                </button></div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><input type="checkbox" value="13" style="cursor: pointer;"></td>
-                        <td>
-                            <div class="tbl-name">
-                                <div class="tbl-ava b-purple" style="width: 28px; height: 28px;">C</div>
-                                <div>
-                                    <div class="tbl-name-val">Nguyễn Minh Châu</div>
-                                    <div class="tbl-name-sub">Chắt gái</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td><span class="badge b-purple">♀ Nữ</span></td>
-                        <td><span class="badge gen-5">Đời 5</span></td>
-                        <td class="font-mono text-sm">1985</td>
-                        <td class="text-secondary">Hà Nội</td>
-                        <td class="text-secondary">Bác sĩ</td>
-                        <td><span class="badge b-green">● Sống</span></td>
-                        <td>
-                            <div class="flex gap-4"><button class="btn btn-ghost btn-xs"> ✏️ </button><button
-                                    class="btn btn-ghost btn-xs"> 👁 </button><button class="btn btn-danger btn-xs"> 🗑
-                                </button></div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><input type="checkbox" value="14" style="cursor: pointer;"></td>
-                        <td>
-                            <div class="tbl-name">
-                                <div class="tbl-ava b-blue" style="width: 28px; height: 28px;">A</div>
-                                <div>
-                                    <div class="tbl-name-val">Nguyễn Phúc An</div>
-                                    <div class="tbl-name-sub">Chít trai</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td><span class="badge b-blue">♂ Nam</span></td>
-                        <td><span class="badge gen-5">Đời 5</span></td>
-                        <td class="font-mono text-sm">1995</td>
-                        <td class="text-secondary">TP.HCM</td>
-                        <td class="text-secondary">Sinh viên</td>
-                        <td><span class="badge b-green">● Sống</span></td>
-                        <td>
-                            <div class="flex gap-4"><button class="btn btn-ghost btn-xs"> ✏️ </button><button
-                                    class="btn btn-ghost btn-xs"> 👁 </button><button class="btn btn-danger btn-xs"> 🗑
-                                </button></div>
                         </td>
                     </tr>
                 </tbody>
             </table>
-            <div class="card-body" style="padding: 12px 20px; border-top: 1px solid var(--border)">
-                <div class="flex-between">
-                    <span class="text-sm text-secondary">Hiển thị 10 trong 14 thành viên</span>
-                    <div class="flex gap-8">
-                        <button class="btn btn-ghost btn-xs">← Trước</button>
-                        <button class="btn btn-secondary btn-xs">1</button>
-                        <button class="btn btn-ghost btn-xs">2</button>
-                        <button class="btn btn-ghost btn-xs">Sau →</button>
-                    </div>
-                </div>
-            </div>
+            <BasePagination v-model:currentPage="page" :totalItems="personStore.total" :pageSize="limit"
+                @change="onPageChange" :delta="4"></BasePagination>
         </div>
     </div>
+    <ToastCompo></ToastCompo>
+    <ConfirmDialog></ConfirmDialog>
 </template>
 <script setup>
+import { onMounted, ref, watch } from 'vue';
+import { usePersonStore } from '@/stores/person.store';
+
+import ConfirmDialog from '@/components/confirm/ConfirmDialog.vue';
+import { useConfirm } from '@/components/confirm/useConfirm';
+import ToastCompo from '@/components/Toast/ToastCompo.vue';
+import { useToast } from '@/components/Toast/useToast';
+import BasePagination from '@/components/BasePagination.vue';
+import { formatDate } from '@/utils/formatDate';
+
+const { showToast } = useToast()
+const { showConfirm } = useConfirm();
+const personStore = usePersonStore();
+
+const page = ref(1);
+const limit = ref(10);// tổng số trang trên 1 bản ghi
+const search = ref("");
+const gender = ref("-1");
+const generation = ref("0");
+const is_alive = ref("-1");
+
+const loadPersons = async () => {
+    await personStore.searchPersons(page.value, limit.value, gender.value, generation.value, is_alive.value, search.value);
+};
+
+const getGeneration = async () => {
+    await personStore.getGenerations();
+};
+
+onMounted(() => {
+    loadPersons();
+    getGeneration();
+});
+
+watch(search, () => {
+    page.value = 1;
+    loadPersons();
+});
+
+const onPageChange = (newPage) => {
+    page.value = newPage;
+    loadPersons();
+};
+
+const deletePerson = async (id) => {
+    const ok = await showConfirm({ title: 'Xóa thành viên', desc: 'Bạn có chắc muốn Xóa thành viên này không?', icon: '<i class="fas fa-trash-alt"></i>', btn: 'Xóa' })
+    if (ok) {
+
+        try {
+            const res = await personStore.deletePerson(id);
+            showToast({ title: 'Xóa user', sub: res.message, type: 'success' })
+        } catch (error) {
+            showToast({ title: 'Đã có lỗi', sub: 'Lỗi :' + error, type: 'error' })
+        }
+    }
+};
+
+const openEdit = (person) => {
+    console.log('Open edit for person:', person);
+    showToast({ title: 'Chức năng đang phát triển', type: 'info' })
+};
+
+const openView = (person) => {
+    console.log('Open view for person:', person);
+    showToast({ title: 'Chức năng đang phát triển', type: 'info' })
+};
+
+
 </script>

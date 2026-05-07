@@ -42,10 +42,10 @@ export class Person {
   place_of_birth: string;
 
   @CreateDateColumn()
-  create_at: Date;
+  created_at: Date;
 
   @Column({ nullable: true, type: 'timestamp' })
-  update_at: Date;
+  updated_at: Date;
 
   //   @ManyToOne(() => Family, (family) => family.id, { onDelete: 'CASCADE' })
 }

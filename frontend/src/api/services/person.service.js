@@ -9,13 +9,17 @@ const getById = async (id) => {
   return res.data
 }
 
-const search = async (page, limit, gender, generation, search, is_alive) => {
+const search = async (page, limit, gender, generation, is_alive, search) => {
   const res = await http.get(`/person/search`, {
-    params: { page, limit, gender, generation, search, is_alive },
+    params: { page, limit, gender, generation, is_alive, search },
   })
   return res.data
 }
 
+const generation = async () => {
+  const res = await http.get(`/person/generation`)
+  return res.data
+}
 const create = async (person) => {
   const res = await http.post('/person', person)
   return res.data
@@ -34,6 +38,8 @@ export default {
   getAll,
   getById,
   search,
+  generation,
+
   create,
   update,
   deletePerson,
