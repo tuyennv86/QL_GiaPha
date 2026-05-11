@@ -110,6 +110,67 @@ export const usePersonStore = defineStore('person', () => {
       loading.value = false
     }
   }
+  const deleteMultiplePersons = async (ids) => {
+    loading.value = true
+    error.value = null
+
+    try {
+      const message = await personService.deleteMultiple(ids)
+      persons.value = persons.value.filter((p) => !ids.includes(p.id))
+      return message
+    } catch (err) {
+      error.value = err.message
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const exportExcel = async (selectedIds) => {
+    loading.value = true
+    error.value = null
+
+    try {
+      const response = await personService.exportExcel(selectedIds)
+      // console.log('response', response)
+      const url = window.URL.createObjectURL(new Blob([response.data]), {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      })
+      const link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', 'thanhvien.xlsx')
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      window.URL.revokeObjectURL(url)
+    } catch (err) {
+      error.value = err.message
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const exportExcelAll = async () => {
+    loading.value = true
+    error.value = null
+
+    try {
+      const response = await personService.exportExcelAll()
+      const url = window.URL.createObjectURL(new Blob([response.data]), {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      })
+      const link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', 'danhsachthanhvien.xlsx')
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      window.URL.revokeObjectURL(url)
+    } catch (err) {
+      error.value = err.message
+    } finally {
+      loading.value = false
+    }
+  }
 
   return {
     persons,
@@ -118,6 +179,8 @@ export const usePersonStore = defineStore('person', () => {
     loading,
     error,
 
+    exportExcel,
+    exportExcelAll,
     getAllPersons,
     getPersonById,
     searchPersons,
@@ -126,5 +189,6 @@ export const usePersonStore = defineStore('person', () => {
     addPerson,
     updatePerson,
     deletePerson,
+    deleteMultiplePersons,
   }
 })

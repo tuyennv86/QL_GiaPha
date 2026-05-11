@@ -60,7 +60,7 @@
 
 <script setup>
 import { computed } from 'vue';
-import SlidePanel from './SlidePanel.vue';
+import SlidePanel from '../SlidePanel.vue';
 import { formatDateTime } from '@/utils/formatDate';
 
 const props = defineProps({

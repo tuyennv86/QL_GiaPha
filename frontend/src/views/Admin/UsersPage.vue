@@ -110,8 +110,8 @@
 <script setup>
 import BasePagination from '@/components/BasePagination.vue';
 import ToastCompo from '@/components/Toast/ToastCompo.vue';
-import AddUserSilde from '@/components/SildePanel/AddUserSilde.vue';
-import ViewUserSilde from '@/components/SildePanel/ViewUserSilde.vue';
+import AddUserSilde from '@/components/SildePanel/User/AddUserSilde.vue';
+import ViewUserSilde from '@/components/SildePanel/User/ViewUserSilde.vue';
 import { useToast } from '@/components/Toast/useToast';
 import { useUserStore } from '@/stores/user.store';
 import ConfirmDialog from '@/components/confirm/ConfirmDialog.vue';
@@ -191,7 +191,7 @@ const openAdd = () => {
 // open silde sửa thông tin user
 const openEdit = async (user) => {
     const data = await userStore.getById(user.id);
-    console.log(data);
+    //console.log(data);
     selectedUser.value = data;
     showPanel.value = true;
 }

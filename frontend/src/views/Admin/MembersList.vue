@@ -11,7 +11,7 @@
                     </div>
                 </div>
                 <div class="flex gap-8">
-                    <button class="btn btn-secondary btn-sm">
+                    <button class="btn btn-secondary btn-sm" @click.prevent="handExportAll">
                         <i class="far fa-file-excel text-red"></i>⬇ Xuất Excel
                     </button>
                     <button class="btn btn-secondary btn-sm"><i class="fas fa-file-import text-green"></i>
@@ -54,16 +54,17 @@
         </div>
 
         <!-- Bulk actions bar -->
-        <div class="card mb-16" style="border-color: var(--gold)">
+        <div class="card mb-16" style="border-color: var(--gold)" v-if="selected.length > 0">
             <div class="card-body" style="padding: 12px 20px">
                 <div class="flex-center gap-12">
-                    <span class="text-gold fw-6">10 đã chọn</span>
-                    <button class="btn btn-secondary btn-sm"><i class="far fa-file-excel"></i> Xuất
+                    <span class="text-gold fw-6">{{ selected.length }} đã chọn</span>
+                    <button class="btn btn-secondary btn-sm" @click.prevent="handExportExcell"><i
+                            class="far fa-file-excel"></i> Xuất
                         Chọn</button>
-                    <button class="btn btn-danger btn-sm">
+                    <button class="btn btn-danger btn-sm" @click.prevent="handDeleteAllCheck">
                         <i class="fas fa-trash"></i> Xoá Chọn
                     </button>
-                    <button class="btn btn-ghost btn-sm">
+                    <button class="btn btn-ghost btn-sm" @click.prevent="handUncheckAll">
                         <i class="fas fa-tasks"></i> Bỏ chọn
                     </button>
                 </div>
@@ -74,7 +75,8 @@
             <table class="tbl">
                 <thead>
                     <tr>
-                        <th style="width: 40px;"><input type="checkbox" style="cursor: pointer;"></th>
+                        <th style="width: 40px;"><input type="checkbox" style="cursor: pointer;" ref="checkAllRef"
+                                :checked="isAllChecked" @change="handleCheckAll"></th>
                         <th>Họ Tên</th>
                         <th>Giới Tính</th>
                         <th>Thế Hệ</th>
@@ -88,7 +90,7 @@
                 </thead>
                 <tbody>
                     <tr v-for="person in personStore.persons" :key="person.id">
-                        <td><input type="checkbox" :value="person.id" style="cursor: pointer;"></td>
+                        <td><input type="checkbox" :value="person.id" v-model="selected" style="cursor: pointer;"></td>
                         <td>
                             <div class="tbl-name">
                                 <div class="tbl-ava" :class="'gen-' + person.generation"
@@ -135,7 +137,7 @@
     <ConfirmDialog></ConfirmDialog>
 </template>
 <script setup>
-import { onMounted, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { usePersonStore } from '@/stores/person.store';
 
 import ConfirmDialog from '@/components/confirm/ConfirmDialog.vue';
@@ -150,7 +152,7 @@ const { showConfirm } = useConfirm();
 const personStore = usePersonStore();
 
 const page = ref(1);
-const limit = ref(10);// tổng số trang trên 1 bản ghi
+const limit = ref(20);// tổng số trang trên 1 bản ghi
 const search = ref("");
 const gender = ref("-1");
 const generation = ref("0");
@@ -179,8 +181,80 @@ const onPageChange = (newPage) => {
     loadPersons();
 };
 
+// check all checkbox
+
+const selected = ref([])
+const checkAllRef = ref(null)
+
+const isAllChecked = computed(() => {
+    return (
+        personStore.persons.length > 0 && selected.value.length === personStore.persons.length
+    )
+})
+
+const isIndeterminate = computed(() => {
+    return (
+        selected.value.length > 0 &&
+        selected.value.length < personStore.persons.length
+    )
+})
+
+const updateIndeterminate = () => {
+    if (checkAllRef.value) {
+        checkAllRef.value.indeterminate = isIndeterminate.value
+    }
+}
+
+watch(selected, updateIndeterminate, { deep: true })
+
+onMounted(updateIndeterminate)
+
+const handleCheckAll = (e) => {
+    if (e.target.checked) {
+        selected.value = personStore.persons.map(x => x.id)
+    } else {
+        selected.value = []
+    }
+}
+const handUncheckAll = () => {
+    selected.value = [];
+}
+//end check all checkbox
+
+const handExportExcell = async () => {
+    try {
+        // console.log('Exporting selected IDs:', selected.value);
+        await personStore.exportExcel(selected.value);
+        showToast({ title: 'Đã xuất danh sách ra file excell', type: 'success' })
+    } catch (error) {
+        showToast({ title: 'Đã có lỗi', sub: 'Lỗi :' + error, type: 'error' })
+    }
+};
+
+const handExportAll = async () => {
+    try {
+        await personStore.exportExcelAll();
+        showToast({ title: 'Đã xuất danh sách ra file excell', type: 'success' })
+    } catch (error) {
+        showToast({ title: 'Đã có lỗi', sub: 'Lỗi :' + error, type: 'error' })
+    }
+};
+
+const handDeleteAllCheck = async () => {
+    const ok = await showConfirm({ title: 'Xóa thành viên', desc: `Bạn có chắc muốn Xóa ${selected.value.length} thành viên này không?`, icon: '<i class="fas fa-user-slash"></i>', btn: 'Xóa' })
+    if (ok) {
+        try {
+            const res = await personStore.deleteMultiplePersons(selected.value);
+            showToast({ title: 'Xóa user', sub: res.message, type: 'success' })
+            selected.value = [];
+        } catch (error) {
+            showToast({ title: 'Đã có lỗi', sub: 'Lỗi :' + error, type: 'error' })
+        }
+    }
+};
+
 const deletePerson = async (id) => {
-    const ok = await showConfirm({ title: 'Xóa thành viên', desc: 'Bạn có chắc muốn Xóa thành viên này không?', icon: '<i class="fas fa-trash-alt"></i>', btn: 'Xóa' })
+    const ok = await showConfirm({ title: 'Xóa thành viên', desc: 'Bạn có chắc muốn Xóa thành viên này không?', icon: '<i class="fas fa-user-slash"></i>', btn: 'Xóa' })
     if (ok) {
 
         try {

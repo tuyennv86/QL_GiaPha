@@ -34,13 +34,44 @@ const deletePerson = async (id) => {
   const res = await http.delete(`/person/${id}`)
   return res.data
 }
+
+const deleteMultiple = async (ids) => {
+  const res = await http.delete(`/person/delete-multiple`, { listId: ids })
+  return res.data
+}
+
+const exportExcel = async (selectedIds) => {
+  const response = await http.post(
+    'person/export-excel',
+    {
+      listId: selectedIds,
+    },
+    {
+      responseType: 'blob',
+    },
+  )
+  return response
+}
+const exportExcelAll = async () => {
+  const response = await http.post(
+    'person/export-all-excel',
+    {},
+    {
+      responseType: 'blob',
+    },
+  )
+  return response
+}
+
 export default {
   getAll,
   getById,
   search,
   generation,
-
+  exportExcel,
+  exportExcelAll,
   create,
   update,
   deletePerson,
+  deleteMultiple,
 }

@@ -9,12 +9,15 @@ import {
   ParseIntPipe,
   Query,
   UseGuards,
+  Res,
 } from '@nestjs/common';
 import { PersonService } from './person.service';
 import { CreatePersonDto } from './dto/create-person.dto';
 import { UpdatePersonDto } from './dto/update-person.dto';
 import { RequirePermissions } from 'src/permissions/require-permissions.decorator';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { ExportPersonDto } from './dto/export-person.dto';
+import type { Response } from 'express';
 
 @Controller('person')
 export class PersonController {
@@ -66,6 +69,16 @@ export class PersonController {
     return this.personService.create(createPersonDto);
   }
 
+  @Post('export-excel')
+  exportExcel(@Body() dto: ExportPersonDto, @Res() res: Response) {
+    return this.personService.exportExcel(dto.listId, res);
+  }
+
+  @Post('export-all-excel')
+  exportExcelAll(@Res() res: Response) {
+    return this.personService.exportAllExcel(res);
+  }
+
   @Patch(':id')
   @RequirePermissions('person.edit')
   @UseGuards(JwtAuthGuard)
@@ -74,6 +87,13 @@ export class PersonController {
     @Body() updatePersonDto: UpdatePersonDto,
   ) {
     return this.personService.update(id, updatePersonDto);
+  }
+
+  @Delete('delete-multiple')
+  @RequirePermissions('person.delete')
+  @UseGuards(JwtAuthGuard)
+  removeMultiple(@Body() dto: ExportPersonDto) {
+    return this.personService.removeMultiple(dto.listId);
   }
 
   @Delete(':id')
