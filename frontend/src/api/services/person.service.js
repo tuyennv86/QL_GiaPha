@@ -36,7 +36,12 @@ const deletePerson = async (id) => {
 }
 
 const deleteMultiple = async (ids) => {
-  const res = await http.delete(`/person/delete-multiple`, { listId: ids })
+  const res = await http.delete('/person/delete-multiple', {
+    data: {
+      listId: ids,
+    },
+  })
+
   return res.data
 }
 

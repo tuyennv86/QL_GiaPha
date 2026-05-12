@@ -101,8 +101,9 @@ export const usePersonStore = defineStore('person', () => {
     error.value = null
 
     try {
-      const message = await personService.delete(id)
+      const message = await personService.deletePerson(id)
       persons.value = persons.value.filter((p) => p.id !== id)
+      total.value--
       return message
     } catch (err) {
       error.value = err.message
@@ -117,6 +118,7 @@ export const usePersonStore = defineStore('person', () => {
     try {
       const message = await personService.deleteMultiple(ids)
       persons.value = persons.value.filter((p) => !ids.includes(p.id))
+      total.value -= ids.length
       return message
     } catch (err) {
       error.value = err.message
@@ -178,6 +180,7 @@ export const usePersonStore = defineStore('person', () => {
 
     try {
       const res = await personService.importExcel(file)
+      await searchPersons(1, 20, '-1', '0', '-1', '') // Tải lại danh sách sau khi nhập thành công
       return res
     } catch (err) {
       error.value = err.message

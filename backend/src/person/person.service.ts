@@ -96,8 +96,9 @@ export class PersonService {
     if (!person) {
       return { message: 'Không tìm thấy người này' };
     }
+    const fullName = person.full_name;
     await this.personRepo.remove(person);
-    return { message: 'Xoá người thành công ' + person.full_name };
+    return { message: 'Xoá người thành công ' + fullName };
   }
 
   async removeMultiple(listId: number[]): Promise<{ message: string }> {
@@ -110,7 +111,7 @@ export class PersonService {
     }
     await this.personRepo.remove(persons);
     return {
-      message: 'Xoá người thành công' + persons.length + ' người',
+      message: 'Xoá người thành công ' + persons.length + ' người',
     };
   }
 

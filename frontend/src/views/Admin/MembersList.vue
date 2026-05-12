@@ -230,7 +230,6 @@ const handUncheckAll = () => {
 
 const handExportExcell = async () => {
     try {
-        // console.log('Exporting selected IDs:', selected.value);
         await personStore.exportExcel(selected.value);
         showToast({ title: 'Đã xuất danh sách ra file excell', type: 'success' })
     } catch (error) {
@@ -267,10 +266,8 @@ const handleImport = async (event) => {
 
     try {
         const response = await personStore.importFromExcel(file,);
-        //console.log('Import thành công', response);
         showToast({ title: 'Import thành công', sub: response.message, type: 'success', });
     } catch (error) {
-        //console.log('Lỗi import', error);
         showToast({ title: 'Lỗi import', sub: error.response?.data?.message || error.message, type: 'error', });
     } finally {
         event.target.value = '';
