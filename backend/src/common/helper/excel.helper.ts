@@ -1,5 +1,3 @@
-// src/common/helpers/excel.helper.ts
-
 import * as ExcelJS from 'exceljs';
 
 export class ExcelHelper {
