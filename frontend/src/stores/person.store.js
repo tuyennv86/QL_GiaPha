@@ -172,6 +172,20 @@ export const usePersonStore = defineStore('person', () => {
     }
   }
 
+  const importFromExcel = async (file) => {
+    loading.value = true
+    error.value = null
+
+    try {
+      const res = await personService.importExcel(file)
+      return res
+    } catch (err) {
+      error.value = err.message
+    } finally {
+      loading.value = false
+    }
+  }
+
   return {
     persons,
     generations,
@@ -181,6 +195,8 @@ export const usePersonStore = defineStore('person', () => {
 
     exportExcel,
     exportExcelAll,
+    importFromExcel,
+
     getAllPersons,
     getPersonById,
     searchPersons,

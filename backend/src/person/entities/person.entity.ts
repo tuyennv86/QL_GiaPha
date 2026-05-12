@@ -1,8 +1,14 @@
-import { Column, CreateDateColumn, Entity, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @Entity('persons')
 export class Person {
-  @PrimaryColumn()
+  @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
@@ -44,7 +50,7 @@ export class Person {
   @CreateDateColumn()
   created_at: Date;
 
-  @Column({ nullable: true, type: 'timestamp' })
+  @UpdateDateColumn()
   updated_at: Date;
 
   //   @ManyToOne(() => Family, (family) => family.id, { onDelete: 'CASCADE' })

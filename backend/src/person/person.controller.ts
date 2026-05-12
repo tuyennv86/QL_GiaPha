@@ -10,6 +10,8 @@ import {
   Query,
   UseGuards,
   Res,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
 import { PersonService } from './person.service';
 import { CreatePersonDto } from './dto/create-person.dto';
@@ -18,6 +20,7 @@ import { RequirePermissions } from 'src/permissions/require-permissions.decorato
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { ExportPersonDto } from './dto/export-person.dto';
 import type { Response } from 'express';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('person')
 export class PersonController {
@@ -77,6 +80,15 @@ export class PersonController {
   @Post('export-all-excel')
   exportExcelAll(@Res() res: Response) {
     return this.personService.exportAllExcel(res);
+  }
+
+  @Post('import-excel')
+  @UseInterceptors(FileInterceptor('file'))
+  @RequirePermissions('person.create')
+  @UseGuards(JwtAuthGuard)
+  importExcel(@UploadedFile() file: Express.Multer.File) {
+    console.log('Received file:', file.originalname);
+    return this.personService.importExcelFromFile(file);
   }
 
   @Patch(':id')

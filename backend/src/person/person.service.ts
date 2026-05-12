@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import * as ExcelJS from 'exceljs';
 import { Response } from 'express';
 import { CreatePersonDto } from './dto/create-person.dto';
@@ -8,6 +8,8 @@ import { Person } from './entities/person.entity';
 import { Repository } from 'typeorm';
 import { PersonResponseList } from './response/person.response';
 import { PersonMapper } from './mapper/person.mapper';
+import { ExcelHelper } from 'src/helper/excel.helper';
+import { ObjectHelper } from 'src/helper/object.helper';
 
 @Injectable()
 export class PersonService {
@@ -237,69 +239,63 @@ export class PersonService {
     await workbook.commit();
   }
 
-  // async importExcelFromFile(
-  //   file: Express.Multer.File,
-  //   family_id: number,
-  //   branch_id?: number,
-  // ): Promise<{ message: string }> {
-  //   if (!file) {
-  //     throw new Error('Không có file');
-  //   }
+  async importExcelFromFile(
+    file: Express.Multer.File,
+  ): Promise<{ message: string }> {
+    if (!file) {
+      throw new Error('Không có file');
+    }
 
-  //   const workbook = new ExcelJS.Workbook();
-  //   await workbook.xlsx.load(file.buffer);
-  //   const worksheet = workbook.getWorksheet(1);
-  //   if (!worksheet) {
-  //     throw new BadRequestException('Không tìm thấy sheet Excel');
-  //   }
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.load(file.buffer as unknown as ArrayBuffer);
+    const worksheet = workbook.getWorksheet(1);
+    if (!worksheet) {
+      throw new BadRequestException('Không tìm thấy sheet Excel');
+    }
 
-  //   const persons: CreatePersonDto[] = [];
+    const persons: Partial<CreatePersonDto>[] = [];
 
-  //   worksheet.eachRow((row, rowNumber) => {
-  //     // Bỏ header
-  //     if (rowNumber === 1) return;
+    worksheet.eachRow((row, rowNumber) => {
+      if (rowNumber === 1) return; // bỏ header
+      // bỏ row trống
+      if (row.actualCellCount === 0) {
+        return;
+      }
+      const values = row.values as ExcelJS.CellValue[];
 
-  //     const values = row.values as ExcelJS.CellValue[];
+      const fullName = ExcelHelper.getRequiredCellString(values[1]);
 
-  //     const fullName = typeof values[1] === 'string' ? values[1].trim() : '';
-  //     const genderValue =
-  //       typeof values[3] === 'string' ? values[3].trim().toLowerCase() : '';
-  //     const generationValue = values[9].toString() || '';
-  //     const isAliveValue =
-  //       typeof values[10] === 'string' ? values[10].trim().toLowerCase() : '';
-  //     const person: CreatePersonDto = {
-  //       family_id: family_id,
-  //       branch_id: branch_id,
-  //       full_name: fullName,
-  //       gender: genderValue === 'nam' ? 1 : genderValue === 'nữ' ? 0 : 2,
-  //       birth_date: values[5] ? new Date(String(values[5])) : undefined,
-  //       death_date: values[6] ? new Date(String(values[6])) : undefined,
-  //       biography: typeof values[7] === 'string' ? values[7].trim() : '',
-  //       avatar: typeof values[8] === 'string' ? values[8].trim() : undefined,
-  //       generation: generationValue
-  //         ? Number(String(generationValue).replace('đời ', ''))
-  //         : undefined,
-  //       is_alive:
-  //         isAliveValue === 'còn sống'
-  //           ? true
-  //           : isAliveValue === 'đã mất'
-  //             ? false
-  //             : undefined,
-  //       job: typeof values[11] === 'string' ? values[11].trim() : undefined,
-  //       place_of_birth:
-  //         typeof values[12] === 'string' ? values[12].trim() : undefined,
-  //     };
+      // Bỏ qua nếu không có tên
+      if (!fullName.trim()) {
+        return;
+      }
 
-  //     persons.push(person);
-  //   });
-  //   console.log(persons);
-  //   // insert database
-  //   await this.personRepo.save(persons);
+      const person: CreatePersonDto = {
+        family_id: 1,
+        branch_id: 1,
 
-  //   return {
-  //     message: 'Import thành công' + persons.length + ' người',
-  //   };
-  // }
+        full_name: fullName,
+        biography: ExcelHelper.getRequiredCellString(values[2]),
+        gender: ExcelHelper.getGender(values[3]),
+        generation: ExcelHelper.getCellNumber(values[4]),
+        birth_date: ExcelHelper.getCellDate(values[5]),
+        death_date: ExcelHelper.getCellDate(values[6]),
+        avatar: '',
+        place_of_birth: ExcelHelper.getCellString(values[7]),
+        job: ExcelHelper.getCellString(values[8]),
+        is_alive: ExcelHelper.getCellBoolean(values[9]),
+      };
+
+      persons.push(person);
+    });
+
+    await this.personRepo.save(
+      persons.map((item) => ObjectHelper.removeUndefined(item)),
+    );
+    return {
+      message: 'Import thành công' + persons.length + ' người',
+    };
+  }
 }
 
 const genderMap = {

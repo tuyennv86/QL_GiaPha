@@ -14,8 +14,15 @@
                     <button class="btn btn-secondary btn-sm" @click.prevent="handExportAll">
                         <i class="far fa-file-excel text-red"></i>⬇ Xuất Excel
                     </button>
-                    <button class="btn btn-secondary btn-sm"><i class="fas fa-file-import text-green"></i>
-                        Import</button>
+                    <label class="import-btn">
+                        <i class="fas fa-file-import"></i>
+                        <span>Import Excel</span>
+                        <input type="file" accept=".xlsx,.xls" @change="handleImport" hidden />
+                    </label>
+
+                    <div v-if="personStore.loading">
+                        Đang import...
+                    </div>
                     <button class="btn btn-primary btn-sm">
                         <i class="fas fa-plus"></i> Thêm Thành Viên
                     </button>
@@ -253,6 +260,23 @@ const handDeleteAllCheck = async () => {
     }
 };
 
+const handleImport = async (event) => {
+    const file = event.target.files[0];
+
+    if (!file) return;
+
+    try {
+        const response = await personStore.importFromExcel(file,);
+        //console.log('Import thành công', response);
+        showToast({ title: 'Import thành công', sub: response.message, type: 'success', });
+    } catch (error) {
+        //console.log('Lỗi import', error);
+        showToast({ title: 'Lỗi import', sub: error.response?.data?.message || error.message, type: 'error', });
+    } finally {
+        event.target.value = '';
+    }
+};
+
 const deletePerson = async (id) => {
     const ok = await showConfirm({ title: 'Xóa thành viên', desc: 'Bạn có chắc muốn Xóa thành viên này không?', icon: '<i class="fas fa-user-slash"></i>', btn: 'Xóa' })
     if (ok) {
@@ -278,3 +302,32 @@ const openView = (person) => {
 
 
 </script>
+
+<style scoped>
+.import-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    padding: 10px 16px;
+
+    background: #21bd5a;
+    color: white;
+
+    border-radius: 4px;
+    cursor: pointer;
+
+    font-size: 13px;
+    font-weight: 500;
+
+    transition: all 0.2s ease;
+}
+
+.import-btn:hover {
+    background: #15803d;
+}
+
+.import-btn i {
+    font-size: 16px;
+}
+</style>

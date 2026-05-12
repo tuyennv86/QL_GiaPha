@@ -52,6 +52,7 @@ const exportExcel = async (selectedIds) => {
   )
   return response
 }
+
 const exportExcelAll = async () => {
   const response = await http.post(
     'person/export-all-excel',
@@ -63,6 +64,19 @@ const exportExcelAll = async () => {
   return response
 }
 
+const importExcel = async (file) => {
+  const formData = new FormData()
+
+  formData.append('file', file)
+
+  const response = await http.post('person/import-excel', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  })
+  return response.data
+}
+
 export default {
   getAll,
   getById,
@@ -70,6 +84,7 @@ export default {
   generation,
   exportExcel,
   exportExcelAll,
+  importExcel,
   create,
   update,
   deletePerson,
