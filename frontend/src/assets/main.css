@@ -656,9 +656,15 @@ body {
   font-weight: 500;
   color: var(--text-primary);
 }
+.tbl-name-val2 {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-primary);
+}
 .tbl-name-sub {
   font-size: 11px;
-  color: var(--text-dim);
+  padding-top: 8px;
+  color: #b6b0b0;
 }
 
 /* ====== BADGES ====== */
@@ -1013,7 +1019,7 @@ body {
   align-items: center;
   gap: 10px;
 }
-.toggle-switch {
+/* .toggle-switch {
   width: 40px;
   height: 22px;
   background: #3d3d3d;
@@ -1039,7 +1045,7 @@ body {
 }
 .toggle-switch.on::after {
   left: 21px;
-}
+} */
 .toggle-label {
   font-size: 13px;
   color: var(--text-primary);

@@ -15,6 +15,7 @@
   "dependencies": {
     "@fortawesome/fontawesome-free": "^7.2.0",
     "@vee-validate/zod": "^4.15.1",
+    "@vuepic/vue-datepicker": "^12.1.0",
     "axios": "^1.14.0",
     "dayjs": "^1.11.20",
     "pinia": "^3.0.4",

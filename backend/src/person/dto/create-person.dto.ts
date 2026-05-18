@@ -1,11 +1,13 @@
 import {
   IsBoolean,
   IsDate,
+  IsEnum,
   IsInt,
   IsOptional,
   IsString,
   MaxLength,
 } from 'class-validator';
+import { PersonType } from '../enum/person-type.enum';
 
 export class CreatePersonDto {
   @IsInt()
@@ -55,4 +57,12 @@ export class CreatePersonDto {
   @IsOptional()
   @MaxLength(500, { message: 'Place of birth tối đa 500 ký tự' })
   place_of_birth?: string;
+
+  @IsString()
+  @IsOptional()
+  @MaxLength(1000, { message: 'Ghi chú tối đa 1000 ký tự' })
+  note?: string;
+
+  @IsEnum(PersonType)
+  person_type: PersonType;
 }

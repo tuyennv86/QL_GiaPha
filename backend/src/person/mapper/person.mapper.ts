@@ -17,6 +17,17 @@ export class PersonMapper {
       is_alive: entity.is_alive,
       job: entity.job,
       place_of_birth: entity.place_of_birth,
+      note: entity.note,
+      person_type: entity.person_type,
+      family: entity.family
+        ? {
+            id: entity.family.id,
+            family_name: entity.family.family_name,
+          }
+        : null,
+      branch: entity.branch
+        ? { id: entity.branch.id, branch_name: entity.branch.branch_name }
+        : null,
     };
   }
 }

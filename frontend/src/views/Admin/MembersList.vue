@@ -85,6 +85,7 @@
                         <th style="width: 40px;"><input type="checkbox" style="cursor: pointer;" ref="checkAllRef"
                                 :checked="isAllChecked" @change="handleCheckAll"></th>
                         <th>Họ Tên</th>
+                        <th>Họ / Chi</th>
                         <th>Giới Tính</th>
                         <th>Thế Hệ</th>
                         <th>Năm Sinh</th>
@@ -110,6 +111,15 @@
                             </div>
                         </td>
                         <td>
+                            <div class="tbl-name">
+                                <div>
+                                    <div class="tbl-name-val2" v-if="person.family">{{ person.family.family_name }}
+                                    </div>
+                                    <div class="tbl-name-sub" v-if="person.branch">{{ person.branch.branch_name }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
                             <span class="badge b-blue" v-if="person.gender === 1"><i class="fas fa-mars"></i> Nam</span>
                             <span class="badge b-purple" v-else-if="person.gender === 0"><i class="fas fa-venus"></i>
                                 Nữ</span>
@@ -122,8 +132,9 @@
                         <td class="text-secondary">{{ person.place_of_brith }}</td>
                         <td class="text-secondary">{{ person.job }}</td>
                         <td>
-                            <span class="badge b-green" v-if="person.is_alive"><i class="fas fa-heart"></i> Sống</span>
-                            <span class="badge b-gray" v-else><i class="fas fa-skull"></i> Mất</span>
+                            <span class="badge b-green" v-if="person.is_alive"><i class="fas fa-heart"></i>Còn
+                                sống</span>
+                            <span class="badge b-gray" v-else><i class="fas fa-skull"></i>Đã mất</span>
                         </td>
                         <td>
                             <button class="btn btn-ghost btn-xs text-gold" @click.prevent="openEdit(person)"> <i
@@ -140,6 +151,10 @@
                 @change="onPageChange" :delta="4"></BasePagination>
         </div>
     </div>
+    <AddPersonSilde v-model="showPanel" :person="selectedPerson" :branchs="branchStore.branches"
+        :generations="generations" :families="familyStore.families" @save="handSave">
+    </AddPersonSilde>
+    <ViewPersonSilde v-model="viewPanel" :person="viewPerson"></ViewPersonSilde>
     <ToastCompo></ToastCompo>
     <ConfirmDialog></ConfirmDialog>
 </template>
@@ -153,10 +168,17 @@ import ToastCompo from '@/components/Toast/ToastCompo.vue';
 import { useToast } from '@/components/Toast/useToast';
 import BasePagination from '@/components/BasePagination.vue';
 import { formatDate } from '@/utils/formatDate';
+import ViewPersonSilde from '@/components/SildePanel/Person/ViewPersonSilde.vue';
+import AddPersonSilde from '@/components/SildePanel/Person/AddPersonSilde.vue';
+
+import { useFamilyStore } from '@/stores/family.store';
+import { useBranchStore } from '@/stores/branch.store';
 
 const { showToast } = useToast()
 const { showConfirm } = useConfirm();
 const personStore = usePersonStore();
+const familyStore = useFamilyStore();
+const branchStore = useBranchStore();
 
 const page = ref(1);
 const limit = ref(20);// tổng số trang trên 1 bản ghi
@@ -165,17 +187,49 @@ const gender = ref("-1");
 const generation = ref("0");
 const is_alive = ref("-1");
 
+const viewPanel = ref(false);
+const viewPerson = ref(null);
+
+const showPanel = ref(false);
+const selectedPerson = ref(null);
+const generations = ref([]);
+
+// const loadBranch = async () => {
+//     await branchStore.getBranches();
+// };
+const loadBranchByFamily = async (family_id) => {
+    await branchStore.getBranchByFamily(family_id);
+};
+const loadFamily = async () => {
+    await familyStore.getAll();
+};
+
+// const loadGenerations = async () => {
+
+//     const list = [...personStore.generations];
+//     list.push(list.length > 0 ? Math.max(...list) + 1 : 1);
+//     generations.value = list;
+// }
+
 const loadPersons = async () => {
     await personStore.searchPersons(page.value, limit.value, gender.value, generation.value, is_alive.value, search.value);
 };
 
 const getGeneration = async () => {
     await personStore.getGenerations();
+
+    const list = [...personStore.generations];
+    list.push(list.length > 0 ? Math.max(...list) + 1 : 1);
+    generations.value = list;
 };
 
 onMounted(() => {
     loadPersons();
+
     getGeneration();
+    loadFamily();
+    // loadGenerations();
+
 });
 
 watch(search, () => {
@@ -261,9 +315,7 @@ const handDeleteAllCheck = async () => {
 
 const handleImport = async (event) => {
     const file = event.target.files[0];
-
     if (!file) return;
-
     try {
         const response = await personStore.importFromExcel(file,);
         showToast({ title: 'Import thành công', sub: response.message, type: 'success', });
@@ -289,12 +341,34 @@ const deletePerson = async (id) => {
 
 const openEdit = (person) => {
     console.log('Open edit for person:', person);
-    showToast({ title: 'Chức năng đang phát triển', type: 'info' })
+    const family_id = person.family_id;
+    loadBranchByFamily(family_id).then(() => {
+        selectedPerson.value = person;
+        showPanel.value = true;
+    });
+    // console.log('Open edit for person:', person);
+    // showToast({ title: 'Chức năng đang phát triển', type: 'info' })
 };
 
 const openView = (person) => {
-    console.log('Open view for person:', person);
-    showToast({ title: 'Chức năng đang phát triển', type: 'info' })
+    viewPanel.value = true;
+    viewPerson.value = person;
+};
+
+const handSave = async (personData) => {
+    console.log('Saving person data:', personData);
+    // try {
+    //     if (personData.id) {
+    //         await personStore.updatePerson(personData.id, personData);
+    //         showToast({ title: 'Cập nhật thành công', type: 'success' });
+    //     } else {
+    //         await personStore.createPerson(personData);
+    //         showToast({ title: 'Tạo thành công', type: 'success' });
+    //     }
+    //     loadPersons();
+    // } catch (error) {
+    //     showToast({ title: 'Đã có lỗi', sub: 'Lỗi :' + error, type: 'error' });
+    // }
 };
 
 

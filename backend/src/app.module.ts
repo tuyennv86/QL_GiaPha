@@ -15,6 +15,7 @@ import { MenuModule } from './menu/menu.module';
 import { FamilyModule } from './family/family.module';
 import { MariageModule } from './mariage/mariage.module';
 import { PersonModule } from './person/person.module';
+import { FamilybrannchesModule } from './familybrannches/familybrannches.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { PersonModule } from './person/person.module';
     FamilyModule,
     MariageModule,
     PersonModule,
+    FamilybrannchesModule,
   ],
   // controllers: [AppController],
   // providers: [AppService],

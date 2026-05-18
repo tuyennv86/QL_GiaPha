@@ -3,13 +3,14 @@ import {
   CreateDateColumn,
   Entity,
   OneToMany,
-  PrimaryColumn,
+  PrimaryGeneratedColumn,
 } from 'typeorm';
 import { User } from 'src/users/entities/user.entity';
+import { Person } from 'src/person/entities/person.entity';
 
 @Entity('families')
 export class Family {
-  @PrimaryColumn()
+  @PrimaryGeneratedColumn()
   id: number;
 
   @Column({ nullable: true, length: 200 })
@@ -21,11 +22,15 @@ export class Family {
   @Column({ length: 300 })
   origin_location: string;
 
+  @Column({ nullable: true })
   description: string;
 
   @CreateDateColumn()
   created_at: Date;
 
-  @OneToMany(() => User, (user) => user.family_id)
+  @OneToMany(() => User, (user) => user.family)
   users: User[];
+
+  @OneToMany(() => Person, (person) => person.family)
+  persons: Person[];
 }

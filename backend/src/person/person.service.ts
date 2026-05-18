@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import * as ExcelJS from 'exceljs';
+import { promises as fs } from 'fs';
 import { Response } from 'express';
 import { CreatePersonDto } from './dto/create-person.dto';
 import { UpdatePersonDto } from './dto/update-person.dto';
@@ -10,12 +11,22 @@ import { PersonResponseList } from './response/person.response';
 import { PersonMapper } from './mapper/person.mapper';
 import { ExcelHelper } from 'src/common/helper/excel.helper';
 import { ObjectHelper } from 'src/common/helper/object.helper';
+import { Family } from 'src/family/entities/family.entity';
+import { FamilyBranch } from 'src/familybrannches/entities/family-branch.entity';
+import path from 'path';
+import { PersonType } from './enum/person-type.enum';
 
 @Injectable()
 export class PersonService {
   constructor(
     @InjectRepository(Person)
     private readonly personRepo: Repository<Person>,
+
+    @InjectRepository(Family)
+    private readonly familyRepo: Repository<Family>,
+
+    @InjectRepository(FamilyBranch)
+    private readonly branchRepo: Repository<FamilyBranch>,
   ) {}
 
   async findAll(): Promise<Person[]> {
@@ -40,7 +51,10 @@ export class PersonService {
     is_alive: number,
     search?: string,
   ): Promise<PersonResponseList> {
-    const query = this.personRepo.createQueryBuilder('persons');
+    const query = this.personRepo
+      .createQueryBuilder('persons')
+      .leftJoinAndSelect('persons.family', 'family')
+      .leftJoinAndSelect('persons.branch', 'branch');
 
     if (search) {
       query.andWhere(
@@ -65,6 +79,29 @@ export class PersonService {
     }
 
     const [entities, total] = await query
+      .select([
+        'persons.id',
+        'persons.family_id',
+        'persons.branch_id',
+        'persons.full_name',
+        'persons.gender',
+        'persons.birth_date',
+        'persons.death_date',
+        'persons.biography',
+        'persons.avatar',
+        'persons.generation',
+        'persons.is_alive',
+        'persons.job',
+        'persons.place_of_birth',
+        'persons.note',
+        'persons.person_type',
+
+        'family.id',
+        'family.family_name',
+
+        'branch.id',
+        'branch.branch_name',
+      ])
       .orderBy('persons.id', 'ASC')
       .skip((page - 1) * limit)
       .take(limit)
@@ -84,8 +121,73 @@ export class PersonService {
     return await this.personRepo.findOne({ where: { id } });
   }
 
-  async create(createPersonDto: CreatePersonDto) {
+  async create(createPersonDto: CreatePersonDto, file?: Express.Multer.File) {
+    // kiểm tra family và branch có tồn tại không
+    const family = await this.familyRepo.findOne({
+      where: { id: createPersonDto.family_id },
+    });
+    if (!family) {
+      throw new BadRequestException('Không tìm thấy gia tộc');
+    }
+    if (createPersonDto.branch_id) {
+      const branch = await this.branchRepo.findOne({
+        where: { id: createPersonDto.branch_id },
+      });
+      if (!branch) {
+        throw new BadRequestException('Không tìm thấy chi tộc');
+      }
+    }
+    // avatar
+    let avatarUrl = createPersonDto.avatar || '';
+    if (file) {
+      // lưu file và lấy url vào thư mục uploads và trả về url là /uploads/filename
+      avatarUrl = await this.uploadImage(file);
+    }
+    createPersonDto.avatar = avatarUrl;
+
     return await this.personRepo.save(createPersonDto);
+  }
+
+  async uploadImage(file: Express.Multer.File) {
+    if (!file) {
+      throw new BadRequestException('File không tồn tại');
+    }
+    const allowMimeTypes = [
+      'image/jpeg',
+      'image/jpg',
+      'image/png',
+      'image/webp',
+      'image/gif',
+    ];
+    if (!allowMimeTypes.includes(file.mimetype)) {
+      throw new BadRequestException('Chỉ được phép upload file ảnh');
+    }
+
+    const maxSize = 5 * 1024 * 1024; // 5MB
+
+    if (file.size > maxSize) {
+      throw new BadRequestException('Dung lượng ảnh tối đa 5MB');
+    }
+    const now = new Date();
+    // yyyy/mm/dd
+    const year = now.getFullYear().toString();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    // uploads/2026/05/14
+    const uploadDir = path.join(process.cwd(), 'uploads', year, month, day);
+    // tạo thư mục nếu chưa tồn tại
+    await fs.mkdir(uploadDir, {
+      recursive: true,
+    });
+
+    // tạo tên file
+    const fileName = `${Date.now()}-${file.originalname}`;
+    // full path
+    const filePath = path.join(uploadDir, fileName);
+    // lưu file
+    await fs.writeFile(filePath, file.buffer);
+    // path lưu DB
+    return `/uploads/${year}/${month}/${day}/${fileName}`;
   }
 
   async update(id: number, updatePersonDto: UpdatePersonDto) {
@@ -197,6 +299,11 @@ export class PersonService {
         key: 'is_alive',
         width: 20,
       },
+      {
+        header: 'Loại thành viên',
+        key: 'person_type',
+        width: 30,
+      },
     ];
 
     // HEADER STYLE
@@ -231,6 +338,16 @@ export class PersonService {
         place_of_birth: person.place_of_birth,
         job: person.job,
         is_alive: person.is_alive ? 'Còn sống' : 'Đã mất',
+        person_type:
+          person.person_type === PersonType.SON
+            ? 'Con trai'
+            : person.person_type === PersonType.DAUGHTER
+              ? 'Con gái'
+              : person.person_type === PersonType.SON_IN_LAW
+                ? 'Con rể'
+                : person.person_type === PersonType.DAUGHTER_IN_LAW
+                  ? 'Con dâu'
+                  : '',
       });
 
       row.commit();
@@ -286,6 +403,7 @@ export class PersonService {
         place_of_birth: ExcelHelper.getCellString(values[7]),
         job: ExcelHelper.getCellString(values[8]),
         is_alive: ExcelHelper.getCellBoolean(values[9]),
+        person_type: ExcelHelper.getPersonType(values[10]),
       };
 
       persons.push(person);

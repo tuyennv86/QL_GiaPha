@@ -68,8 +68,12 @@ export class PersonController {
   @Post()
   @RequirePermissions('person.create')
   @UseGuards(JwtAuthGuard)
-  create(@Body() createPersonDto: CreatePersonDto) {
-    return this.personService.create(createPersonDto);
+  @UseInterceptors(FileInterceptor('avatar'))
+  create(
+    @Body() createPersonDto: CreatePersonDto,
+    @UploadedFile() avatar?: Express.Multer.File,
+  ) {
+    return this.personService.create(createPersonDto, avatar);
   }
 
   @Post('export-excel')

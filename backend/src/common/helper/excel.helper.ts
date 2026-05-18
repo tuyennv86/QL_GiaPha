@@ -1,4 +1,6 @@
+import { BadRequestException } from '@nestjs/common';
 import * as ExcelJS from 'exceljs';
+import { PersonType } from 'src/person/enum/person-type.enum';
 
 export class ExcelHelper {
   /**
@@ -138,5 +140,35 @@ export class ExcelHelper {
       .split(separator)
       .map((item) => item.trim())
       .filter(Boolean);
+  }
+
+  static getPersonType(value: ExcelJS.CellValue): PersonType {
+    if (value === null || value === undefined) {
+      throw new BadRequestException('Loại thành viên không được để trống');
+    }
+
+    // chỉ cho phép string/number
+    if (typeof value !== 'string' && typeof value !== 'number') {
+      throw new BadRequestException('Loại thành viên không hợp lệ');
+    }
+
+    const text = String(value).trim().toLowerCase();
+
+    switch (text) {
+      case 'con trai':
+        return PersonType.SON;
+
+      case 'con gái':
+        return PersonType.DAUGHTER;
+
+      case 'con dâu':
+        return PersonType.DAUGHTER_IN_LAW;
+
+      case 'con rể':
+        return PersonType.SON_IN_LAW;
+
+      default:
+        throw new BadRequestException(`Loại thành viên không hợp lệ: ${text}`);
+    }
   }
 }
