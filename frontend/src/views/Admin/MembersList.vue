@@ -152,7 +152,7 @@
         </div>
     </div>
     <AddPersonSilde v-model="showPanel" :person="selectedPerson" :branchs="branchStore.branches"
-        :generations="generations" :families="familyStore.families" @save="handSave">
+        :generations="generations" :families="familyStore.families" @save="handSave" @onDeleteImg="handDeleteImg">
     </AddPersonSilde>
     <ViewPersonSilde v-model="viewPanel" :person="viewPerson"></ViewPersonSilde>
     <ToastCompo></ToastCompo>
@@ -355,22 +355,43 @@ const openView = (person) => {
     viewPerson.value = person;
 };
 
-const handSave = async (personData) => {
-    console.log('Saving person data:', personData);
-    // try {
-    //     if (personData.id) {
-    //         await personStore.updatePerson(personData.id, personData);
-    //         showToast({ title: 'Cập nhật thành công', type: 'success' });
-    //     } else {
-    //         await personStore.createPerson(personData);
-    //         showToast({ title: 'Tạo thành công', type: 'success' });
-    //     }
-    //     loadPersons();
-    // } catch (error) {
-    //     showToast({ title: 'Đã có lỗi', sub: 'Lỗi :' + error, type: 'error' });
-    // }
+const handSave = async ({ form, imageFile, isEdit }) => {
+    console.log('Saving person data:', form);
+    console.log('Image file:', imageFile);
+    console.log('Is edit mode:', isEdit);
+    if (isEdit) {
+        try {
+            await personStore.updatePerson(form.id, form, imageFile);
+            showToast({ title: 'Cập nhật thành công', type: 'success' });
+            loadPersons();
+        } catch (error) {
+            showToast({ title: 'Đã có lỗi', sub: 'Lỗi :' + error, type: 'error' });
+        }
+    } else {
+        try {
+            await personStore.createPerson(form, imageFile);
+            showToast({ title: 'Tạo thành công', type: 'success' });
+            loadPersons();
+        } catch (error) {
+            showToast({ title: 'Đã có lỗi', sub: 'Lỗi :' + error, type: 'error' });
+        }
+    }
 };
 
+const handDeleteImg = async (personId) => {
+    const ok = await showConfirm({ title: 'Xóa ảnh đại diện', desc: 'Bạn có chắc muốn Xóa ảnh đại diện của thành viên này không?', icon: '<i class="fas fa-image"></i>', btn: 'Xóa' })
+    if (ok) {
+        try {
+            await personStore.deleteAvatar(personId);
+            showToast({ title: 'Xóa ảnh đại diện thành công', type: 'success' });
+            // Cập nhật lại thông tin người dùng sau khi xóa ảnh
+            // const updatedPerson = await personStore.getPersonById(personId);
+            // selectedPerson.value = updatedPerson;
+        } catch (error) {
+            showToast({ title: 'Đã có lỗi', sub: 'Lỗi :' + error, type: 'error' });
+        }
+    }
+};
 
 </script>
 

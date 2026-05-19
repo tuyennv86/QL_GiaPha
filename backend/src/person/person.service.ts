@@ -190,8 +190,51 @@ export class PersonService {
     return `/uploads/${year}/${month}/${day}/${fileName}`;
   }
 
-  async update(id: number, updatePersonDto: UpdatePersonDto) {
-    return await this.personRepo.update(id, updatePersonDto);
+  async update(
+    id: number,
+    updatePersonDto: UpdatePersonDto,
+    file?: Express.Multer.File,
+  ) {
+    const person = await this.findOne(id);
+    if (!person) {
+      throw new BadRequestException('Không tìm thấy người này');
+    }
+    // kiểm tra family và branch có tồn tại không
+    if (updatePersonDto.family_id) {
+      const family = await this.familyRepo.findOne({
+        where: { id: updatePersonDto.family_id },
+      });
+      if (!family) {
+        throw new BadRequestException('Không tìm thấy gia tộc');
+      }
+    }
+    if (updatePersonDto.branch_id) {
+      const branch = await this.branchRepo.findOne({
+        where: { id: updatePersonDto.branch_id },
+      });
+      if (!branch) {
+        throw new BadRequestException('Không tìm thấy chi tộc');
+      }
+    }
+    // avatar
+    if (file) {
+      // xoá avatar cũ nếu có
+      if (person.avatar) {
+        const oldFilePath = path.join(process.cwd(), person.avatar);
+        try {
+          await fs.unlink(oldFilePath);
+        } catch (err) {
+          console.error('Lỗi xoá file cũ:', err);
+        }
+      }
+      // lưu file mới và lấy url
+      const avatarUrl = await this.uploadImage(file);
+      updatePersonDto.avatar = avatarUrl;
+    }
+    return await this.personRepo.save({
+      ...person,
+      ...updatePersonDto,
+    });
   }
 
   async remove(id: number): Promise<{ message: string }> {
@@ -216,6 +259,27 @@ export class PersonService {
     return {
       message: 'Xoá người thành công ' + persons.length + ' người',
     };
+  }
+
+  async removeAvatar(id: number): Promise<{ message: string }> {
+    const person = await this.findOne(id);
+    if (!person) {
+      return { message: 'Không tìm thấy người này' };
+    }
+    if (!person.avatar) {
+      return { message: 'Người này không có avatar' };
+    }
+    // xoá file
+    const filePath = path.join(process.cwd(), person.avatar);
+    try {
+      await fs.unlink(filePath);
+    } catch (err) {
+      console.error('Lỗi xoá file:', err);
+    }
+    // xoá url trong DB
+    person.avatar = '';
+    await this.personRepo.save(person);
+    return { message: 'Xoá avatar thành công' };
   }
 
   async getListByIds(listId: number[]): Promise<Person[]> {

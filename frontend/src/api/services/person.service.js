@@ -20,13 +20,54 @@ const generation = async () => {
   const res = await http.get(`/person/generation`)
   return res.data
 }
-const create = async (person) => {
-  const res = await http.post('/person', person)
+
+const buildFormData = (person, avatar) => {
+  const formData = new FormData()
+
+  // append object fields
+  Object.keys(person).forEach((key) => {
+    const value = person[key]
+
+    // null/undefined bỏ qua
+    if (value === null || value === undefined) return
+
+    // array/object
+    if (typeof value === 'object' && !(value instanceof File)) {
+      formData.append(key, JSON.stringify(value))
+    } else {
+      formData.append(key, value)
+    }
+  })
+
+  // append avatar
+  if (avatar) {
+    formData.append('avatar', avatar)
+  }
+
+  return formData
+}
+
+const create = async (person, avatar) => {
+  const formData = buildFormData(person, avatar)
+
+  const res = await http.post('/person', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  })
+
   return res.data
 }
 
-const update = async (id, person) => {
-  const res = await http.patch(`/person/${id}`, person)
+const update = async (id, person, avatar) => {
+  const formData = buildFormData(person, avatar)
+
+  const res = await http.patch(`/person/${id}`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  })
+
   return res.data
 }
 
@@ -42,6 +83,11 @@ const deleteMultiple = async (ids) => {
     },
   })
 
+  return res.data
+}
+
+const deleteAvatar = async (id) => {
+  const res = await http.delete(`/person/${id}/avatar`)
   return res.data
 }
 
@@ -94,4 +140,5 @@ export default {
   update,
   deletePerson,
   deleteMultiple,
+  deleteAvatar,
 }

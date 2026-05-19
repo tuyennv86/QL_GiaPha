@@ -91,18 +91,20 @@ export class PersonController {
   @RequirePermissions('person.create')
   @UseGuards(JwtAuthGuard)
   importExcel(@UploadedFile() file: Express.Multer.File) {
-    console.log('Received file:', file.originalname);
+    //console.log('Received file:', file.originalname);
     return this.personService.importExcelFromFile(file);
   }
 
   @Patch(':id')
   @RequirePermissions('person.edit')
   @UseGuards(JwtAuthGuard)
+  @UseInterceptors(FileInterceptor('avatar'))
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updatePersonDto: UpdatePersonDto,
+    @UploadedFile() avatar?: Express.Multer.File,
   ) {
-    return this.personService.update(id, updatePersonDto);
+    return this.personService.update(id, updatePersonDto, avatar);
   }
 
   @Delete('delete-multiple')
@@ -117,5 +119,12 @@ export class PersonController {
   @UseGuards(JwtAuthGuard)
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.personService.remove(id);
+  }
+
+  @Delete(':id/avatar')
+  @RequirePermissions('person.delete')
+  @UseGuards(JwtAuthGuard)
+  removeAvatar(@Param('id', ParseIntPipe) id: number) {
+    return this.personService.removeAvatar(id);
   }
 }

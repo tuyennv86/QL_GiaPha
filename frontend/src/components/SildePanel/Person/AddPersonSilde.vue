@@ -61,7 +61,19 @@
                         <div class="f-group">
                             <label class="f-label">Ảnh đại diện</label>
                             <input class="f-input" v-model="form.avatar" type="hidden">
-                            <img src="" alt="">
+                            <!-- ẢNH PREVIEW -->
+                            <img v-if="previewImage" :src="previewImage" class="w-32 h-32 object-cover rounded border"
+                                style="max-width: 200px;" />
+                            <!-- ẢNH CŨ -->
+                            <img v-else-if="form.avatar" :src="API_URL + 'uploads/' + form.avatar"
+                                class="w-32 h-32 object-cover rounded border" style="max-width: 200px;" />
+
+                            <p v-else class="text-muted fst-italic">Chưa có ảnh</p>
+                            <button class="btn btn-outline-danger btn-circle btn-sm"
+                                @click.prevent="onDeleteImg(form.id)" title="Xóa ảnh" v-if="form.avatar">
+                                <i class="fa-regular fa-trash-can"></i>
+                            </button>
+                            <input type="file" class="mt-3" @change="onChangFile" />
                         </div>
                         <div class="f-group"><label class="f-label">Năm Sinh</label>
                             <!-- <input class="f-input" type="number"> -->
@@ -107,13 +119,24 @@
 </template>
 
 <script setup>
-import { reactive, watch, computed } from 'vue'
+import { reactive, watch, computed, ref } from 'vue'
 import SlidePanel from '../SlidePanel.vue'
 import ToggleSwitch from '@/components/common/ToggleSwitch.vue'
 import { PERSON_TYPE_OPTIONS } from '@/constants/person-type-options'
 import { VueDatePicker } from '@vuepic/vue-datepicker';
 import '@vuepic/vue-datepicker/dist/main.css';
 import { vi } from "date-fns/locale"
+
+const API_URL = import.meta.env.VITE_API_URL;
+const previewImage = ref(null);
+const imageFile = ref(null);
+
+const onChangFile = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    imageFile.value = file;
+    previewImage.value = URL.createObjectURL(file);
+}
 
 const props = defineProps({
     modelValue: Boolean,
@@ -123,7 +146,7 @@ const props = defineProps({
     generations: Array
 })
 
-const emit = defineEmits(['update:modelValue', 'save'])
+const emit = defineEmits(['update:modelValue', 'save', 'onDeleteImg'])
 
 const visible = computed({
     get: () => props.modelValue,
@@ -170,7 +193,9 @@ const resetForm = () => {
         place_of_birth: '',
         note: '',
         person_type: null
-    })
+    });
+    previewImage.value = null;
+    imageFile.value = null;
     Object.keys(errors).forEach(k => delete errors[k])
 }
 
@@ -238,11 +263,18 @@ const handleSubmit = () => {
     if (!validate()) return
 
     emit("save", {
+        imageFile: imageFile.value,
         form: { ...form },
         isEdit: isEdit.value
     });
     close();
     resetForm();
+}
+
+const onDeleteImg = (id) => {
+    previewImage.value = null;
+    form.imageUrl = "";
+    emit("onDeleteImg", id);
 }
 
 const close = () => {

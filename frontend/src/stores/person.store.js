@@ -64,7 +64,7 @@ export const usePersonStore = defineStore('person', () => {
     }
   }
 
-  const addPerson = async (person) => {
+  const createPerson = async (person, imageFile) => {
     loading.value = true
     error.value = null
 
@@ -79,7 +79,7 @@ export const usePersonStore = defineStore('person', () => {
     }
   }
 
-  const updatePerson = async (id, person) => {
+  const updatePerson = async (id, person, imageFile) => {
     loading.value = true
     error.value = null
 
@@ -119,6 +119,24 @@ export const usePersonStore = defineStore('person', () => {
       const message = await personService.deleteMultiple(ids)
       persons.value = persons.value.filter((p) => !ids.includes(p.id))
       total.value -= ids.length
+      return message
+    } catch (err) {
+      error.value = err.message
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const deleteAvatar = async (id) => {
+    loading.value = true
+    error.value = null
+
+    try {
+      const message = await personService.deleteAvatar(id)
+      const index = persons.value.findIndex((p) => p.id === id)
+      if (index !== -1) {
+        persons.value[index].avatar = null
+      }
       return message
     } catch (err) {
       error.value = err.message
@@ -205,9 +223,10 @@ export const usePersonStore = defineStore('person', () => {
     searchPersons,
     getGenerations,
 
-    addPerson,
+    createPerson,
     updatePerson,
     deletePerson,
     deleteMultiplePersons,
+    deleteAvatar,
   }
 })
