@@ -17,6 +17,9 @@ import { MariageModule } from './mariage/mariage.module';
 import { PersonModule } from './person/person.module';
 import { FamilybrannchesModule } from './familybrannches/familybrannches.module';
 
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -26,6 +29,13 @@ import { FamilybrannchesModule } from './familybrannches/familybrannches.module'
       load: [appConfig, databaseConfig, jwtConfig],
       validate: validateConfig,
     }),
+
+    // STATIC FILES
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'uploads'),
+      serveRoot: '/uploads',
+    }),
+
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -41,6 +51,7 @@ import { FamilybrannchesModule } from './familybrannches/familybrannches.module'
     PersonModule,
     FamilybrannchesModule,
   ],
+
   // controllers: [AppController],
   // providers: [AppService],
 })

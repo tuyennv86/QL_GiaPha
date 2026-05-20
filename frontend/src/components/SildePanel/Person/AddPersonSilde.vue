@@ -50,7 +50,7 @@
                                 <option :value="g" v-for="g in generations" :key="g">Đời {{ g }}</option>
                             </select>
                         </div>
-                        <div class="f-group"><label class="f-label">Loại</label>
+                        <div class="f-group"><label class="f-label">Kiểu</label>
                             <select class="f-select" v-model="form.person_type">
                                 <option :value="null">-- Không chọn --</option>
                                 <option v-for="item in PERSON_TYPE_OPTIONS" :key="item.value" :value="item.value">
@@ -58,23 +58,7 @@
                                 </option>
                             </select>
                         </div>
-                        <div class="f-group">
-                            <label class="f-label">Ảnh đại diện</label>
-                            <input class="f-input" v-model="form.avatar" type="hidden">
-                            <!-- ẢNH PREVIEW -->
-                            <img v-if="previewImage" :src="previewImage" class="w-32 h-32 object-cover rounded border"
-                                style="max-width: 200px;" />
-                            <!-- ẢNH CŨ -->
-                            <img v-else-if="form.avatar" :src="API_URL + 'uploads/' + form.avatar"
-                                class="w-32 h-32 object-cover rounded border" style="max-width: 200px;" />
 
-                            <p v-else class="text-muted fst-italic">Chưa có ảnh</p>
-                            <button class="btn btn-outline-danger btn-circle btn-sm"
-                                @click.prevent="onDeleteImg(form.id)" title="Xóa ảnh" v-if="form.avatar">
-                                <i class="fa-regular fa-trash-can"></i>
-                            </button>
-                            <input type="file" class="mt-3" @change="onChangFile" />
-                        </div>
                         <div class="f-group"><label class="f-label">Năm Sinh</label>
                             <!-- <input class="f-input" type="number"> -->
                             <VueDatePicker v-model="form.birth_date" :year-range="[0, 9999]" dark
@@ -85,6 +69,27 @@
                             <VueDatePicker v-model="form.death_date" :year-range="[0, 9999]" dark
                                 :formats="{ input: 'dd/MM/yyyy HH:mm' }" :locale="vi" />
                         </div>
+                    </div>
+                    <div class="form-row form-row-1">
+                        <div class="f-group">
+                            <label class="f-label">Ảnh đại diện</label>
+                            <input class="f-input" v-model="form.avatar" type="hidden">
+                            <!-- ẢNH PREVIEW -->
+                            <img v-if="previewImage" :src="previewImage"
+                                style="width: 150px; border-radius: 4px; overflow: hidden;" />
+                            <!-- ẢNH CŨ -->
+                            <img v-else-if="form.avatar" :src="`${API_URL}${form.avatar}`" style="max-width: 150px;" />
+
+                            <p v-else class="ir-val">Chưa có ảnh</p>
+                            <button class="btn btn-ghost" @click.prevent="onDeleteImg(form.id)" title="Xóa ảnh"
+                                v-if="form.avatar">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                            <input type="file" class="mt-3" @change="onChangFile" accept=".jpeg,.jpg,.png,.webp,.gif" />
+                        </div>
+                    </div>
+                    <div class="form-row form-row-1">
+                        <br>
                     </div>
                     <div class="form-row form-row-1" style="grid-template-columns: 1fr;">
                         <div class="f-group"><label class="f-label">Quê Quán</label>

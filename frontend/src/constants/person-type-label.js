@@ -1,4 +1,4 @@
-import { PersonType } from '@/enums/person-type.enum'
+import { PersonType } from '@/enum/person-type.enum'
 
 export const PERSON_TYPE_LABEL = {
   [PersonType.SON]: 'Con trai',

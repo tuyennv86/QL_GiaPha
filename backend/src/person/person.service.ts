@@ -129,14 +129,7 @@ export class PersonService {
     if (!family) {
       throw new BadRequestException('Không tìm thấy gia tộc');
     }
-    if (createPersonDto.branch_id) {
-      const branch = await this.branchRepo.findOne({
-        where: { id: createPersonDto.branch_id },
-      });
-      if (!branch) {
-        throw new BadRequestException('Không tìm thấy chi tộc');
-      }
-    }
+
     // avatar
     let avatarUrl = createPersonDto.avatar || '';
     if (file) {
@@ -208,14 +201,6 @@ export class PersonService {
         throw new BadRequestException('Không tìm thấy gia tộc');
       }
     }
-    if (updatePersonDto.branch_id) {
-      const branch = await this.branchRepo.findOne({
-        where: { id: updatePersonDto.branch_id },
-      });
-      if (!branch) {
-        throw new BadRequestException('Không tìm thấy chi tộc');
-      }
-    }
     // avatar
     if (file) {
       // xoá avatar cũ nếu có
@@ -242,6 +227,15 @@ export class PersonService {
     if (!person) {
       return { message: 'Không tìm thấy người này' };
     }
+    // xóa ảnh nếu có
+    if (person.avatar) {
+      const filePath = path.join(process.cwd(), person.avatar);
+      try {
+        await fs.unlink(filePath);
+      } catch (err) {
+        console.error('Lỗi xoá file:', err);
+      }
+    }
     const fullName = person.full_name;
     await this.personRepo.remove(person);
     return { message: 'Xoá người thành công ' + fullName };
@@ -254,6 +248,17 @@ export class PersonService {
       .getMany();
     if (persons.length === 0) {
       return { message: 'Không tìm thấy người nào' };
+    }
+    // xóa ảnh nếu có
+    for (const person of persons) {
+      if (person.avatar) {
+        const filePath = path.join(process.cwd(), person.avatar);
+        try {
+          await fs.unlink(filePath);
+        } catch (err) {
+          console.error('Lỗi xoá file:', err);
+        }
+      }
     }
     await this.personRepo.remove(persons);
     return {

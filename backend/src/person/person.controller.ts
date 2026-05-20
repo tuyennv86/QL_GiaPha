@@ -104,6 +104,7 @@ export class PersonController {
     @Body() updatePersonDto: UpdatePersonDto,
     @UploadedFile() avatar?: Express.Multer.File,
   ) {
+    console.log('Updating person with ID:', id);
     return this.personService.update(id, updatePersonDto, avatar);
   }
 

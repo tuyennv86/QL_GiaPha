@@ -26,6 +26,7 @@ const buildFormData = (person, avatar) => {
 
   // append object fields
   Object.keys(person).forEach((key) => {
+    if (key === 'id') return // id không cần gửi lên server
     const value = person[key]
 
     // null/undefined bỏ qua

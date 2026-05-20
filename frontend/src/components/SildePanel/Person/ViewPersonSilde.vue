@@ -23,7 +23,9 @@
                     </div>
                     <div class="info-row">
                         <div class="ir-key">Ảnh</div>
-                        <div class="ir-val"></div>
+                        <div class="ir-val"> <img v-if="person.avatar" :src="`${API_URL}${person.avatar}`"
+                                style="width: 150px; border-radius: 4px; overflow: hidden;" />
+                        </div>
                     </div>
                     <div class="info-row">
                         <div class="ir-key">Giới Tính</div>
@@ -31,6 +33,11 @@
                         <div class="ir-val" v-else-if="person.gender === 0"> <i class="fas fa-venus"></i> Nữ</div>
                         <div class="ir-val" v-else><i class="fas fa-venus-mars"></i> Khác</div>
                     </div>
+                    <div class="info-row">
+                        <div class="ir-key">Kiểu</div>
+                        <div class="ir-val">{{ PERSON_TYPE_LABEL[person.person_type] }}</div>
+                    </div>
+
                     <div class="info-row">
                         <div class="ir-key">Thế Hệ</div>
                         <div class="ir-val"><span class="badge" :class="'gen-' + person.generation">Đời {{
@@ -77,6 +84,9 @@
         <!-- FOOTER -->
         <template #footer>
             <button type="button" class="btn btn-ghost" @click="close">Đóng</button>
+            <button type="button" class="btn btn-primary" @click.prevent="openEdit(person)">
+                <i class="fas fa-pen"></i> Chỉnh sửa
+            </button>
         </template>
     </SlidePanel>
 </template>
@@ -85,6 +95,9 @@
 import { computed } from 'vue';
 import SlidePanel from '../SlidePanel.vue';
 import { formatDate } from '@/utils/formatDate';
+import { PERSON_TYPE_LABEL } from '@/constants/person-type-label';
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 const props = defineProps({
     modelValue: Boolean,
@@ -94,7 +107,7 @@ const props = defineProps({
     }
 })
 
-const emit = defineEmits(['update:modelValue', 'save'])
+const emit = defineEmits(['update:modelValue', 'edit-person'])
 
 const visible = computed({
     get: () => props.modelValue,
@@ -104,6 +117,11 @@ const visible = computed({
 
 const close = () => {
     visible.value = false
+}
+
+const openEdit = (person) => {
+    emit('edit-person', person)
+    close()
 }
 
 </script>

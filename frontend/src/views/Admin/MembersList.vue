@@ -85,13 +85,13 @@
                         <th style="width: 40px;"><input type="checkbox" style="cursor: pointer;" ref="checkAllRef"
                                 :checked="isAllChecked" @change="handleCheckAll"></th>
                         <th>Họ Tên</th>
+                        <th>Ảnh</th>
                         <th>Họ / Chi</th>
                         <th>Giới Tính</th>
                         <th>Thế Hệ</th>
                         <th>Năm Sinh</th>
                         <th>Năm Mất</th>
                         <th>Quê Quán</th>
-                        <th>Nghề Nghiệp</th>
                         <th>Tình Trạng</th>
                         <th>Thao Tác</th>
                     </tr>
@@ -111,6 +111,14 @@
                             </div>
                         </td>
                         <td>
+                            <div v-if="person.avatar"
+                                style="width: 40px; height: 40px; border-radius: 4px; overflow: hidden;">
+                                <img v-if="person.avatar" :src="`${API_URL}${person.avatar}`"
+                                    alt="{{ person.full_name }}"
+                                    style="width: 100%; height: 100%; object-fit: cover;" />
+                            </div>
+                        </td>
+                        <td>
                             <div class="tbl-name">
                                 <div>
                                     <div class="tbl-name-val2" v-if="person.family">{{ person.family.family_name }}
@@ -124,13 +132,17 @@
                             <span class="badge b-purple" v-else-if="person.gender === 0"><i class="fas fa-venus"></i>
                                 Nữ</span>
                             <span class="badge b-gray" v-else><i class="fas fa-venus-mars"></i> Khác</span>
+                            <span class="tbl-name-sub" v-if="person.person_type"> / </span>
+                            <span class="tbl-name-sub" :class="'gen-' + person.generation" v-if="person.person_type">
+                                {{
+                                    PERSON_TYPE_LABEL[person.person_type]
+                                }}</span>
                         </td>
                         <td><span class="badge" :class="'gen-' + person.generation">Đời {{ person.generation }}</span>
                         </td>
                         <td class="font-mono text-sm">{{ formatDate(person.birth_date) }}</td>
                         <td class="font-mono text-sm">{{ formatDate(person.death_date) }}</td>
                         <td class="text-secondary">{{ person.place_of_brith }}</td>
-                        <td class="text-secondary">{{ person.job }}</td>
                         <td>
                             <span class="badge b-green" v-if="person.is_alive"><i class="fas fa-heart"></i>Còn
                                 sống</span>
@@ -154,7 +166,7 @@
     <AddPersonSilde v-model="showPanel" :person="selectedPerson" :branchs="branchStore.branches"
         :generations="generations" :families="familyStore.families" @save="handSave" @onDeleteImg="handDeleteImg">
     </AddPersonSilde>
-    <ViewPersonSilde v-model="viewPanel" :person="viewPerson"></ViewPersonSilde>
+    <ViewPersonSilde v-model="viewPanel" :person="viewPerson" @edit-person="handEditPerson"></ViewPersonSilde>
     <ToastCompo></ToastCompo>
     <ConfirmDialog></ConfirmDialog>
 </template>
@@ -173,6 +185,9 @@ import AddPersonSilde from '@/components/SildePanel/Person/AddPersonSilde.vue';
 
 import { useFamilyStore } from '@/stores/family.store';
 import { useBranchStore } from '@/stores/branch.store';
+import { PERSON_TYPE_LABEL } from '@/constants/person-type-label';
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 const { showToast } = useToast()
 const { showConfirm } = useConfirm();
@@ -340,14 +355,11 @@ const deletePerson = async (id) => {
 };
 
 const openEdit = (person) => {
-    console.log('Open edit for person:', person);
     const family_id = person.family_id;
     loadBranchByFamily(family_id).then(() => {
         selectedPerson.value = person;
         showPanel.value = true;
     });
-    // console.log('Open edit for person:', person);
-    // showToast({ title: 'Chức năng đang phát triển', type: 'info' })
 };
 
 const openView = (person) => {
@@ -356,14 +368,11 @@ const openView = (person) => {
 };
 
 const handSave = async ({ form, imageFile, isEdit }) => {
-    console.log('Saving person data:', form);
-    console.log('Image file:', imageFile);
-    console.log('Is edit mode:', isEdit);
     if (isEdit) {
         try {
             await personStore.updatePerson(form.id, form, imageFile);
             showToast({ title: 'Cập nhật thành công', type: 'success' });
-            loadPersons();
+            await loadPersons();
         } catch (error) {
             showToast({ title: 'Đã có lỗi', sub: 'Lỗi :' + error, type: 'error' });
         }
@@ -371,11 +380,20 @@ const handSave = async ({ form, imageFile, isEdit }) => {
         try {
             await personStore.createPerson(form, imageFile);
             showToast({ title: 'Tạo thành công', type: 'success' });
-            loadPersons();
+            await loadPersons();
         } catch (error) {
             showToast({ title: 'Đã có lỗi', sub: 'Lỗi :' + error, type: 'error' });
         }
     }
+};
+
+const handEditPerson = (person) => {
+    viewPanel.value = false;
+    const family_id = person.family_id;
+    loadBranchByFamily(family_id).then(() => {
+        selectedPerson.value = person;
+        showPanel.value = true;
+    });
 };
 
 const handDeleteImg = async (personId) => {

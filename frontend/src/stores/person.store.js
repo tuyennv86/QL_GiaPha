@@ -69,7 +69,7 @@ export const usePersonStore = defineStore('person', () => {
     error.value = null
 
     try {
-      const newPerson = await personService.create(person)
+      const newPerson = await personService.create(person, imageFile)
       persons.value.push(newPerson)
       // total.value++
     } catch (err) {
@@ -84,7 +84,7 @@ export const usePersonStore = defineStore('person', () => {
     error.value = null
 
     try {
-      const updatedPerson = await personService.update(id, person)
+      const updatedPerson = await personService.update(id, person, imageFile)
       const index = persons.value.findIndex((p) => p.id === id)
       if (index !== -1) {
         persons.value[index] = updatedPerson
