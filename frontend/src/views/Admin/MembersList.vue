@@ -113,8 +113,7 @@
                         <td>
                             <div v-if="person.avatar"
                                 style="width: 40px; height: 40px; border-radius: 4px; overflow: hidden;">
-                                <img v-if="person.avatar" :src="`${API_URL}${person.avatar}`"
-                                    alt="{{ person.full_name }}"
+                                <img v-if="person.avatar" :src="`${API_URL}${person.avatar}`" :alt="person.full_name"
                                     style="width: 100%; height: 100%; object-fit: cover;" />
                             </div>
                         </td>
