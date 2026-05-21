@@ -8,6 +8,7 @@ import {
   MaxLength,
 } from 'class-validator';
 import { PersonType } from '../enum/person-type.enum';
+import { Type } from 'class-transformer';
 
 export class CreatePersonDto {
   @IsInt()
@@ -24,10 +25,12 @@ export class CreatePersonDto {
   @IsInt()
   gender: number;
 
+  @Type(() => Date)
   @IsDate()
   @IsOptional()
   birth_date?: Date;
 
+  @Type(() => Date)
   @IsDate()
   @IsOptional()
   death_date?: Date;

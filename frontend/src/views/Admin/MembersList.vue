@@ -23,7 +23,7 @@
                     <div v-if="personStore.loading">
                         Đang import...
                     </div>
-                    <button class="btn btn-primary btn-sm">
+                    <button class="btn btn-primary btn-sm" @click.prevent="handAddPerson">
                         <i class="fas fa-plus"></i> Thêm Thành Viên
                     </button>
                 </div>
@@ -82,7 +82,7 @@
             <table class="tbl">
                 <thead>
                     <tr>
-                       <th style="width: 40px;"><input type="checkbox" style="cursor: pointer;" ref="checkAllRef"
+                        <th style="width: 40px;"><input type="checkbox" style="cursor: pointer;" ref="checkAllRef"
                                 :checked="isAllChecked" @change="handleCheckAll"></th>
                         <th>Họ Tên</th>
                         <th>Ảnh</th>
@@ -102,7 +102,7 @@
                         <td>
                             <div class="tbl-name">
                                 <div class="tbl-ava" :class="'gen-' + person.generation"
-                                   style="width: 28px; height: 28px;">{{ person.full_name.split(' ').slice(-1)[0][0] }}
+                                    style="width: 28px; height: 28px;">{{ person.full_name.split(' ').slice(-1)[0][0] }}
                                 </div>
                                 <div>
                                     <div class="tbl-name-val">{{ person.full_name }}</div>
@@ -113,7 +113,7 @@
                         <td>
                             <div v-if="person.avatar"
                                 style="width: 40px; height: 40px; border-radius: 4px; overflow: hidden;">
-                                <img v-if="person.avatar" :src="`${API_URL}${person.avatar}`" :alt="person.full_name"
+                                <img v-if="person.avatar" :src="`${IMG_URL}${person.avatar}`" :alt="person.full_name"
                                     style="width: 100%; height: 100%; object-fit: cover;" />
                             </div>
                         </td>
@@ -133,7 +133,7 @@
                             <span class="badge b-gray" v-else><i class="fas fa-venus-mars"></i> Khác</span>
                             <span class="tbl-name-sub" v-if="person.person_type"> / </span>
                             <span class="tbl-name-sub" :class="'gen-' + person.generation" v-if="person.person_type">
-                               {{ PERSON_TYPE_LABEL[person.person_type] }}</span>
+                                {{ PERSON_TYPE_LABEL[person.person_type] }}</span>
                         </td>
                         <td><span class="badge" :class="'gen-' + person.generation">Đời {{ person.generation }}</span>
                         </td>
@@ -141,12 +141,12 @@
                         <td class="font-mono text-sm">{{ formatDate(person.death_date) }}</td>
                         <td class="text-secondary">{{ person.place_of_brith }}</td>
                         <td>
-                           <span class="badge b-green" v-if="person.is_alive"><i class="fas fa-heart"></i>Còn
+                            <span class="badge b-green" v-if="person.is_alive"><i class="fas fa-heart"></i>Còn
                                 sống</span>
                             <span class="badge b-gray" v-else><i class="fas fa-skull"></i>Đã mất</span>
                         </td>
                         <td>
-                           <button class="btn btn-ghost btn-xs text-gold" @click.prevent="openEdit(person)"> <i
+                            <button class="btn btn-ghost btn-xs text-gold" @click.prevent="openEdit(person)"> <i
                                     class="fas fa-pen"></i> </button>
                             <button class="btn btn-ghost btn-xs text-green" @click.prevent="openView(person)"> <i
                                     class="fas fa-eye"></i> </button>
@@ -160,8 +160,9 @@
                 @change="onPageChange" :delta="4"></BasePagination>
         </div>
     </div>
-   <AddPersonSilde v-model="showPanel" :person="selectedPerson" :branchs="branchStore.branches"
-        :generations="generations" :families="familyStore.families" @save="handSave" @onDeleteImg="handDeleteImg">
+    <AddPersonSilde v-model="showPanel" :person="selectedPerson" :branchs="branchStore.branches"
+        :generations="generations" :families="familyStore.families" @save="handSave" @onDeleteImg="handDeleteImg"
+        @changeFamily="handleChangeFamily">
     </AddPersonSilde>
     <ViewPersonSilde v-model="viewPanel" :person="viewPerson" @edit-person="handEditPerson"></ViewPersonSilde>
     <ToastCompo></ToastCompo>
@@ -184,7 +185,7 @@ import { useFamilyStore } from '@/stores/family.store';
 import { useBranchStore } from '@/stores/branch.store';
 import { PERSON_TYPE_LABEL } from '@/constants/person-type-label';
 
-const API_URL = import.meta.env.VITE_API_URL;
+const IMG_URL = import.meta.env.VITE_URL;
 
 const { showToast } = useToast()
 const { showConfirm } = useConfirm();
@@ -206,9 +207,7 @@ const showPanel = ref(false);
 const selectedPerson = ref(null);
 const generations = ref([]);
 
-// const loadBranch = async () => {
-//     await branchStore.getBranches();
-// };
+
 const loadBranchByFamily = async (family_id) => {
     await branchStore.getBranchByFamily(family_id);
 };
@@ -232,7 +231,7 @@ onMounted(() => {
     loadPersons();
 
     getGeneration();
-    loadFamily();    
+    loadFamily();
 
 });
 
@@ -351,6 +350,11 @@ const openEdit = (person) => {
     });
 };
 
+const handAddPerson = () => {
+    selectedPerson.value = null;
+    showPanel.value = true;
+};
+
 const openView = (person) => {
     viewPanel.value = true;
     viewPerson.value = person;
@@ -367,6 +371,7 @@ const handSave = async ({ form, imageFile, isEdit }) => {
         }
     } else {
         try {
+            console.log('Creating person with data:', form, 'and image file:', imageFile);
             await personStore.createPerson(form, imageFile);
             showToast({ title: 'Tạo thành công', type: 'success' });
             await loadPersons();
@@ -399,6 +404,14 @@ const handDeleteImg = async (personId) => {
         }
     }
 };
+
+const handleChangeFamily = async (familyId) => {
+    if (familyId) {
+        branchStore.branches = [];
+        await loadBranchByFamily(familyId);
+    }
+
+}
 
 </script>
 

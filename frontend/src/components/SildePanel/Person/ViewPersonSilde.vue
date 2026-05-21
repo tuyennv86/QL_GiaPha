@@ -23,7 +23,7 @@
                     </div>
                     <div class="info-row">
                         <div class="ir-key">Ảnh</div>
-                        <div class="ir-val"> <img v-if="person.avatar" :src="`${API_URL}${person.avatar}`"
+                        <div class="ir-val"> <img v-if="person.avatar" :src="`${IMG_URL}${person.avatar}`"
                                 style="width: 150px; border-radius: 4px; overflow: hidden;" />
                         </div>
                     </div>
@@ -97,7 +97,7 @@ import SlidePanel from '../SlidePanel.vue';
 import { formatDate } from '@/utils/formatDate';
 import { PERSON_TYPE_LABEL } from '@/constants/person-type-label';
 
-const API_URL = import.meta.env.VITE_API_URL;
+const IMG_URL = import.meta.env.VITE_URL;
 
 const props = defineProps({
     modelValue: Boolean,

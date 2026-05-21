@@ -24,23 +24,36 @@ const generation = async () => {
 const buildFormData = (person, avatar) => {
   const formData = new FormData()
 
-  // append object fields
   Object.keys(person).forEach((key) => {
-    if (key === 'id') return // id không cần gửi lên server
-    const value = person[key]
 
-    // null/undefined bỏ qua
+    if (key === 'id') return
+
+    let value = person[key]
+
     if (value === null || value === undefined) return
 
-    // array/object
-    if (typeof value === 'object' && !(value instanceof File)) {
+    // xử lý riêng date fields
+    if (key === 'birth_date' || key === 'death_date') {
+
+      if (value) {
+        value = new Date(value).toISOString()
+        formData.append(key, value)
+      }
+
+      return
+    }
+
+    // object / array
+    if (
+      typeof value === 'object' &&
+      !(value instanceof File)
+    ) {
       formData.append(key, JSON.stringify(value))
     } else {
       formData.append(key, value)
     }
   })
 
-  // append avatar
   if (avatar) {
     formData.append('avatar', avatar)
   }

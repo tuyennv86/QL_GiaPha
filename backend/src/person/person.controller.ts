@@ -73,6 +73,8 @@ export class PersonController {
     @Body() createPersonDto: CreatePersonDto,
     @UploadedFile() avatar?: Express.Multer.File,
   ) {
+    console.log('Creating person with data:', createPersonDto);
+    console.log('Received avatar file:', avatar);
     return this.personService.create(createPersonDto, avatar);
   }
 
@@ -104,7 +106,7 @@ export class PersonController {
     @Body() updatePersonDto: UpdatePersonDto,
     @UploadedFile() avatar?: Express.Multer.File,
   ) {
-    console.log('Updating person with ID:', id);
+    //console.log('Updating person with ID:', id);
     return this.personService.update(id, updatePersonDto, avatar);
   }
 
