@@ -82,7 +82,7 @@
             <table class="tbl">
                 <thead>
                     <tr>
-                        <th style="width: 40px;"><input type="checkbox" style="cursor: pointer;" ref="checkAllRef"
+                       <th style="width: 40px;"><input type="checkbox" style="cursor: pointer;" ref="checkAllRef"
                                 :checked="isAllChecked" @change="handleCheckAll"></th>
                         <th>Họ Tên</th>
                         <th>Ảnh</th>
@@ -102,8 +102,8 @@
                         <td>
                             <div class="tbl-name">
                                 <div class="tbl-ava" :class="'gen-' + person.generation"
-                                    style="width: 28px; height: 28px;">{{
-                                        person.full_name.split(' ').slice(-1)[0][0] }}</div>
+                                   style="width: 28px; height: 28px;">{{ person.full_name.split(' ').slice(-1)[0][0] }}
+                                </div>
                                 <div>
                                     <div class="tbl-name-val">{{ person.full_name }}</div>
                                     <div class="tbl-name-sub">{{ person.biography }}</div>
@@ -133,9 +133,7 @@
                             <span class="badge b-gray" v-else><i class="fas fa-venus-mars"></i> Khác</span>
                             <span class="tbl-name-sub" v-if="person.person_type"> / </span>
                             <span class="tbl-name-sub" :class="'gen-' + person.generation" v-if="person.person_type">
-                                {{
-                                    PERSON_TYPE_LABEL[person.person_type]
-                                }}</span>
+                               {{ PERSON_TYPE_LABEL[person.person_type] }}</span>
                         </td>
                         <td><span class="badge" :class="'gen-' + person.generation">Đời {{ person.generation }}</span>
                         </td>
@@ -143,12 +141,12 @@
                         <td class="font-mono text-sm">{{ formatDate(person.death_date) }}</td>
                         <td class="text-secondary">{{ person.place_of_brith }}</td>
                         <td>
-                            <span class="badge b-green" v-if="person.is_alive"><i class="fas fa-heart"></i>Còn
+                           <span class="badge b-green" v-if="person.is_alive"><i class="fas fa-heart"></i>Còn
                                 sống</span>
                             <span class="badge b-gray" v-else><i class="fas fa-skull"></i>Đã mất</span>
                         </td>
                         <td>
-                            <button class="btn btn-ghost btn-xs text-gold" @click.prevent="openEdit(person)"> <i
+                           <button class="btn btn-ghost btn-xs text-gold" @click.prevent="openEdit(person)"> <i
                                     class="fas fa-pen"></i> </button>
                             <button class="btn btn-ghost btn-xs text-green" @click.prevent="openView(person)"> <i
                                     class="fas fa-eye"></i> </button>
@@ -162,7 +160,7 @@
                 @change="onPageChange" :delta="4"></BasePagination>
         </div>
     </div>
-    <AddPersonSilde v-model="showPanel" :person="selectedPerson" :branchs="branchStore.branches"
+   <AddPersonSilde v-model="showPanel" :person="selectedPerson" :branchs="branchStore.branches"
         :generations="generations" :families="familyStore.families" @save="handSave" @onDeleteImg="handDeleteImg">
     </AddPersonSilde>
     <ViewPersonSilde v-model="viewPanel" :person="viewPerson" @edit-person="handEditPerson"></ViewPersonSilde>
@@ -218,13 +216,6 @@ const loadFamily = async () => {
     await familyStore.getAll();
 };
 
-// const loadGenerations = async () => {
-
-//     const list = [...personStore.generations];
-//     list.push(list.length > 0 ? Math.max(...list) + 1 : 1);
-//     generations.value = list;
-// }
-
 const loadPersons = async () => {
     await personStore.searchPersons(page.value, limit.value, gender.value, generation.value, is_alive.value, search.value);
 };
@@ -241,8 +232,7 @@ onMounted(() => {
     loadPersons();
 
     getGeneration();
-    loadFamily();
-    // loadGenerations();
+    loadFamily();    
 
 });
 

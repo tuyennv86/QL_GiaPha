@@ -183,23 +183,22 @@ const deleteUser = async (userId) => {
         }
     }
 }
-// open Sile thêm mới
+
 const openAdd = () => {
     selectedUser.value = null;
     showPanel.value = true;
 }
-// open silde sửa thông tin user
+
 const openEdit = async (user) => {
     const data = await userStore.getById(user.id);
-    //console.log(data);
+
     selectedUser.value = data;
     showPanel.value = true;
 }
 
 //save user
 const handleSave = async ({ form, isEdit }) => {
-    // console.log("Edit :", isEdit);
-    // console.log('Form', form);
+
     if (isEdit) {
         try {
             // remote password và username
