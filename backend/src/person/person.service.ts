@@ -122,15 +122,13 @@ export class PersonService {
   }
 
   async create(createPersonDto: CreatePersonDto, file?: Express.Multer.File) {
-    // kiểm tra family và branch có tồn tại không
     const family = await this.familyRepo.findOne({
       where: { id: createPersonDto.family_id },
     });
     if (!family) {
       throw new BadRequestException('Không tìm thấy gia tộc');
     }
-
-    // avatar
+    
     let avatarUrl = createPersonDto.avatar || '';
     if (file) {
       // lưu file và lấy url vào thư mục uploads và trả về url là /uploads/filename
