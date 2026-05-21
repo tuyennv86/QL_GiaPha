@@ -128,7 +128,7 @@ export class PersonService {
     if (!family) {
       throw new BadRequestException('Không tìm thấy gia tộc');
     }
-    
+    //lưu file nếu có và lấy url
     let avatarUrl = createPersonDto.avatar || '';
     if (file) {
       // lưu file và lấy url vào thư mục uploads và trả về url là /uploads/filename
