@@ -15,4 +15,5 @@
             <div class="empty-text">Chưa có file nào được tải lên</div>
         </div>
     </div>
+    <!-- END MEDIA -->
 </template>
