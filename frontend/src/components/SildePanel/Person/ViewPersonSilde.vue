@@ -77,8 +77,25 @@
                             <span class="badge b-gray" v-else><i class="fas fa-skull"></i> Đã mất</span>
                         </div>
                     </div>
+                    <template v-if="parentChild">
+                        <div class="divider"></div>
+                        <div class="section-label">Bố / mẹ</div>
+                        <div class="info-row">
+                            <div class="ir-key">Bố</div>
+                            <div class="ir-val" v-if="parentChild.father_name">{{ parentChild.father_name }}</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="ir-key">Mẹ</div>
+                            <div class="ir-val" v-if="parentChild.mother_name">{{ parentChild.mother_name }}</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="ir-key"></div>
+                            <div class="ir-val" v-if="parentChild.relationship_type === 0">Con đẻ</div>
+                            <div class="ir-val" v-else-if="parentChild.relationship_type === 1">Con nuôi</div>
+                        </div>
+                    </template>
                 </div>
-            </div><!----><!---->
+            </div>
         </div>
 
         <!-- FOOTER -->
@@ -102,6 +119,10 @@ const IMG_URL = import.meta.env.VITE_URL;
 const props = defineProps({
     modelValue: Boolean,
     person: {
+        type: Object,
+        default: () => ({})
+    },
+    parentChild: {
         type: Object,
         default: () => ({})
     }

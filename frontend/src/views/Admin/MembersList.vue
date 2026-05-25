@@ -161,10 +161,13 @@
         </div>
     </div>
     <AddPersonSilde v-model="showPanel" :person="selectedPerson" :branchs="branchStore.branches"
-        :generations="generations" :families="familyStore.families" @save="handSave" @onDeleteImg="handDeleteImg"
-        @changeFamily="handleChangeFamily">
+        :parentChild="parentChildStore.parentChild" :generations="generations" :families="familyStore.families"
+        @save="handSave" @onDeleteImg="handDeleteImg" @changeFamily="handleChangeFamily">
     </AddPersonSilde>
-    <ViewPersonSilde v-model="viewPanel" :person="viewPerson" @edit-person="handEditPerson"></ViewPersonSilde>
+
+    <ViewPersonSilde v-model="viewPanel" :person="viewPerson" :parentChild="parentChildStore.parentChild"
+        @edit-person="handEditPerson"></ViewPersonSilde>
+
     <ToastCompo></ToastCompo>
     <ConfirmDialog></ConfirmDialog>
 </template>
@@ -184,6 +187,7 @@ import AddPersonSilde from '@/components/SildePanel/Person/AddPersonSilde.vue';
 import { useFamilyStore } from '@/stores/family.store';
 import { useBranchStore } from '@/stores/branch.store';
 import { PERSON_TYPE_LABEL } from '@/constants/person-type-label';
+import { useParentChildStore } from '@/stores/parent-child.store';
 
 const IMG_URL = import.meta.env.VITE_URL;
 
@@ -192,6 +196,7 @@ const { showConfirm } = useConfirm();
 const personStore = usePersonStore();
 const familyStore = useFamilyStore();
 const branchStore = useBranchStore();
+const parentChildStore = useParentChildStore();
 
 const page = ref(1);
 const limit = ref(20);// tổng số trang trên 1 bản ghi
@@ -343,11 +348,15 @@ const deletePerson = async (id) => {
 };
 
 const openEdit = (person) => {
+
+    parentChildStore.getByChildId(person.id);
+
     const family_id = person.family_id;
     loadBranchByFamily(family_id).then(() => {
         selectedPerson.value = person;
         showPanel.value = true;
     });
+
 };
 
 const handAddPerson = () => {
@@ -358,6 +367,7 @@ const handAddPerson = () => {
 const openView = (person) => {
     viewPanel.value = true;
     viewPerson.value = person;
+    parentChildStore.getByChildId(person.id);
 };
 
 const handSave = async ({ form, imageFile, isEdit }) => {

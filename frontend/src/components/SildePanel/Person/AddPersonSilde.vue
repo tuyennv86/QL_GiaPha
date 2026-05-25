@@ -15,118 +15,120 @@
         <!-- BODY -->
         <form @submit.prevent="handleSubmit">
             <div class="sp-body">
-                <!---->
-                <div>
-                    <div class="form-row form-row-1" style="grid-template-columns: 1fr">
-                        <div class="f-group">
-                            <label class="f-label">Họ &amp; Tên <span class="f-req">*</span></label>
-                            <input class="f-input" v-model="form.full_name" />
-                            <small v-if="errors.full_name">{{ errors.full_name }}</small>
-                        </div>
-                    </div>
-                    <div class="form-row form-row-2">
-                        <div class="f-group">
-                            <label class="f-label">Dòng họ</label>
-                            <select class="f-select" v-model="form.family_id">
-                                <option v-for="fam in families" :key="fam.id" :value="fam.id">
-                                    {{ fam.family_name }}
-                                </option>
-                            </select>
-                        </div>
-                        <div class="f-group">
-                            <label class="f-label">Chi họ (Ngành)</label>
-                            <select class="f-select" v-model="form.branch_id">
-                                <option :value="null">-- Không chọn --</option>
-                                <option v-for="ban in branchs" :key="ban.id" :value="ban.id">
-                                    {{ ban.branch_name }}
-                                </option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-row form-row-2">
-                        <div class="f-group">
-                            <label class="f-label">Giới Tính</label>
-                            <select class="f-select" v-model="form.gender">
-                                <option :value="1">Nam</option>
-                                <option :value="0">Nữ</option>
-                                <option :value="2">Khác</option>
-                            </select>
-                        </div>
-                        <div class="f-group">
-                            <label class="f-label">Thế Hệ</label>
-                            <select class="f-select" v-model="form.generation">
-                                <option :value="g" v-for="g in generations" :key="g">Đời {{ g }}</option>
-                            </select>
-                        </div>
-                        <div class="f-group">
-                            <label class="f-label">Kiểu</label>
-                            <select class="f-select" v-model="form.person_type">
-                                <option :value="null">-- Không chọn --</option>
-                                <option v-for="item in PERSON_TYPE_OPTIONS" :key="item.value" :value="item.value">
-                                    {{ item.label }}
-                                </option>
-                            </select>
-                        </div>
-
-                        <div class="f-group">
-                            <label class="f-label">Năm Sinh <span class="f-req">*</span></label>
-                            <VueDatePicker v-model="form.birth_date" :year-range="[0, 9999]" dark
-                                :formats="{ input: 'dd/MM/yyyy HH:mm' }" :locale="vi" />
-                            <small v-if="errors.birth_date">{{ errors.birth_date }}</small>
-                        </div>
-                        <div class="f-group">
-                            <label class="f-label">Năm Mất</label>
-                            <VueDatePicker v-model="form.death_date" :year-range="[0, 9999]" dark
-                                :formats="{ input: 'dd/MM/yyyy HH:mm' }" :locale="vi" />
-                        </div>
-                    </div>
-                    <div class="form-row form-row-1">
-                        <div class="f-group">
-                            <label class="f-label">Ảnh đại diện</label>
-                            <input class="f-input" v-model="form.avatar" type="hidden" />
-                            <!-- ẢNH PREVIEW -->
-                            <img v-if="previewImage" :src="previewImage"
-                                style="width: 150px; border-radius: 4px; overflow: hidden" />
-                            <!-- ẢNH CŨ -->
-                            <img v-else-if="form.avatar" :src="`${IMG_URL}${form.avatar}`" style="max-width: 150px" />
-
-                            <p v-else class="ir-val">Chưa có ảnh</p>
-                            <button class="btn btn-ghost" @click.prevent="onDeleteImg(form.id)" title="Xóa ảnh"
-                                v-if="form.avatar">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                            <input type="file" class="mt-3" @change="onChangFile" accept=".jpeg,.jpg,.png,.webp,.gif" />
-                        </div>
-                    </div>
-                    <div class="form-row form-row-1">
-                        <br />
-                    </div>
-                    <div class="form-row form-row-1" style="grid-template-columns: 1fr">
-                        <div class="f-group">
-                            <label class="f-label">Quê Quán</label>
-                            <input class="f-input" v-model="form.place_of_birth" />
-                        </div>
-                        <div class="f-group">
-                            <label class="f-label">Nghề Nghiệp</label>
-                            <input class="f-input" v-model="form.job" />
-                        </div>
-                        <div class="f-group">
-                            <label class="f-label">Vai Trò</label>
-                            <input class="f-input" v-model="form.biography"
-                                placeholder="Ví dụ: Tổ tiên, vợ hoặc chồng, con ..." />
-                        </div>
-                        <div class="f-group">
-                            <label class="f-label">Ghi Chú</label>
-                            <textarea class="f-textarea" rows="3" v-model="form.note"></textarea>
-                        </div>
-                        <div class="f-group">
-                            <label class="f-label" v-if="form.is_alive"> Còn sống</label><label class="f-label"
-                                v-else>Đã
-                                mất</label>
-                            <ToggleSwitch v-model="form.is_alive"></ToggleSwitch>
-                        </div>
+                <div class="form-row form-row-1" style="grid-template-columns: 1fr">
+                    <div class="f-group">
+                        <label class="f-label">Họ &amp; Tên <span class="f-req">*</span></label>
+                        <input class="f-input" v-model="form.full_name" />
+                        <small v-if="errors.full_name">{{ errors.full_name }}</small>
                     </div>
                 </div>
+                <div class="form-row form-row-2">
+                    <div class="f-group">
+                        <label class="f-label">Dòng họ</label>
+                        <select class="f-select" v-model="form.family_id">
+                            <option v-for="fam in families" :key="fam.id" :value="fam.id">
+                                {{ fam.family_name }}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="f-group">
+                        <label class="f-label">Chi họ (Ngành)</label>
+                        <select class="f-select" v-model="form.branch_id">
+                            <option :value="null">-- Không chọn --</option>
+                            <option v-for="ban in branchs" :key="ban.id" :value="ban.id">
+                                {{ ban.branch_name }}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row form-row-2">
+                    <div class="f-group">
+                        <label class="f-label">Giới Tính</label>
+                        <select class="f-select" v-model="form.gender">
+                            <option :value="1">Nam</option>
+                            <option :value="0">Nữ</option>
+                            <option :value="2">Khác</option>
+                        </select>
+                    </div>
+                    <div class="f-group">
+                        <label class="f-label">Thế Hệ</label>
+                        <select class="f-select" v-model="form.generation">
+                            <option :value="g" v-for="g in generations" :key="g">Đời {{ g }}</option>
+                        </select>
+                    </div>
+                    <div class="f-group">
+                        <label class="f-label">Kiểu</label>
+                        <select class="f-select" v-model="form.person_type">
+                            <option :value="null">-- Không chọn --</option>
+                            <option v-for="item in PERSON_TYPE_OPTIONS" :key="item.value" :value="item.value">
+                                {{ item.label }}
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="f-group">
+                        <label class="f-label">Năm Sinh <span class="f-req">*</span></label>
+                        <VueDatePicker v-model="form.birth_date" :year-range="[0, 9999]" dark
+                            :formats="{ input: 'dd/MM/yyyy HH:mm' }" :locale="vi" />
+                        <small v-if="errors.birth_date">{{ errors.birth_date }}</small>
+                    </div>
+                    <div class="f-group">
+                        <label class="f-label">Năm Mất</label>
+                        <VueDatePicker v-model="form.death_date" :year-range="[0, 9999]" dark
+                            :formats="{ input: 'dd/MM/yyyy HH:mm' }" :locale="vi" />
+                    </div>
+                </div>
+                <div class="form-row form-row-1">
+                    <div class="f-group">
+                        <label class="f-label">Ảnh đại diện</label>
+                        <input class="f-input" v-model="form.avatar" type="hidden" />
+                        <!-- ẢNH PREVIEW -->
+                        <img v-if="previewImage" :src="previewImage"
+                            style="width: 150px; border-radius: 4px; overflow: hidden" />
+                        <!-- ẢNH CŨ -->
+                        <img v-else-if="form.avatar" :src="`${IMG_URL}${form.avatar}`" style="max-width: 150px" />
+
+                        <p v-else class="ir-val">Chưa có ảnh</p>
+                        <button class="btn btn-ghost" @click.prevent="onDeleteImg(form.id)" title="Xóa ảnh"
+                            v-if="form.avatar">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                        <input type="file" class="mt-3" @change="onChangFile" accept=".jpeg,.jpg,.png,.webp,.gif" />
+                    </div>
+                </div>
+                <div class="form-row form-row-1">
+                    <br />
+                </div>
+                <div class="form-row form-row-1" style="grid-template-columns: 1fr">
+                    <div class="f-group">
+                        <label class="f-label">Quê Quán</label>
+                        <input class="f-input" v-model="form.place_of_birth" />
+                    </div>
+                    <div class="f-group">
+                        <label class="f-label">Nghề Nghiệp</label>
+                        <input class="f-input" v-model="form.job" />
+                    </div>
+                    <div class="f-group">
+                        <label class="f-label">Vai Trò</label>
+                        <input class="f-input" v-model="form.biography"
+                            placeholder="Ví dụ: Tổ tiên, vợ hoặc chồng, con ..." />
+                    </div>
+                    <div class="f-group">
+                        <label class="f-label">Ghi Chú</label>
+                        <textarea class="f-textarea" rows="3" v-model="form.note"></textarea>
+                    </div>
+                    <div class="f-group">
+                        <label class="f-label" v-if="form.is_alive"> Còn sống</label><label class="f-label" v-else>Đã
+                            mất</label>
+                        <ToggleSwitch v-model="form.is_alive"></ToggleSwitch>
+                    </div>
+                </div>
+
+                <template v-if="parentChild">
+                    <div class="divider"></div>
+                    <div class="section-label">Bố / mẹ</div>
+                    <div>{{ parentChild.father_name }}</div>
+                </template>
             </div>
         </form>
 
@@ -166,6 +168,7 @@ const props = defineProps({
     branchs: Array,
     families: Array,
     generations: Array,
+    parentChild: Object,
 });
 
 const emit = defineEmits(["update:modelValue", "save", "onDeleteImg", "changeFamily"]);

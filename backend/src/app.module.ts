@@ -19,6 +19,7 @@ import { FamilybrannchesModule } from './familybrannches/familybrannches.module'
 
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { ParentChildModule } from './parent-child/parent-child.module';
 
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import { join } from 'path';
     MariageModule,
     PersonModule,
     FamilybrannchesModule,
+    ParentChildModule,
   ],
 
   // controllers: [AppController],
