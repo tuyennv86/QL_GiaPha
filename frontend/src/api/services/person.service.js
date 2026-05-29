@@ -16,6 +16,11 @@ const search = async (page, limit, gender, generation, is_alive, search) => {
   return res.data
 }
 
+const getByGender = async (gender) => {
+  const res = await http.get(`person/gender/${gender}`);
+  return res.data
+}
+
 const generation = async () => {
   const res = await http.get(`/person/generation`)
   return res.data
@@ -145,6 +150,7 @@ const importExcel = async (file) => {
 export default {
   getAll,
   getById,
+  getByGender,
   search,
   generation,
   exportExcel,

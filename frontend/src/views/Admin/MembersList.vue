@@ -162,7 +162,8 @@
     </div>
     <AddPersonSilde v-model="showPanel" :person="selectedPerson" :branchs="branchStore.branches"
         :parentChild="parentChildStore.parentChild" :generations="generations" :families="familyStore.families"
-        @save="handSave" @onDeleteImg="handDeleteImg" @changeFamily="handleChangeFamily">
+        :personMen="personMen" :personWomen="personWomen" @save="handSave" @onDeleteImg="handDeleteImg"
+        @changeFamily="handleChangeFamily">
     </AddPersonSilde>
 
     <ViewPersonSilde v-model="viewPanel" :person="viewPerson" :parentChild="parentChildStore.parentChild"
@@ -212,12 +213,16 @@ const showPanel = ref(false);
 const selectedPerson = ref(null);
 const generations = ref([]);
 
+const personMen = ref([]);
+const personWomen = ref([]);
 
 const loadBranchByFamily = async (family_id) => {
     await branchStore.getBranchByFamily(family_id);
 };
 const loadFamily = async () => {
     await familyStore.getAll();
+    personMen.value = await personStore.getPersonsByGender(1);
+    personWomen.value = await personStore.getPersonsByGender(0);
 };
 
 const loadPersons = async () => {
@@ -370,10 +375,15 @@ const openView = (person) => {
     parentChildStore.getByChildId(person.id);
 };
 
-const handSave = async ({ form, imageFile, isEdit }) => {
+const handSave = async ({ form, imageFile, isEdit, parent }) => {
     if (isEdit) {
         try {
-            await personStore.updatePerson(form.id, form, imageFile);
+            const perentUpdate = await personStore.updatePerson(form.id, form, imageFile);
+            // update parent-child relationships
+            if (parent && parent.length > 0) {
+                parent.child_id = perentUpdate.id;
+                await parentChildStore.update(parent.id, parent)
+            }
             showToast({ title: 'Cập nhật thành công', type: 'success' });
             await loadPersons();
         } catch (error) {
@@ -381,8 +391,12 @@ const handSave = async ({ form, imageFile, isEdit }) => {
         }
     } else {
         try {
-            console.log('Creating person with data:', form, 'and image file:', imageFile);
-            await personStore.createPerson(form, imageFile);
+            const perentNew = await personStore.createPerson(form, imageFile);
+            //insert parent-child relationships
+            if (parent && parent.length > 0) {
+                parent.child_id = perentNew.id;
+                await parentChildStore.create(parent);
+            }
             showToast({ title: 'Tạo thành công', type: 'success' });
             await loadPersons();
         } catch (error) {

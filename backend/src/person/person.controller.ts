@@ -58,6 +58,13 @@ export class PersonController {
     return this.personService.findGeneration();
   }
 
+  @Get('gender/:gender')
+  @RequirePermissions('person.view')
+  @UseGuards(JwtAuthGuard)
+  findGender(@Param('gender', ParseIntPipe) gender: number) {
+    return this.personService.findByGender(gender);
+  }
+
   @Get(':id')
   @RequirePermissions('person.view')
   @UseGuards(JwtAuthGuard)

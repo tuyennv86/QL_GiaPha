@@ -79,6 +79,20 @@ export const usePersonStore = defineStore('person', () => {
     }
   }
 
+  const getPersonsByGender = async (gender) => {
+    loading.value = true
+    error.value = null
+    try {
+      return await personService.getByGender(gender);
+    }
+    catch (err) {
+      error.value = err.message
+    }
+    finally {
+      loading.value = false
+    }
+  }
+
   const updatePerson = async (id, person, imageFile) => {
     loading.value = true
     error.value = null
@@ -222,6 +236,7 @@ export const usePersonStore = defineStore('person', () => {
     getPersonById,
     searchPersons,
     getGenerations,
+    getPersonsByGender,    
 
     createPerson,
     updatePerson,

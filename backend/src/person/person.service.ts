@@ -121,6 +121,10 @@ export class PersonService {
     return await this.personRepo.findOne({ where: { id } });
   }
 
+  async findByGender(gender: number) {
+    return await this.personRepo.find({ where: { gender: gender } });
+  }
+
   async create(createPersonDto: CreatePersonDto, file?: Express.Multer.File) {
     const family = await this.familyRepo.findOne({
       where: { id: createPersonDto.family_id },
