@@ -1,22 +1,23 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
-import parentChildService from '@/api/services/parent-child.service';
+import marriagesService from '@/api/services/marriages.service';
 
-export const useParentChildStore = defineStore('parentChild', () => {
-
+export const useMarriagesStore = defineStore('marriages', () => {
+    
     const error = ref(null)    
     const loading = ref(false);
 
-    const parentChildList = ref([]);
-    const parentChild = ref(null);
-
+    const marriagesList = ref([]);
+    const marriagesByPerson = ref([]);
+    const marriage = ref(null);
+    
     const getAll = async () => {
         loading.value = true;
         error.value = null;
 
         try {
-            const data = await parentChildService.getAll();    
-            parentChildList.value = data;
+            const data = await marriagesService.getAll();    
+            marriagesList.value = data;
         } catch (err) {
             error.value = err.message;
         }  
@@ -24,14 +25,14 @@ export const useParentChildStore = defineStore('parentChild', () => {
             loading.value = false;
         }
     }
-
-    const getByChildId = async (childId) => {
+    
+    const getByPersonId = async (personId) => {
         loading.value = true;
         error.value = null;
         try {
-            const data = await parentChildService.getByChildId(childId);    
-            parentChild.value = data;
-           // return data;
+            const data = await marriagesService.getByPersonId(personId);    
+            marriagesByPerson.value = data;
+       
         } catch (err) {
             error.value = err.message;
         }        
@@ -39,13 +40,13 @@ export const useParentChildStore = defineStore('parentChild', () => {
             loading.value = false;
         }
     }
-
+    
     const getById = async (id) => {
         loading.value = true;
         error.value = null;
         try {
-            const data = await parentChildService.getById(id);    
-            parentChild.value = data;
+            const data = await marriagesService.getById(id);    
+            marriage.value = data;
         } catch (err) {
             error.value = err.message;
         }        
@@ -53,44 +54,44 @@ export const useParentChildStore = defineStore('parentChild', () => {
             loading.value = false;
         }
     }
-
+    
     const create = async (data) => {
         loading.value = true;
         error.value = null;
         try {
-           const newParent = await parentChildService.create(data);    
-            parentChildList.value.push(newParent);
+        const newMarriage = await marriagesService.create(data);    
+            marriagesList.value.push(newMarriage);
         } catch (err) {
             error.value = err.message;
-        }        
+        }  
         finally {
             loading.value = false;
         }
-    }   
-
+    }
+    
     const update = async (id, data) => {
         loading.value = true;
         error.value = null;
         try {
-            const updatedParent = await parentChildService.update(id, data);    
-            const index = parentChildList.value.findIndex(p => p.id === id);
-            if (index !== -1) {
-                parentChildList.value[index] = updatedParent;
-            }
+            const updatedMarriage = await marriagesService.update(id, data);
+            const index = marriagesList.value.findIndex(m => m.id === id);
+            if (index !== -1) marriagesList.value[index] = updatedMarriage;
+            if (marriage.value?.id === id) marriage.value = updatedMarriage;
         } catch (err) {
             error.value = err.message;
-        }        
-        finally {
-            loading.value = false;
         }
+            finally {
+                loading.value = false;
+        }   
     }
-
+        
     const remove = async (id) => {
         loading.value = true;
         error.value = null;
         try {
-            await parentChildService.remove(id);    
-            parentChildList.value = parentChildList.value.filter(p => p.id !== id);
+            await marriagesService.remove(id);    
+            marriagesList.value = marriagesList.value.filter(m => m.id !== id);
+            if (marriage.value?.id === id) marriage.value = null;
         } catch (err) {
             error.value = err.message;
         }        
@@ -98,15 +99,16 @@ export const useParentChildStore = defineStore('parentChild', () => {
             loading.value = false;
         }
     }
-
-    return {    
-        loading,
+        
+    return {
+        marriagesList,
+        marriagesByPerson,
+        marriage,
         error,
-        parentChildList,
-        parentChild,
+        loading,
         getAll,
+        getByPersonId,
         getById,
-        getByChildId,
         create,
         update,
         remove

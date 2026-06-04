@@ -216,3 +216,14 @@ onBeforeUnmount(() => {
     color: #999;
 }
 </style>
+<!--<template>
+    
+    <SearchSelect v-model="parent.father_id" :options="personMen" label-field="full_name" value-field="id" //
+        placeholder="Chọn bố" @change="onChangeMen" />
+
+</template>
+  <script setup>
+ const onChangeMen = (val) => {
+ parent.father_id = val ? val.id : null;
+ };
+ </script> -->

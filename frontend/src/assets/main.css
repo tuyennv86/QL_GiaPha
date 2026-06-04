@@ -1637,6 +1637,9 @@ body {
 .text-red {
   color: #ff8389;
 }
+.text-pink {
+  color: #ff83f9;
+}
 .text-sm {
   font-size: 12px;
 }

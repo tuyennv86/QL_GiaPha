@@ -1,40 +1,7 @@
 <script setup>
 const model = defineModel({ type: Boolean, default: false })
 </script>
-
 <template>
     <div class="toggle-switch" :class="{ 'on': model }" @click="model = !model"></div>
 </template>
-
-<style scoped>
-.toggle-switch {
-    width: 40px;
-    height: 22px;
-    background: #3d3d3d;
-    border-radius: 11px;
-    cursor: pointer;
-    position: relative;
-    transition: background-color 0.2s;
-    flex-shrink: 0;
-}
-
-.toggle-switch.on {
-    background: var(--green);
-}
-
-.toggle-switch::after {
-    content: '';
-    position: absolute;
-    top: 3px;
-    left: 3px;
-    width: 16px;
-    height: 16px;
-    background: #fff;
-    border-radius: 50%;
-    transition: left 0.2s;
-}
-
-.toggle-switch.on::after {
-    left: 21px;
-}
-</style>
+<style scoped src="./toggle-switch.css"></style>

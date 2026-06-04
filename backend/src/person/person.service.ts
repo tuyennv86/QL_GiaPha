@@ -121,8 +121,10 @@ export class PersonService {
     return await this.personRepo.findOne({ where: { id } });
   }
 
-  async findByGender(gender: number) {
-    return await this.personRepo.find({ where: { gender: gender } });
+  async findByGender(gender: number, generation: number) {
+    return await this.personRepo.find({
+      where: { gender: gender, generation: generation },
+    });
   }
 
   async create(createPersonDto: CreatePersonDto, file?: Express.Multer.File) {
@@ -190,6 +192,7 @@ export class PersonService {
     updatePersonDto: UpdatePersonDto,
     file?: Express.Multer.File,
   ) {
+    console.log('updatePersonDto:', updatePersonDto);
     const person = await this.findOne(id);
     if (!person) {
       throw new BadRequestException('Không tìm thấy người này');

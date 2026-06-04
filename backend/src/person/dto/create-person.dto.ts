@@ -9,6 +9,7 @@ import {
 } from 'class-validator';
 import { PersonType } from '../enum/person-type.enum';
 import { Type } from 'class-transformer';
+import { ToBoolean } from 'src/common/decorators/to-boolean.decorator';
 
 export class CreatePersonDto {
   @IsInt()
@@ -47,6 +48,7 @@ export class CreatePersonDto {
   @IsOptional()
   generation?: number;
 
+  @ToBoolean()
   @IsBoolean()
   @IsOptional()
   is_alive?: boolean;

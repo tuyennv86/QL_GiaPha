@@ -16,8 +16,8 @@ const search = async (page, limit, gender, generation, is_alive, search) => {
   return res.data
 }
 
-const getByGender = async (gender) => {
-  const res = await http.get(`person/gender/${gender}`);
+const getByGender = async (gender, generation) => {
+  const res = await http.get(`person/gender/${gender}/generation/${generation}`);
   return res.data
 }
 
@@ -30,13 +30,17 @@ const buildFormData = (person, avatar) => {
   const formData = new FormData()
 
   Object.keys(person).forEach((key) => {
-
+  console.log('person.is_alive:', person.is_alive, typeof person.is_alive)
     if (key === 'id') return
 
     let value = person[key]
 
     if (value === null || value === undefined) return
-
+    // Boolean fields — ép string tường minh
+    if (typeof value === 'boolean') {
+      formData.append(key, value ? 'true' : 'false')
+      return
+    }
     // xử lý riêng date fields
     if (key === 'birth_date' || key === 'death_date') {
 
@@ -61,6 +65,9 @@ const buildFormData = (person, avatar) => {
 
   if (avatar) {
     formData.append('avatar', avatar)
+  }
+for (const [key, value] of formData.entries()) {
+    console.log(`FormData: ${key} =`, value)
   }
 
   return formData

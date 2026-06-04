@@ -20,8 +20,12 @@ const create = async (data) => {
 }
 
 const update = async (id, data) => {
-    const res = await http.put(`parent-child/${id}`, data);
+    const res = await http.patch(`parent-child/${id}`, data);
     return res.data;
+}
+
+const remove = async (id) => {
+    await http.delete(`parent-child/${id}`);
 }
 
 export default {
@@ -29,5 +33,6 @@ export default {
     getById,
     getByChildId,
     create,
-    update
+    update,
+    remove
 }

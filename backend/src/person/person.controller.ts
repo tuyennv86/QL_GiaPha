@@ -58,11 +58,14 @@ export class PersonController {
     return this.personService.findGeneration();
   }
 
-  @Get('gender/:gender')
+  @Get('gender/:gender/generation/:generation')
   @RequirePermissions('person.view')
   @UseGuards(JwtAuthGuard)
-  findGender(@Param('gender', ParseIntPipe) gender: number) {
-    return this.personService.findByGender(gender);
+  findGender(
+    @Param('gender', ParseIntPipe) gender: number,
+    @Param('generation', ParseIntPipe) generation: number,
+  ) {
+    return this.personService.findByGender(gender, generation);
   }
 
   @Get(':id')
@@ -113,7 +116,6 @@ export class PersonController {
     @Body() updatePersonDto: UpdatePersonDto,
     @UploadedFile() avatar?: Express.Multer.File,
   ) {
-    //console.log('Updating person with ID:', id);
     return this.personService.update(id, updatePersonDto, avatar);
   }
 

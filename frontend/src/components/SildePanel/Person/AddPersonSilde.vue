@@ -59,7 +59,7 @@
                     <div class="f-group">
                         <label class="f-label">Kiểu</label>
                         <select class="f-select" v-model="form.person_type">
-                            <option :value="null">-- Không chọn --</option>
+                            <!-- <option :value="null">-- Không chọn --</option> -->
                             <option v-for="item in PERSON_TYPE_OPTIONS" :key="item.value" :value="item.value">
                                 {{ item.label }}
                             </option>
@@ -123,36 +123,6 @@
                         <ToggleSwitch v-model="form.is_alive"></ToggleSwitch>
                     </div>
                 </div>
-
-                <!-- <template v-if="parentChild">
-                    <div class="divider"></div>
-                    <div class="section-label">Bố / mẹ</div>
-                    <div>{{ parentChild.father_name }}</div>
-                </template> -->
-                <div class="form-row form-row-2">
-                    <div class="f-group">
-                        <label class="f-label">Bố </label>
-                        <SearchSelect v-model="parent.father_id" :options="personMen" label-field="full_name"
-                            value-field="id" placeholder="Chọn bố" @change="onChangeMen" />
-                        <!-- <select class="f-select" v-model="parent.father_id">
-                            <option :value="null">-- Không chọn --</option>
-                            <option v-for="pw in personMen" :key="pw.id" :value="pw.id">
-                                {{ pw.full_name }}
-                            </option>
-                        </select> -->
-                    </div>
-                    <div class="f-group">
-                        <label class="f-label">Mẹ</label>
-                        <SearchSelect v-model="parent.mother_id" :options="personWomen" label-field="full_name"
-                            value-field="id" placeholder="Chọn mẹ" @change="onChangeWomen" />
-                        <!-- <select class="f-select" v-model="parent.mother_id">
-                            <option :value="null">-- Không chọn --</option>
-                            <option v-for="pw in personWomen" :key="pw.id" :value="pw.id">
-                                {{ pw.full_name }}
-                            </option>
-                        </select> -->
-                    </div>
-                </div>
             </div>
         </form>
 
@@ -174,14 +144,10 @@ import { PERSON_TYPE_OPTIONS } from "@/constants/person-type-options";
 import { VueDatePicker } from "@vuepic/vue-datepicker";
 import "@vuepic/vue-datepicker/dist/main.css";
 import { vi } from "date-fns/locale";
-import SearchSelect from "@/components/common/SearchSelect.vue";
-
 
 const IMG_URL = import.meta.env.VITE_URL;
 const previewImage = ref(null);
 const imageFile = ref(null);
-// const personMenID = ref(null);
-// const personWomenID = ref(null);
 
 const onChangFile = (e) => {
     const file = e.target.files[0];
@@ -196,9 +162,6 @@ const props = defineProps({
     branchs: Array,
     families: Array,
     generations: Array,
-    parentChild: Object,
-    personMen: Array,
-    personWomen: Array
 });
 
 const emit = defineEmits(["update:modelValue", "save", "onDeleteImg", "changeFamily"]);
@@ -221,49 +184,13 @@ const form = reactive({
     biography: "",
     avatar: "",
     generation: null,
-    is_alive: true,
+    is_alive: null,
     job: "",
     place_of_birth: "",
     note: "",
     person_type: null,
 });
 
-const parent = reactive({
-    father_id: null,
-    mother_id: null,
-    child_id: null,
-    relationship_type: null,
-    father_name: "",
-    mother_name: "",
-    child_name: ""
-});
-
-watch(() => props.parentChild,
-    (val) => {
-        if (val) {
-            Object.assign(parent, {
-                father_id: val.father_id,
-                mother_id: val.mother_id,
-                child_id: val.child_id,
-                relationship_type: val.relationship_type,
-                father_name: val.father_name,
-                mother_name: val.mother_name,
-                child_name: val.child_name
-            });
-        } else {
-            Object.assign(parent, {
-                father_id: null,
-                mother_id: null,
-                child_id: null,
-                relationship_type: null,
-                father_name: "",
-                mother_name: "",
-                child_name: ""
-            });
-        }
-    },
-    { immediate: true }
-);
 
 const errors = reactive({});
 
@@ -280,7 +207,7 @@ const resetForm = () => {
         biography: "",
         avatar: "",
         generation: null,
-        is_alive: true,
+        is_alive: null,
         job: "",
         place_of_birth: "",
         note: "",
@@ -347,8 +274,7 @@ const handleSubmit = () => {
     emit("save", {
         imageFile: imageFile.value,
         form: { ...form },
-        isEdit: isEdit.value,
-        parent: { ...parent }
+        isEdit: isEdit.value
     });
     close();
     resetForm();
@@ -365,17 +291,6 @@ watch(() => form.family_id,
         emit("changeFamily", val);
     }
 );
-
-const onChangeMen = (val) => {
-    // console.log("Selected mother_id:", val);
-    parent.father_id = val ? val.id : null;
-    console.log("Selected Man:", parent);
-};
-const onChangeWomen = (val) => {
-    // console.log("Selected mother_id:", val);
-    parent.mother_id = val ? val.id : null;
-    console.log("Selected Wonmen:", parent);
-};
 
 const close = () => {
     visible.value = false;

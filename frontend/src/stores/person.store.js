@@ -79,11 +79,11 @@ export const usePersonStore = defineStore('person', () => {
     }
   }
 
-  const getPersonsByGender = async (gender) => {
+  const getPersonsByGender = async (gender, generation) => {
     loading.value = true
     error.value = null
     try {
-      return await personService.getByGender(gender);
+      return await personService.getByGender(gender, generation);
     }
     catch (err) {
       error.value = err.message

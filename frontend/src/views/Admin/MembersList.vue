@@ -146,8 +146,10 @@
                             <span class="badge b-gray" v-else><i class="fas fa-skull"></i>Đã mất</span>
                         </td>
                         <td>
-                            <button class="btn btn-ghost btn-xs text-gold" @click.prevent="openEdit(person)"> <i
-                                    class="fas fa-pen"></i> </button>
+                            <button class="btn btn-ghost btn-xs text-pink" @click.prevent="openRelationship(person)"
+                                title="Sửa mối quan hệ"><i class="fas fa-users-cog"></i></button>
+                            <button class="btn btn-ghost btn-xs text-gold" @click.prevent="openEdit(person)"
+                                title="Sử thông tin"> <i class="fas fa-pen"></i> </button>
                             <button class="btn btn-ghost btn-xs text-green" @click.prevent="openView(person)"> <i
                                     class="fas fa-eye"></i> </button>
                             <button class="btn btn-danger btn-xs" @click.prevent="deletePerson(person.id)"><i
@@ -161,13 +163,16 @@
         </div>
     </div>
     <AddPersonSilde v-model="showPanel" :person="selectedPerson" :branchs="branchStore.branches"
-        :parentChild="parentChildStore.parentChild" :generations="generations" :families="familyStore.families"
-        :personMen="personMen" :personWomen="personWomen" @save="handSave" @onDeleteImg="handDeleteImg"
+        :generations="generations" :families="familyStore.families" @save="handSave" @onDeleteImg="handDeleteImg"
         @changeFamily="handleChangeFamily">
     </AddPersonSilde>
 
     <ViewPersonSilde v-model="viewPanel" :person="viewPerson" :parentChild="parentChildStore.parentChild"
         @edit-person="handEditPerson"></ViewPersonSilde>
+
+    <EditPersonRelationship v-model="viewRelationshipPanel" :person="selectedRelationshipPerson" :personMen="personMen"
+        :personWomen="personWomen" :parentChild="parentChildStore.parentChild" @save="handSaveRelationship">
+    </EditPersonRelationship>
 
     <ToastCompo></ToastCompo>
     <ConfirmDialog></ConfirmDialog>
@@ -184,6 +189,7 @@ import BasePagination from '@/components/BasePagination.vue';
 import { formatDate } from '@/utils/formatDate';
 import ViewPersonSilde from '@/components/SildePanel/Person/ViewPersonSilde.vue';
 import AddPersonSilde from '@/components/SildePanel/Person/AddPersonSilde.vue';
+import EditPersonRelationship from '@/components/SildePanel/Person/EditPersonRelationship.vue';
 
 import { useFamilyStore } from '@/stores/family.store';
 import { useBranchStore } from '@/stores/branch.store';
@@ -215,14 +221,16 @@ const generations = ref([]);
 
 const personMen = ref([]);
 const personWomen = ref([]);
+//const parentChild = ref(null);
+
+const viewRelationshipPanel = ref(false);
+const selectedRelationshipPerson = ref(null);
 
 const loadBranchByFamily = async (family_id) => {
     await branchStore.getBranchByFamily(family_id);
 };
 const loadFamily = async () => {
     await familyStore.getAll();
-    personMen.value = await personStore.getPersonsByGender(1);
-    personWomen.value = await personStore.getPersonsByGender(0);
 };
 
 const loadPersons = async () => {
@@ -353,15 +361,25 @@ const deletePerson = async (id) => {
 };
 
 const openEdit = (person) => {
-
-    parentChildStore.getByChildId(person.id);
-
     const family_id = person.family_id;
     loadBranchByFamily(family_id).then(() => {
         selectedPerson.value = person;
         showPanel.value = true;
     });
 
+};
+
+const openRelationship = async (person) => {
+    // console.log('open connection', person);
+    // lấy danh sách nam nữ để chọn làm bố mẹ có đời nhỏ hơn con cần sửa mối quan hệ
+    personMen.value = await personStore.getPersonsByGender(1, person.generation - 1);
+    personWomen.value = await personStore.getPersonsByGender(0, person.generation - 1);
+
+    await parentChildStore.getByChildId(person.id);
+
+    console.log('parentChild', parentChildStore.parentChild);
+    viewRelationshipPanel.value = true;
+    selectedRelationshipPerson.value = person;
 };
 
 const handAddPerson = () => {
@@ -375,15 +393,12 @@ const openView = (person) => {
     parentChildStore.getByChildId(person.id);
 };
 
-const handSave = async ({ form, imageFile, isEdit, parent }) => {
+const handSave = async ({ form, imageFile, isEdit }) => {
+    console.log('save person', form);
     if (isEdit) {
         try {
-            const perentUpdate = await personStore.updatePerson(form.id, form, imageFile);
-            // update parent-child relationships
-            if (parent && parent.length > 0) {
-                parent.child_id = perentUpdate.id;
-                await parentChildStore.update(parent.id, parent)
-            }
+            await personStore.updatePerson(form.id, form, imageFile);
+
             showToast({ title: 'Cập nhật thành công', type: 'success' });
             await loadPersons();
         } catch (error) {
@@ -391,12 +406,7 @@ const handSave = async ({ form, imageFile, isEdit, parent }) => {
         }
     } else {
         try {
-            const perentNew = await personStore.createPerson(form, imageFile);
-            //insert parent-child relationships
-            if (parent && parent.length > 0) {
-                parent.child_id = perentNew.id;
-                await parentChildStore.create(parent);
-            }
+            await personStore.createPerson(form, imageFile);
             showToast({ title: 'Tạo thành công', type: 'success' });
             await loadPersons();
         } catch (error) {
@@ -420,9 +430,6 @@ const handDeleteImg = async (personId) => {
         try {
             await personStore.deleteAvatar(personId);
             showToast({ title: 'Xóa ảnh đại diện thành công', type: 'success' });
-            // Cập nhật lại thông tin người dùng sau khi xóa ảnh
-            // const updatedPerson = await personStore.getPersonById(personId);
-            // selectedPerson.value = updatedPerson;
         } catch (error) {
             showToast({ title: 'Đã có lỗi', sub: 'Lỗi :' + error, type: 'error' });
         }
@@ -436,6 +443,36 @@ const handleChangeFamily = async (familyId) => {
     }
 
 }
+
+const handSaveRelationship = async (parent) => {
+    console.log('save relationship', parent);
+    try {
+        const payload = {
+            father_id: parent.father_id,
+            mother_id: parent.mother_id,
+            child_id: parent.child_id,
+            relationship_type: parent.relationship_type
+        };
+        if (parent.id) {
+            if (!parent.father_id && !parent.mother_id) {
+                // nếu không chọn bố mẹ nào thì xóa mối quan hệ
+                await parentChildStore.remove(parent.id);
+                showToast({ title: 'Xóa mối quan hệ thành công', type: 'success' });
+                return;
+            }
+            await parentChildStore.update(parent.id, payload);
+            showToast({ title: 'Cập nhật mối quan hệ thành công', type: 'success' });
+        }
+        else {
+            await parentChildStore.create(payload);
+            showToast({ title: 'Tạo mối quan hệ thành công', type: 'success' });
+        }
+
+    } catch (error) {
+        showToast({ title: 'Đã có lỗi', sub: 'Lỗi :' + error, type: 'error' });
+    }
+}
+
 
 </script>
 

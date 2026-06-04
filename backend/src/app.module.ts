@@ -13,7 +13,7 @@ import { RolesModule } from './roles/roles.module';
 import { PermissionsModule } from './permissions/permissions.module';
 import { MenuModule } from './menu/menu.module';
 import { FamilyModule } from './family/family.module';
-import { MariageModule } from './mariage/mariage.module';
+import { MarriagesModule } from './marriages/marriages.module';
 import { PersonModule } from './person/person.module';
 import { FamilybrannchesModule } from './familybrannches/familybrannches.module';
 
@@ -48,7 +48,7 @@ import { ParentChildModule } from './parent-child/parent-child.module';
     PermissionsModule,
     MenuModule,
     FamilyModule,
-    MariageModule,
+    MarriagesModule,
     PersonModule,
     FamilybrannchesModule,
     ParentChildModule,

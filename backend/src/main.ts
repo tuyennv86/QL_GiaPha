@@ -11,7 +11,7 @@ async function bootstrap() {
       forbidNonWhitelisted: true, // Trả lỗi nếu client gửi field lạ
       transform: true, // Tự động cast kiểu (string → number, v.v.)
       transformOptions: {
-        enableImplicitConversion: true,
+        enableImplicitConversion: true, // Chỉ transform khi có decorator @Type() hoặc @Transform() trong DTO
       },
     }),
   );
