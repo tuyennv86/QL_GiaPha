@@ -1,7 +1,10 @@
+import { Person } from 'src/person/entities/person.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
+  ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -33,4 +36,12 @@ export class Marriages {
 
   @CreateDateColumn()
   created_at: Date;
+
+  @ManyToOne(() => Person)
+  @JoinColumn({ name: 'person1_id' })
+  person1: Person;
+
+  @ManyToOne(() => Person)
+  @JoinColumn({ name: 'person2_id' })
+  person2: Person;
 }

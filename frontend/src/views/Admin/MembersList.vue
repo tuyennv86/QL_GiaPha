@@ -168,10 +168,12 @@
     </AddPersonSilde>
 
     <ViewPersonSilde v-model="viewPanel" :person="viewPerson" :parentChild="parentChildStore.parentChild"
-        @edit-person="handEditPerson"></ViewPersonSilde>
+        :marriages="marriagesStore.marriagesList" @edit-person="handEditPerson"></ViewPersonSilde>
 
     <EditPersonRelationship v-model="viewRelationshipPanel" :person="selectedRelationshipPerson" :personMen="personMen"
-        :personWomen="personWomen" :parentChild="parentChildStore.parentChild" @save="handSaveRelationship">
+        :personWomen="personWomen" :parentChild="parentChildStore.parentChild" :marriages="marriagesStore.marriagesList"
+        :personMarriages="personMarriages" @save="handSaveRelationship" @saveMarriage="handSaveMarriage"
+        @deleteMarriage="handDeleteMarriage">
     </EditPersonRelationship>
 
     <ToastCompo></ToastCompo>
@@ -195,6 +197,8 @@ import { useFamilyStore } from '@/stores/family.store';
 import { useBranchStore } from '@/stores/branch.store';
 import { PERSON_TYPE_LABEL } from '@/constants/person-type-label';
 import { useParentChildStore } from '@/stores/parent-child.store';
+import { useMarriagesStore } from '@/stores/marriages.store';
+import { PersonType } from '@/enum/person-type.enum';
 
 const IMG_URL = import.meta.env.VITE_URL;
 
@@ -204,6 +208,7 @@ const personStore = usePersonStore();
 const familyStore = useFamilyStore();
 const branchStore = useBranchStore();
 const parentChildStore = useParentChildStore();
+const marriagesStore = useMarriagesStore();
 
 const page = ref(1);
 const limit = ref(20);// tổng số trang trên 1 bản ghi
@@ -221,10 +226,11 @@ const generations = ref([]);
 
 const personMen = ref([]);
 const personWomen = ref([]);
-//const parentChild = ref(null);
+
 
 const viewRelationshipPanel = ref(false);
 const selectedRelationshipPerson = ref(null);
+const personMarriages = ref([]);
 
 const loadBranchByFamily = async (family_id) => {
     await branchStore.getBranchByFamily(family_id);
@@ -370,14 +376,18 @@ const openEdit = (person) => {
 };
 
 const openRelationship = async (person) => {
-    // console.log('open connection', person);
     // lấy danh sách nam nữ để chọn làm bố mẹ có đời nhỏ hơn con cần sửa mối quan hệ
     personMen.value = await personStore.getPersonsByGender(1, person.generation - 1);
     personWomen.value = await personStore.getPersonsByGender(0, person.generation - 1);
 
-    await parentChildStore.getByChildId(person.id);
+    await parentChildStore.getByChildId(person.id); //lấy mối quan hệ cha mẹ con cái của người này
+    await marriagesStore.getByPersonId(person.id, person.person_type); // lấy mối quan hệ vợ chồng của người này
 
-    console.log('parentChild', parentChildStore.parentChild);
+    //console.log('marriages', marriagesStore.marriagesList);
+
+    // lấy toàn bộ con dâu hoặc con rể có đời bằng đời person để chọn làm con nếu muốn sửa mối quan hệ
+    personMarriages.value = await personStore.getMarriage(person.id);
+    //console.log('parentChild', parentChildStore.parentChild);
     viewRelationshipPanel.value = true;
     selectedRelationshipPerson.value = person;
 };
@@ -387,10 +397,11 @@ const handAddPerson = () => {
     showPanel.value = true;
 };
 
-const openView = (person) => {
+const openView = async (person) => {
     viewPanel.value = true;
     viewPerson.value = person;
-    parentChildStore.getByChildId(person.id);
+    await parentChildStore.getByChildId(person.id);
+    await marriagesStore.getByPersonId(person.id, person.person_type);
 };
 
 const handSave = async ({ form, imageFile, isEdit }) => {
@@ -445,7 +456,7 @@ const handleChangeFamily = async (familyId) => {
 }
 
 const handSaveRelationship = async (parent) => {
-    console.log('save relationship', parent);
+    // console.log('save relationship', parent);
     try {
         const payload = {
             father_id: parent.father_id,
@@ -473,6 +484,54 @@ const handSaveRelationship = async (parent) => {
     }
 }
 
+const handSaveMarriage = async (marriage) => {
+
+    try {
+        const [person1_id, person2_id] =
+            marriage.person_type === PersonType.SON || marriage.person_type === PersonType.DAUGHTER
+                ? [marriage.person_id, marriage.spouse_id] : [marriage.spouse_id, marriage.person_id];
+
+        const payload = {
+            person1_id,
+            person2_id,
+            marriage_date: marriage.marriage_date,
+            marriage_status: marriage.marriage_status,
+            divorce_date: marriage.divorce_date,
+            marriage_order: marriage.marriage_order,
+            note: marriage.note
+        };
+
+        if (marriage.id) {
+            if (!marriage.spouse_id) {
+                // nếu không chọn vợ chồng nào thì xóa mối quan hệ
+                await marriagesStore.remove(marriage.id);
+                showToast({ title: 'Xóa mối quan hệ thành công', type: 'success' });
+                return;
+            }
+            await marriagesStore.update(marriage.id, payload);
+            showToast({ title: 'Cập nhật mối quan hệ thành công', type: 'success' });
+        }
+        else {
+            await marriagesStore.create(payload);
+            showToast({ title: 'Tạo mối quan hệ thành công', type: 'success' });
+        }
+
+    } catch (error) {
+        showToast({ title: 'Đã có lỗi', sub: 'Lỗi :' + error, type: 'error' });
+    }
+}
+
+const handDeleteMarriage = async (marriageId) => {
+    const ok = await showConfirm({ title: 'Xóa mối quan hệ vợ chồng', desc: 'Bạn có chắc muốn Xóa mối quan hệ vợ chồng này không?', icon: '<i class="fas fa-ring"></i>', btn: 'Xóa' })
+    if (ok) {
+        try {
+            await marriagesStore.remove(marriageId);
+            showToast({ title: 'Xóa mối quan hệ thành công', type: 'success' });
+        } catch (error) {
+            showToast({ title: 'Đã có lỗi', sub: 'Lỗi :' + error, type: 'error' });
+        }
+    }
+}
 
 </script>
 

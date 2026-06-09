@@ -1,4 +1,4 @@
-import http from '../http.api'
+import http from '@/api/http.api'
 
 const getAll = async () => {
   const res = await http.get('/person')
@@ -25,12 +25,16 @@ const generation = async () => {
   const res = await http.get(`/person/generation`)
   return res.data
 }
+const getMarriage = async (id) => {
+  const res = await http.get(`/person/marriage/${id}`)
+  return res.data
+}
 
 const buildFormData = (person, avatar) => {
   const formData = new FormData()
 
   Object.keys(person).forEach((key) => {
-  console.log('person.is_alive:', person.is_alive, typeof person.is_alive)
+  
     if (key === 'id') return
 
     let value = person[key]
@@ -65,9 +69,6 @@ const buildFormData = (person, avatar) => {
 
   if (avatar) {
     formData.append('avatar', avatar)
-  }
-for (const [key, value] of formData.entries()) {
-    console.log(`FormData: ${key} =`, value)
   }
 
   return formData
@@ -160,6 +161,7 @@ export default {
   getByGender,
   search,
   generation,
+  getMarriage,
   exportExcel,
   exportExcelAll,
   importExcel,

@@ -7,31 +7,30 @@ export const useMarriagesStore = defineStore('marriages', () => {
     const error = ref(null)    
     const loading = ref(false);
 
-    const marriagesList = ref([]);
-    const marriagesByPerson = ref([]);
+    const marriagesList = ref([]);    
     const marriage = ref(null);
     
-    const getAll = async () => {
-        loading.value = true;
-        error.value = null;
+    // const getAll = async () => {
+    //     loading.value = true;
+    //     error.value = null;
 
-        try {
-            const data = await marriagesService.getAll();    
-            marriagesList.value = data;
-        } catch (err) {
-            error.value = err.message;
-        }  
-        finally {
-            loading.value = false;
-        }
-    }
+    //     try {
+    //         const data = await marriagesService.getAll();    
+    //         marriagesList.value = data;
+    //     } catch (err) {
+    //         error.value = err.message;
+    //     }  
+    //     finally {
+    //         loading.value = false;
+    //     }
+    // }
     
-    const getByPersonId = async (personId) => {
+    const getByPersonId = async (personId, personType) => {
         loading.value = true;
         error.value = null;
         try {
-            const data = await marriagesService.getByPersonId(personId);    
-            marriagesByPerson.value = data;
+            const data = await marriagesService.getByPersonId(personId, personType);    
+            marriagesList.value = data;
        
         } catch (err) {
             error.value = err.message;
@@ -101,12 +100,11 @@ export const useMarriagesStore = defineStore('marriages', () => {
     }
         
     return {
-        marriagesList,
-        marriagesByPerson,
+        marriagesList,        
         marriage,
         error,
         loading,
-        getAll,
+        // getAll,
         getByPersonId,
         getById,
         create,

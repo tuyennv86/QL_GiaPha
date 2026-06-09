@@ -126,6 +126,48 @@ export class PersonService {
       where: { gender: gender, generation: generation },
     });
   }
+  //lấy danh sách người có cùng thế hệ và
+  //nếu người đó là con trai thì lấy con dâu,
+  //nếu là con gái thì lấy con rể,
+  //nếu con rể thì lấy con gái, nếu con dâu thì lấy con trai
+  async findByMarriage(personId: number): Promise<Person[]> {
+    const person = await this.findOne(personId);
+    if (!person) {
+      throw new BadRequestException('Không tìm thấy người này');
+    }
+    switch (person.person_type) {
+      case PersonType.SON:
+        return await this.personRepo.find({
+          where: {
+            generation: person.generation,
+            person_type: PersonType.DAUGHTER_IN_LAW,
+          },
+        });
+      case PersonType.DAUGHTER:
+        return await this.personRepo.find({
+          where: {
+            generation: person.generation,
+            person_type: PersonType.SON_IN_LAW,
+          },
+        });
+      case PersonType.SON_IN_LAW:
+        return await this.personRepo.find({
+          where: {
+            generation: person.generation,
+            person_type: PersonType.DAUGHTER,
+          },
+        });
+      case PersonType.DAUGHTER_IN_LAW:
+        return await this.personRepo.find({
+          where: {
+            generation: person.generation,
+            person_type: PersonType.SON,
+          },
+        });
+      default:
+        return [];
+    }
+  }
 
   async create(createPersonDto: CreatePersonDto, file?: Express.Multer.File) {
     const family = await this.familyRepo.findOne({
@@ -192,7 +234,6 @@ export class PersonService {
     updatePersonDto: UpdatePersonDto,
     file?: Express.Multer.File,
   ) {
-    console.log('updatePersonDto:', updatePersonDto);
     const person = await this.findOne(id);
     if (!person) {
       throw new BadRequestException('Không tìm thấy người này');

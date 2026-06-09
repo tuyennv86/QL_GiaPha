@@ -6,10 +6,12 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { MarriagesService } from './marriages.service';
 import { CreateMarriageDto } from './dto/create-marriage.dto';
 import { UpdateMarriageDto } from './dto/update-marriage.dto';
+import { PersonType } from 'src/person/enum/person-type.enum';
 
 @Controller('marriages')
 export class MarriagesController {
@@ -31,8 +33,11 @@ export class MarriagesController {
   }
 
   @Get('person/:personId')
-  findByPerson1Id(@Param('personId') personId: string) {
-    return this.marriagesService.findByPerson1Id(+personId);
+  findByPerson1Id(
+    @Param('personId') personId: string,
+    @Query('personType') personType: PersonType,
+  ) {
+    return this.marriagesService.findByPersonId(+personId, personType);
   }
 
   @Patch(':id')

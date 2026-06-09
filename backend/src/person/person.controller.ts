@@ -68,6 +68,13 @@ export class PersonController {
     return this.personService.findByGender(gender, generation);
   }
 
+  @Get('marriage/:id')
+  @RequirePermissions('person.view')
+  @UseGuards(JwtAuthGuard)
+  findMarriage(@Param('id', ParseIntPipe) id: number) {
+    return this.personService.findByMarriage(id);
+  }
+
   @Get(':id')
   @RequirePermissions('person.view')
   @UseGuards(JwtAuthGuard)

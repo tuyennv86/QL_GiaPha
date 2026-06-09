@@ -94,6 +94,51 @@
                             <div class="ir-val" v-else-if="parentChild.relationship_type === 1">Con nuôi</div>
                         </div>
                     </template>
+                    <template v-if="marriages.length > 0">
+                        <div class="divider"></div>
+                        <div class="section-label"> {{ person?.gender === 1 ? 'Vợ' : 'Chồng' }}</div>
+
+                        <div v-for="marriage in marriages" :key="marriage.id" class="marriage-card">
+                            <div class="marriage-card__header">
+                                <div>
+                                    <div class="marriage-card__name">
+                                        {{
+                                            person?.person_type === PersonType.SON || person?.person_type ===
+                                                PersonType.DAUGHTER
+                                                ? marriage.person2_name : marriage.person1_name
+                                        }}
+                                    </div>
+
+                                    <div class="marriage-card__meta">
+                                        💍 Ngày cưới: {{ formatDate(marriage.marriage_date) }}
+                                    </div>
+                                </div>
+
+                                <span class="marriage-status" :class="{
+                                    active: marriage.marriage_status === 0,
+                                    divorce: marriage.marriage_status === 1,
+                                    deceased: marriage.marriage_status === 2
+                                }">
+                                    {{
+                                        marriage.marriage_status === 0 ? 'Đang hôn nhân' : marriage.marriage_status === 1 ?
+                                            'Ly hôn' : 'Đã mất'
+                                    }}
+                                </span>
+                            </div>
+
+                            <div v-if="marriage.marriage_status !== 0" class="marriage-card__event">
+                                {{
+                                    marriage.marriage_status === 1 ? `Ly hôn: ${formatDate(marriage.divorce_date)}`
+                                        : `${person?.gender === 1 ? 'Vợ' : 'Chồng'} mất: ${formatDate(marriage.divorce_date)}`
+                                }}
+                            </div>
+
+                            <div v-if="marriage.note" class="marriage-card__note">
+                                {{ marriage.note }}
+                            </div>
+                        </div>
+                    </template>
+
                 </div>
             </div>
         </div>
@@ -113,6 +158,7 @@ import { computed } from 'vue';
 import SlidePanel from '../SlidePanel.vue';
 import { formatDate } from '@/utils/formatDate';
 import { PERSON_TYPE_LABEL } from '@/constants/person-type-label';
+import { PersonType } from "@/enum/person-type.enum.js"
 
 const IMG_URL = import.meta.env.VITE_URL;
 
@@ -125,7 +171,8 @@ const props = defineProps({
     parentChild: {
         type: Object,
         default: () => ({})
-    }
+    },
+    marriages: Array // danh sách các hôn nhân của người này
 })
 
 const emit = defineEmits(['update:modelValue', 'edit-person'])
@@ -146,3 +193,52 @@ const openEdit = (person) => {
 }
 
 </script>
+<style scoped>
+.marriage-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.marriage-card {
+    background: #1f1f1f;
+    border: 1px solid var(--border);
+    border-left: 2px solid var(--gold);
+    padding: 14px;
+    transition: all .2s;
+}
+
+.marriage-card__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.marriage-card__name {
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 15px;
+}
+
+.marriage-card__meta {
+    margin-top: 4px;
+    color: var(--text-secondary);
+    font-size: 12px;
+}
+
+.marriage-card__event {
+    margin-top: 8px;
+    color: #ff8389;
+    font-size: 12px;
+}
+
+.marriage-card__note {
+    margin-top: 10px;
+    padding: 10px;
+    background: rgba(201, 168, 76, .08);
+    border-left: 2px solid var(--gold);
+    color: var(--text-secondary);
+    font-size: 12px;
+}
+</style>

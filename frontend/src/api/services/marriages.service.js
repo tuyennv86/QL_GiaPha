@@ -5,13 +5,19 @@ const getAll = async () => {
     return res.data;
 }
 
-const getByPersonId = async (personId) => {
-    const res = await http.get(`marriages/person/${personId}`);
+const getByPersonId = async (personId, personType) => {
+    const res = await http.get(`marriages/person/${personId}`,
+        {
+        params: {
+          personType,
+        },
+        }
+    );
     return res.data;
 }
 const getById = async (id) => {
     const res = await http.get(`marriages/${id}`);
-    return res.data;
+    return res.data;    
 }
 
 const create = async (data) => {
