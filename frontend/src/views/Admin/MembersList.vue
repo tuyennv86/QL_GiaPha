@@ -48,6 +48,13 @@
                         <option :value="0">Nữ</option>
                         <option :value="2">Khác</option>
                     </select>
+                    <select class="f-select" style="width: auto; padding: 8px 12px" v-model="person_type">
+                        <option :value="null">Tất cả quan hệ</option>
+                        <option :value="PersonType.SON">Con trai</option>
+                        <option :value="PersonType.DAUGHTER">Con gái</option>
+                        <option :value="PersonType.SON_IN_LAW">Con rể</option>
+                        <option :value="PersonType.DAUGHTER_IN_LAW">Con dâu</option>
+                    </select>
                     <select class="f-select" style="width: auto; padding: 8px 12px" v-model="is_alive">
                         <option :value="-1">Tất cả tình trạng</option>
                         <option :value="1">Còn sống</option>
@@ -217,6 +224,7 @@ const search = ref("");
 const gender = ref("-1");
 const generation = ref("0");
 const is_alive = ref("-1");
+const person_type = ref(null)
 
 const viewPanel = ref(false);
 const viewPerson = ref(null);
@@ -242,7 +250,7 @@ const loadFamily = async () => {
 };
 
 const loadPersons = async () => {
-    await personStore.searchPersons(page.value, limit.value, gender.value, generation.value, is_alive.value, search.value);
+    await personStore.searchPersons(page.value, limit.value, gender.value, generation.value, is_alive.value, person_type.value, search.value);
 };
 
 const getGeneration = async () => {

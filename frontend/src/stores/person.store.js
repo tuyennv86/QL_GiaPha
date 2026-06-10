@@ -37,11 +37,11 @@ export const usePersonStore = defineStore('person', () => {
     }
   }
 
-  const searchPersons = async (page, limit, gender, generation, is_alive, search) => {
+  const searchPersons = async (page, limit, gender, generation, is_alive, person_type, search) => {
     loading.value = true
     error.value = null
     try {
-      const response = await personService.search(page, limit, gender, generation, is_alive, search)
+      const response = await personService.search(page, limit, gender, generation, is_alive, person_type, search)
       total.value = response.total
       persons.value = response.items
     } catch (err) {

@@ -49,6 +49,7 @@ export class PersonService {
     gender: number,
     generation: number,
     is_alive: number,
+    person_type?: PersonType,
     search?: string,
   ): Promise<PersonResponseList> {
     const query = this.personRepo
@@ -76,6 +77,12 @@ export class PersonService {
     if (is_alive !== -1) {
       const isAliveBool = is_alive === 1 ? true : false;
       query.andWhere('persons.is_alive = :is_alive', { is_alive: isAliveBool });
+    }
+
+    if (person_type) {
+      query.andWhere('persons.person_type = :person_type', {
+        person_type,
+      });
     }
 
     const [entities, total] = await query

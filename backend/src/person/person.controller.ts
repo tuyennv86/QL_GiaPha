@@ -21,6 +21,7 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { ExportPersonDto } from './dto/export-person.dto';
 import type { Response } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { PersonType } from './enum/person-type.enum';
 
 @Controller('person')
 export class PersonController {
@@ -30,6 +31,7 @@ export class PersonController {
   findAll() {
     return this.personService.findAll();
   }
+
   @Get('search')
   @RequirePermissions('person.view')
   @UseGuards(JwtAuthGuard)
@@ -39,6 +41,7 @@ export class PersonController {
     @Query('gender') gender: string = '-1',
     @Query('generation') generation: string = '0',
     @Query('is_alive') is_alive: string = '-1',
+    @Query('person_type') person_type?: PersonType,
     @Query('search') search?: string,
   ) {
     return this.personService.findSearch(
@@ -47,6 +50,7 @@ export class PersonController {
       Number(gender),
       Number(generation),
       Number(is_alive),
+      person_type,
       search,
     );
   }
