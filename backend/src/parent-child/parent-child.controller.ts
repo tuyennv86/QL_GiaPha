@@ -35,6 +35,11 @@ export class ParentChildController {
     return this.parentChildService.findByChildId(+childId);
   }
 
+  @Get('findChildAll/:parentId/parents')
+  findAllChildrenByParentId(@Param('parentId') parentId: string) {
+    return this.parentChildService.findAllChildrenByParentId(+parentId);
+  }
+
   @Patch(':id')
   update(
     @Param('id') id: string,

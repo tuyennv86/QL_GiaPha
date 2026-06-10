@@ -34,6 +34,7 @@ export class ParentChildService {
         'mother.full_name',
         'child.id',
         'child.full_name',
+        'child.gender',
       ])
       .getMany();
     if (!pc) {
@@ -48,6 +49,7 @@ export class ParentChildService {
       father_name: pc.father?.full_name,
       mother_name: pc.mother?.full_name,
       child_name: pc.child?.full_name ?? '',
+      gender: pc.child?.gender,
     }));
   }
 
@@ -69,6 +71,7 @@ export class ParentChildService {
         'mother.full_name',
         'child.id',
         'child.full_name',
+        'child.gender',
       ])
       .where('parent_child.child_id = :childId', { childId })
       .getOne();
@@ -84,6 +87,7 @@ export class ParentChildService {
       father_name: pc.father?.full_name,
       mother_name: pc.mother?.full_name,
       child_name: pc.child?.full_name ?? '',
+      gender: pc.child?.gender,
     };
   }
 
@@ -107,6 +111,7 @@ export class ParentChildService {
 
         'child.id',
         'child.full_name',
+        'child.gender',
       ])
       .where('parent_child.id = :id', { id })
       .getOne();
@@ -124,7 +129,49 @@ export class ParentChildService {
       father_name: pc.father?.full_name,
       mother_name: pc.mother?.full_name,
       child_name: pc.child?.full_name ?? '',
+      gender: pc.child?.gender,
     };
+  }
+
+  async findAllChildrenByParentId(
+    parentId: number,
+  ): Promise<ParentChildResponse[]> {
+    const pcs = await this.parentChildRepository
+      .createQueryBuilder('parent_child')
+      .leftJoinAndSelect('parent_child.father', 'father')
+      .leftJoinAndSelect('parent_child.mother', 'mother')
+      .leftJoinAndSelect('parent_child.child', 'child')
+      .select([
+        'parent_child.id',
+        'parent_child.father_id',
+        'parent_child.mother_id',
+        'parent_child.child_id',
+        'parent_child.relationship_type',
+        'father.id',
+        'father.full_name',
+        'mother.id',
+        'mother.full_name',
+        'child.id',
+        'child.full_name',
+        'child.gender',
+      ])
+      .where(
+        'parent_child.father_id = :parentId OR parent_child.mother_id = :parentId',
+        { parentId },
+      )
+      .getMany();
+
+    return pcs.map((pc) => ({
+      id: pc.id,
+      father_id: pc.father_id,
+      mother_id: pc.mother_id,
+      child_id: pc.child_id,
+      relationship_type: pc.relationship_type,
+      father_name: pc.father?.full_name,
+      mother_name: pc.mother?.full_name,
+      child_name: pc.child?.full_name ?? '',
+      gender: pc.child?.gender,
+    }));
   }
 
   update(id: number, updateParentChildDto: UpdateParentChildDto) {

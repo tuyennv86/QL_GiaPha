@@ -139,6 +139,35 @@
                         </div>
                     </template>
 
+                    <template v-if="childList.length > 0">
+                        <div class="divider"></div>
+                        <div class="section-label">Danh sách các con</div>
+
+                        <div v-for="child in childList" :key="child.id" class="marriage-card">
+                            <div class="marriage-card__header">
+                                <div>
+                                    <div class="marriage-card__name">
+                                        {{
+                                            child.child_name
+                                        }}
+                                    </div>
+
+                                    <div class="marriage-card__meta">
+                                        {{ child.relationship_type === 0 ? 'Con đẻ' : child.relationship_type === 1 ?
+                                            'Con nuôi' : 'Khác' }}
+                                    </div>
+                                </div>
+
+                                <span class="marriage-status"
+                                    :class="{ active: child.gender === 0, divorce: child.gender === 1 }">
+                                    Giới tính : {{ child.gender === 0 ? 'Nữ' : child.gender === 1 ? 'Nam' :
+                                        'Khác' }}
+                                </span>
+                            </div>
+                        </div>
+                    </template>
+
+
                 </div>
             </div>
         </div>
@@ -172,7 +201,8 @@ const props = defineProps({
         type: Object,
         default: () => ({})
     },
-    marriages: Array // danh sách các hôn nhân của người này
+    marriages: Array, // danh sách các hôn nhân của người này
+    childList: Array // danh sách con cái của người này
 })
 
 const emit = defineEmits(['update:modelValue', 'edit-person'])

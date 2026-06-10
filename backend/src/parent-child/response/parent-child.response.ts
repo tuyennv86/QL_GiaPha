@@ -7,4 +7,5 @@ export class ParentChildResponse {
   father_name?: string;
   mother_name?: string;
   child_name: string;
+  gender?: number;
 }

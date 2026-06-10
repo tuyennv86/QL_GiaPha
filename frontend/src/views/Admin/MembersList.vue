@@ -168,7 +168,8 @@
     </AddPersonSilde>
 
     <ViewPersonSilde v-model="viewPanel" :person="viewPerson" :parentChild="parentChildStore.parentChild"
-        :marriages="marriagesStore.marriagesList" @edit-person="handEditPerson"></ViewPersonSilde>
+        :marriages="marriagesStore.marriagesList" :childList="childList" @edit-person="handEditPerson">
+    </ViewPersonSilde>
 
     <EditPersonRelationship v-model="viewRelationshipPanel" :person="selectedRelationshipPerson" :personMen="personMen"
         :personWomen="personWomen" :parentChild="parentChildStore.parentChild" :marriages="marriagesStore.marriagesList"
@@ -223,6 +224,7 @@ const viewPerson = ref(null);
 const showPanel = ref(false);
 const selectedPerson = ref(null);
 const generations = ref([]);
+const childList = ref([]);
 
 const personMen = ref([]);
 const personWomen = ref([]);
@@ -402,6 +404,7 @@ const openView = async (person) => {
     viewPerson.value = person;
     await parentChildStore.getByChildId(person.id);
     await marriagesStore.getByPersonId(person.id, person.person_type);
+    childList.value = await parentChildStore.getAllChildrenByParent(person.id);
 };
 
 const handSave = async ({ form, imageFile, isEdit }) => {

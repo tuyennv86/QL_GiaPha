@@ -54,6 +54,20 @@ export const useParentChildStore = defineStore('parentChild', () => {
         }
     }
 
+    const getAllChildrenByParent = async (parentId) => {
+        loading.value = true;
+        error.value = null;
+        try {
+            const data = await parentChildService.getAllChildrenByParent(parentId);    
+            return data;
+        } catch (err) {
+            error.value = err.message;
+        }        
+        finally {
+            loading.value = false;
+        }
+    }
+
     const create = async (data) => {
         loading.value = true;
         error.value = null;
@@ -107,6 +121,7 @@ export const useParentChildStore = defineStore('parentChild', () => {
         getAll,
         getById,
         getByChildId,
+        getAllChildrenByParent,
         create,
         update,
         remove

@@ -14,6 +14,10 @@ const getByChildId = async (childId) => {
     const res = await http.get(`parent-child/child/${childId}`);
     return res.data;
 }
+const getAllChildrenByParent = async (parentId) => {
+    const res = await http.get(`parent-child/findChildAll/${parentId}/parents`);
+    return res.data;
+}
 
 const create = async (data) => {
     return await http.post('parent-child', data);
@@ -32,6 +36,7 @@ export default {
     getAll,
     getById,
     getByChildId,
+    getAllChildrenByParent,
     create,
     update,
     remove
