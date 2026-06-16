@@ -11,9 +11,13 @@ const getTreeMnu = async () => {
 const getAll = async () => {
   return await http.get('menu')
 }
+const getNotRoter = async () => {
+  return await http.get('menu/not-router')
+}
 
 export default {
   getMyMenu,
   getTreeMnu,
   getAll,
+  getNotRoter
 }

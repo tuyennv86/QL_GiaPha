@@ -88,6 +88,15 @@ export class MenuService {
     return TreeUtil.buildTree(filtered);
   }
 
+  async getMenuNotRouter(): Promise<MenuItem[]> {
+    return await this.menuRepo
+      .createQueryBuilder('menu')
+      .where('menu.route is not null')
+      .andWhere("menu.route <> ''")
+      .orderBy('menu.sort_order', 'ASC')
+      .getMany();
+  }
+
   async create(dto: CreateMenuItemDto): Promise<MenuItem> {
     const { permission_ids, ...menuData } = dto;
     const item = await this.menuRepo.save(this.menuRepo.create(menuData));

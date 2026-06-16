@@ -1,191 +1,218 @@
 <template>
-    <!-- ====== ROLES ====== -->
     <div class="page">
         <div class="ph">
             <div class="ph-eyebrow">Quản Trị Hệ Thống</div>
             <div class="ph-row">
                 <div>
-                    <div class="ph-title">Phân Quyền & Vai Trò</div>
+                    <div class="ph-title">Quản Lý Phân Quyền</div>
                     <div class="ph-sub">
                         Ma trận quyền hạn cho từng vai trò trong hệ thống
                     </div>
                 </div>
+                <button class="btn btn-primary btn-sm" @click="openAdd">
+                    <i class="fas fa-calendar-plus"></i> Thêm mới quyền
+                </button>
             </div>
         </div>
 
-        <div class="card mb-16">
-            <div class="card-head">
-                <div class="card-title">📋 Ma Trận Quyền Hạn</div>
+        <div class="grid mb-16" style="gap: 2px;">
+            <!-- Filters -->
+            <div class="card mb-16">
+                <div class="card-body" style="padding: 14px 20px">
+                    <div class="select-bar">
+                        <div class="search-bar" style="max-width: 260px">
+                            <span style="color: var(--text-dim)">🔍</span>
+                            <input placeholder="Nhập thông tin tìm kiếm..." v-model="search" />
+                        </div>
+                        <button class="btn btn-danger btn-sm" @click="loadData">
+                            <i class="fas fa-search"></i> Tìm kiếm
+                        </button>
+                    </div>
+                </div>
             </div>
-            <div class="card-body" style="padding: 0; overflow-x: auto">
-                <table class="perm-matrix">
+            <div class="card mb-16" style="border-color: var(--gold)" v-if="selected.length > 0">
+                <div class="card-body" style="padding: 12px 20px">
+                    <div class="flex-center gap-12">
+                        <span class="text-gold fw-6">{{ selected.length }} đã chọn</span>
+                        <button class="btn btn-danger btn-sm" @click.prevent="handDeleteAllCheck">
+                            <i class="fas fa-trash"></i> Xoá Chọn
+                        </button>
+                        <button class="btn btn-ghost btn-sm" @click.prevent="handUncheckAll">
+                            <i class="fas fa-tasks"></i> Bỏ chọn
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="card" v-if="permissionStore.permissions.length > 0">
+                <table class="tbl">
                     <thead>
                         <tr>
-                            <th style="width: 200px;">Chức Năng</th>
-                            <th>Super Admin</th>
-                            <th>Admin</th>
-                            <th>Biên Tập Viên</th>
-                            <th>Xem</th>
+                            <th style="width: 40px;"><input type="checkbox" style="cursor: pointer;" ref="checkAllRef"
+                                    :checked="isAllChecked" @change="handleCheckAll"></th>
+                            <th>Tên quyền</th>
+                            <th>Mã Code</th>
+                            <th>Mô tả</th>
+                            <th>Khu vực</th>
+                            <th>Thao Tác</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td style="text-align: left; font-weight: 500; color: var(--text-primary);">Xem thành viên
+                        <tr v-for="permission in permissionStore.permissions" :key="permission.id">
+                            <td><input type="checkbox" :value="permission.id" v-model="selected"
+                                    style="cursor: pointer;">
                             </td>
-                            <td><span class="perm-check perm-yes">✓</span></td>
-                            <td><span class="perm-check perm-yes">✓</span></td>
-                            <td><span class="perm-check perm-yes">✓</span></td>
-                            <td><span class="perm-check perm-yes">✓</span></td>
-                        </tr>
-                        <tr>
-                            <td style="text-align: left; font-weight: 500; color: var(--text-primary);">Thêm thành viên
+                            <td>
+                                {{ permission.permission_name }}
                             </td>
-                            <td><span class="perm-check perm-yes">✓</span></td>
-                            <td><span class="perm-check perm-yes">✓</span></td>
-                            <td><span class="perm-check perm-partial">~</span></td>
-                            <td><span class="perm-check perm-no">✗</span></td>
-                        </tr>
-                        <tr>
-                            <td style="text-align: left; font-weight: 500; color: var(--text-primary);">Sửa thành viên
+                            <td>
+                                {{ permission.permission_code }}
                             </td>
-                            <td><span class="perm-check perm-yes">✓</span></td>
-                            <td><span class="perm-check perm-yes">✓</span></td>
-                            <td><span class="perm-check perm-partial">~</span></td>
-                            <td><span class="perm-check perm-no">✗</span></td>
-                        </tr>
-                        <tr>
-                            <td style="text-align: left; font-weight: 500; color: var(--text-primary);">Xoá thành viên
+                            <td>
+                                {{ permission.description }}
                             </td>
-                            <td><span class="perm-check perm-yes">✓</span></td>
-                            <td><span class="perm-check perm-yes">✓</span></td>
-                            <td><span class="perm-check perm-no">✗</span></td>
-                            <td><span class="perm-check perm-no">✗</span></td>
-                        </tr>
-                        <tr>
-                            <td style="text-align: left; font-weight: 500; color: var(--text-primary);">Quản lý sự kiện
+                            <td>{{ permission.scope }}</td>
+                            <td>
+                                <div class="flex gap-4">
+                                    <button class="btn btn-ghost btn-xs text-gold"
+                                        @click.prevent="openEdit(permission)"> <i class="fas fa-pen"></i> </button>
+                                    <button class="btn btn-danger btn-xs"
+                                        @click.prevent="deletePermission(permission.id)"><i
+                                            class="fas fa-trash"></i></button>
+                                </div>
                             </td>
-                            <td><span class="perm-check perm-yes">✓</span></td>
-                            <td><span class="perm-check perm-yes">✓</span></td>
-                            <td><span class="perm-check perm-yes">✓</span></td>
-                            <td><span class="perm-check perm-no">✗</span></td>
-                        </tr>
-                        <tr>
-                            <td style="text-align: left; font-weight: 500; color: var(--text-primary);">Quản lý người
-                                dùng</td>
-                            <td><span class="perm-check perm-yes">✓</span></td>
-                            <td><span class="perm-check perm-partial">~</span></td>
-                            <td><span class="perm-check perm-no">✗</span></td>
-                            <td><span class="perm-check perm-no">✗</span></td>
-                        </tr>
-                        <tr>
-                            <td style="text-align: left; font-weight: 500; color: var(--text-primary);">Phân quyền</td>
-                            <td><span class="perm-check perm-yes">✓</span></td>
-                            <td><span class="perm-check perm-no">✗</span></td>
-                            <td><span class="perm-check perm-no">✗</span></td>
-                            <td><span class="perm-check perm-no">✗</span></td>
-                        </tr>
-                        <tr>
-                            <td style="text-align: left; font-weight: 500; color: var(--text-primary);">Cài đặt hệ thống
-                            </td>
-                            <td><span class="perm-check perm-yes">✓</span></td>
-                            <td><span class="perm-check perm-partial">~</span></td>
-                            <td><span class="perm-check perm-no">✗</span></td>
-                            <td><span class="perm-check perm-no">✗</span></td>
-                        </tr>
-                        <tr>
-                            <td style="text-align: left; font-weight: 500; color: var(--text-primary);">Sao lưu / Phục
-                                hồi</td>
-                            <td><span class="perm-check perm-yes">✓</span></td>
-                            <td><span class="perm-check perm-yes">✓</span></td>
-                            <td><span class="perm-check perm-no">✗</span></td>
-                            <td><span class="perm-check perm-no">✗</span></td>
-                        </tr>
-                        <tr>
-                            <td style="text-align: left; font-weight: 500; color: var(--text-primary);">Xuất dữ liệu
-                            </td>
-                            <td><span class="perm-check perm-yes">✓</span></td>
-                            <td><span class="perm-check perm-yes">✓</span></td>
-                            <td><span class="perm-check perm-partial">~</span></td>
-                            <td><span class="perm-check perm-no">✗</span></td>
-                        </tr>
-                        <tr>
-                            <td style="text-align: left; font-weight: 500; color: var(--text-primary);">Xem nhật ký</td>
-                            <td><span class="perm-check perm-yes">✓</span></td>
-                            <td><span class="perm-check perm-yes">✓</span></td>
-                            <td><span class="perm-check perm-no">✗</span></td>
-                            <td><span class="perm-check perm-no">✗</span></td>
                         </tr>
                     </tbody>
                 </table>
             </div>
+
         </div>
 
-        <div class="grid-2" style="gap: 2px;">
-            <div class="card">
-                <div class="card-head">
-                    <div class="flex-center gap-8"><span style="font-size: 20px;">👑</span>
-                        <div>
-                            <div class="card-title">Super Admin</div>
-                            <div class="card-sub">1 tài khoản</div>
-                        </div>
-                    </div><span class="badge role-superadmin">Super Admin</span>
-                </div>
-                <div class="card-body">
-                    <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 12px;">Toàn quyền trên hệ
-                        thống. Có thể thực hiện mọi thao tác bao gồm xoá dữ liệu và quản lý tài khoản.</div>
-                    <div class="tag-list"><span class="chip">Toàn quyền</span><span class="chip">Quản lý
-                            users</span><span class="chip">Cài đặt hệ thống</span><span class="chip">Sao lưu</span>
-                    </div>
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-head">
-                    <div class="flex-center gap-8"><span style="font-size: 20px;">🛡️</span>
-                        <div>
-                            <div class="card-title">Admin</div>
-                            <div class="card-sub">2 tài khoản</div>
-                        </div>
-                    </div><span class="badge role-admin">Admin</span>
-                </div>
-                <div class="card-body">
-                    <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 12px;">Quản lý nội dung và
-                        người dùng ở mức hạn chế. Không thể thay đổi cấu hình hệ thống lõi.</div>
-                    <div class="tag-list"><span class="chip">Quản lý nội dung</span><span class="chip">Duyệt yêu
-                            cầu</span><span class="chip">Xuất dữ liệu</span><span class="chip">Sao lưu</span></div>
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-head">
-                    <div class="flex-center gap-8"><span style="font-size: 20px;">✏️</span>
-                        <div>
-                            <div class="card-title">Biên tập viên</div>
-                            <div class="card-sub">2 tài khoản</div>
-                        </div>
-                    </div><span class="badge role-editor">Editor</span>
-                </div>
-                <div class="card-body">
-                    <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 12px;">Biên tập viên có
-                        thể thêm và sửa nội dung nhưng không thể xoá hoặc truy cập tính năng quản trị.</div>
-                    <div class="tag-list"><span class="chip">Thêm thành viên</span><span class="chip">Sửa nội
-                            dung</span><span class="chip">Quản lý sự kiện</span></div>
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-head">
-                    <div class="flex-center gap-8"><span style="font-size: 20px;">👁️</span>
-                        <div>
-                            <div class="card-title">Xem</div>
-                            <div class="card-sub">1 tài khoản</div>
-                        </div>
-                    </div><span class="badge role-viewer">Viewer</span>
-                </div>
-                <div class="card-body">
-                    <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 12px;">Chỉ có quyền xem dữ
-                        liệu. Dành cho thành viên gia đình muốn tra cứu thông tin.</div>
-                    <div class="tag-list"><span class="chip">Xem thành viên</span><span class="chip">Xem sự kiện</span>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
+    <AddPermission v-model="viewModel" :permission="selectPermission" @save="handSave"></AddPermission>
+    <ToastCompo></ToastCompo>
+    <ConfirmDialog></ConfirmDialog>
 </template>
+<script setup>
+import { usePermissionStore } from '@/stores/permissions.store';
+import { onMounted, ref, watch, computed } from 'vue';
+import ToastCompo from '@/components/Toast/ToastCompo.vue';
+import { useToast } from '@/components/Toast/useToast';
+import ConfirmDialog from '@/components/confirm/ConfirmDialog.vue';
+import { useConfirm } from '@/components/confirm/useConfirm';
+import AddPermission from '@/components/SildePanel/Permission/AddPermission.vue';
+
+const permissionStore = usePermissionStore();
+const { showToast } = useToast()
+const { showConfirm } = useConfirm();
+
+const search = ref('');
+const viewModel = ref(false);
+const selectPermission = ref(null);
+
+// check all checkbox
+
+const selected = ref([])
+const checkAllRef = ref(null)
+
+const isAllChecked = computed(() => {
+    return (
+        permissionStore.permissions.length > 0 && selected.value.length === permissionStore.permissions.length
+    )
+})
+
+const isIndeterminate = computed(() => {
+    return (
+        selected.value.length > 0 &&
+        selected.value.length < permissionStore.permissions.length
+    )
+})
+
+const updateIndeterminate = () => {
+    if (checkAllRef.value) {
+        checkAllRef.value.indeterminate = isIndeterminate.value
+    }
+}
+
+watch(selected, updateIndeterminate, { deep: true })
+
+onMounted(updateIndeterminate)
+
+const handleCheckAll = (e) => {
+    if (e.target.checked) {
+        selected.value = permissionStore.permissions.map(x => x.id)
+    } else {
+        selected.value = []
+    }
+}
+const handUncheckAll = () => {
+    selected.value = [];
+}
+//end check all checkbox
+
+const loadData = () => {
+    permissionStore.getBySearch(search.value);
+};
+
+onMounted(() => {
+    loadData();
+});
+
+watch(search, () => {
+    loadData();
+}
+);
+
+const openAdd = () => {
+    viewModel.value = true;
+    selectPermission.value = null;
+};
+
+const openEdit = (permission) => {
+    console.log('permission gửi lên', permission);
+    viewModel.value = true;
+    selectPermission.value = permission;
+};
+
+const handSave = async ({ form, isEdit }) => {
+    const payload = { ...form };
+    delete payload.id;
+    try {
+        if (isEdit) {
+            await permissionStore.updatePermission(form.id, payload);
+
+            showToast({ title: 'Cập nhật quyền!', sub: "Cập nhật thành công", type: 'success' })
+        } else {
+            await permissionStore.addPermission(payload);
+            showToast({ title: 'Tạo mới quyền!', sub: "Thêm mới thành công", type: 'success' })
+        }
+    } catch (error) {
+        showToast({ title: 'Đã có lỗi', sub: 'Lỗi :' + error, type: 'error' })
+    }
+}
+
+const deletePermission = async (id) => {
+    const ok = await showConfirm({ title: 'Xóa quyền', desc: 'Bạn có chắc muốn xóa QUYỀN này không?', icon: '<i class="fas fa-trash-alt"></i>', btn: 'Xóa' })
+    if (ok) {
+        try {
+            const mess = await permissionStore.deletePermission(id);
+            showToast({ title: 'Xóa quyền!', sub: mess.message, type: 'success' })
+        } catch (error) {
+            showToast({ title: 'Đã có lỗi', sub: 'Lỗi :' + error, type: 'error' })
+        }
+    }
+};
+
+const handDeleteAllCheck = async () => {
+    console.log(selected.value);
+    const ok = await showConfirm({ title: 'Xóa quyền', desc: `Bạn có chắc muốn Xóa ${selected.value.length} quyền này không?`, icon: '<i class="fas fa-trash-alt"></i>', btn: 'Xóa' })
+    if (ok) {
+        try {
+            const res = await permissionStore.deleteMultiple(selected.value);
+            showToast({ title: 'Xóa quyền!', sub: res.message, type: 'success' })
+            selected.value = [];
+        } catch (error) {
+            showToast({ title: 'Đã có lỗi', sub: 'Lỗi :' + error, type: 'error' })
+        }
+    }
+};
+</script>

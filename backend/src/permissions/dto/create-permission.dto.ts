@@ -1,4 +1,5 @@
-import { IsString, IsOptional, MaxLength } from 'class-validator';
+import { IsString, IsOptional, MaxLength, IsEnum } from 'class-validator';
+import { PermissionScope } from '../require-permissions.decorator';
 
 export class CreatePermissionDto {
   @IsString()
@@ -13,4 +14,8 @@ export class CreatePermissionDto {
   @IsString()
   @MaxLength(500)
   description?: string;
+
+  @IsOptional()
+  @IsEnum(PermissionScope)
+  scope?: PermissionScope;
 }

@@ -73,18 +73,18 @@ const routes = [
           title: 'Admin Panel - Vai trò người dùng',
           permissions: ['role.view'],
         },
-      },
+      },     
       {
         path: '/admin/premissions',
-        name: 'premissions',
+        name: 'Premissions',
         component: () => import('@/views/Admin/PremissionsPage.vue'),
         meta: {
           requiresAuth: true,
           layout: 'admin',
-          title: 'Admin Panel - Phân quyền người dùng',
-          permissions: ['permission.view'],
+          title: 'Admin Panel - Quản lý quyền',
+          permissions: ['permisstion.view'],
         },
-      },
+      },     
       {
         path: '/admin/approval',
         name: 'Approval',

@@ -41,8 +41,8 @@ export class RolesController {
 
   @Get('rolesWithUserCount')
   @RequirePermissions('role.view')
-  getRolesWithUserCount() {
-    return this.rolesService.getRolesWithUserCount();
+  getRolesWithUserCount(@Query('search') search?: string) {
+    return this.rolesService.getRolesWithUserCount(search);
   }
 
   @Get(':id')

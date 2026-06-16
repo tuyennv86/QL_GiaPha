@@ -37,8 +37,10 @@ const assignPermissions = async (id, permissions) => {
   return res.data
 }
 
-const rolesWithUserCount = async () => {
-  const res = await http.get('roles/rolesWithUserCount')
+const rolesWithUserCount = async (search) => {
+  const res = await http.get('roles/rolesWithUserCount', {
+    params: {search},
+  })
   return res.data
 }
 

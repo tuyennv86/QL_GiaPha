@@ -24,7 +24,7 @@
                         Đang import...
                     </div>
                     <button class="btn btn-primary btn-sm" @click.prevent="handAddPerson">
-                        <i class="fas fa-plus"></i> Thêm Thành Viên
+                        <i class="fas fa-id-badge"></i> Thêm Thành Viên
                     </button>
                 </div>
             </div>

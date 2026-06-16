@@ -44,6 +44,12 @@ export class MenuController {
     return this.menuService.getTree();
   }
 
+  @Get('not-router')
+  @RequirePermissions('menu.view')
+  findNotRoter() {
+    return this.menuService.getMenuNotRouter();
+  }
+
   @Get(':id')
   @RequirePermissions('menu.view')
   findOne(@Param('id', ParseIntPipe) id: number) {

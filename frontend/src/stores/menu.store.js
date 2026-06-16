@@ -21,10 +21,59 @@ export const useMenuStore = defineStore('menu', () => {
     }
   }
 
+  const getMenuTree = async () => {
+    loading.value = true;
+    error.value = null
+    try {
+      const res = await menuService.getTreeMnu();
+      return res.data;
+    }
+    catch (err) {
+      error.value = err.message;
+    }
+    finally
+    {
+      loading.value = false;
+    }
+  }
+
+  const getAll = async () => {
+    loading.value = true;
+    error.value = null
+    try {
+      const res = await menuService.getAll();
+      return res.data;
+    }
+    catch (err) {
+      error.value = err.message;
+    }
+    finally
+    {
+      loading.value = false;
+    }
+  }
+
+  const getNotRoter = async () => {
+    loading.value = true;
+    error.value = null;
+    try {
+      const res = await menuService.getNotRoter();
+      return res.data;
+    } catch (err) {
+      error.value = err.message;      
+    }
+    finally {
+      loading.value = false;
+    }
+  }
+
   return {
     loading,
     error,
     menus,
     getMyMenu,
+    getMenuTree,
+    getAll,
+    getNotRoter
   }
 })

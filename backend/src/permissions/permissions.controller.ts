@@ -7,6 +7,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { PermissionsService } from './permissions.service';
@@ -25,6 +26,12 @@ export class PermissionsController {
   @RequirePermissions('permission.view')
   findAll() {
     return this.permissionsService.findAll();
+  }
+
+  @Get('search')
+  @RequirePermissions('permission.view')
+  findBySearch(@Query('search') search: string) {
+    return this.permissionsService.findBySearch(search);
   }
 
   @Get(':id')
@@ -46,6 +53,13 @@ export class PermissionsController {
     @Body() dto: UpdatePermissionDto,
   ) {
     return this.permissionsService.update(id, dto);
+  }
+
+  // delete multiple permissions by ids
+  @Delete('delete-multiple')
+  @RequirePermissions('permission.delete')
+  deleteMultiple(@Body('ids') ids: number[]) {
+    return this.permissionsService.deleteMultiple(ids);
   }
 
   @Delete(':id')

@@ -11,7 +11,7 @@
                     </div>
                 </div>
                 <button class="btn btn-primary btn-sm" @click="openAdd">
-                    + Tạo Tài Khoản
+                    <i class="fas fa-user-plus"></i> Tạo Tài Khoản
                 </button>
             </div>
         </div>

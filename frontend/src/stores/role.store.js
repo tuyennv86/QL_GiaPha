@@ -99,10 +99,10 @@ export const useRoleStore = defineStore('role', () => {
     }
   }
 
-  const rolesWithUserCount = async () => {
+  const rolesWithUserCount = async (search) => {
     loading.value = true
     try {
-      const data = await roleService.rolesWithUserCount()
+      const data = await roleService.rolesWithUserCount(search)
       roles.value = data
     } catch (err) {
       error.value = err.message

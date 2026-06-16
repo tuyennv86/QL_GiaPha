@@ -27,7 +27,7 @@ export class RolesService {
     return await this.roleRepo.find({ order: { id: 'ASC' } });
   }
 
-  async getRolesWithUserCount(): Promise<RoleSumUserResponse[]> {
+  async getRolesWithUserCount(search?: string): Promise<RoleSumUserResponse[]> {
     return await this.roleRepo
       .createQueryBuilder('role')
       .leftJoin('role.user_roles', 'ur')
@@ -36,6 +36,9 @@ export class RolesService {
       .addSelect('role.role_name', 'role_name')
       .addSelect('role.description', 'description')
       .addSelect('COUNT(user.id)', 'users_count')
+      .where('LOWER(role.role_name) LIKE LOWER(:search)', {
+        search: `%${search}%`,
+      })
       .groupBy('role.id')
       .addGroupBy('role.role_name')
       .orderBy('role.id', 'ASC')
