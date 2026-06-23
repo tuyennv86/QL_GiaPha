@@ -6,12 +6,14 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Role } from 'src/roles/entities/role.entity';
-import { RolePermission } from 'src/roles/entities/role-permission.entity';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
 import { RoleResponseList } from './response/role.response';
 import { RoleSumUserResponse } from 'src/roles/response/role.sumuser.response';
 import { RoleMapper } from './mapper/role.mapper';
+import { RoleMenu } from 'src/role-menus/entities/role-menu.entity';
+import { UserRole } from 'src/users/entities/user-role.entity';
+import { RolePermission } from 'src/role-permission/entities/role-permission.entity';
 
 @Injectable()
 export class RolesService {
@@ -21,6 +23,12 @@ export class RolesService {
 
     @InjectRepository(RolePermission)
     private readonly rolePermRepo: Repository<RolePermission>,
+    @InjectRepository(RolePermission)
+    private readonly rolePermissionRepo: Repository<RolePermission>,
+    @InjectRepository(RoleMenu)
+    private readonly roleMenuRepo: Repository<RoleMenu>,
+    @InjectRepository(UserRole)
+    private readonly userRoleRepo: Repository<UserRole>,
   ) {}
 
   async findAll(): Promise<Role[]> {
@@ -121,6 +129,13 @@ export class RolesService {
   async remove(id: number): Promise<{ message: string }> {
     const role = await this.roleRepo.findOne({ where: { id } });
     if (!role) throw new NotFoundException('Không tìm thấy role');
+    // xóa user_role trước khi xóa role
+    await this.userRoleRepo.delete({ role_id: id });
+    // xóa role_permission trước khi xóa role
+    await this.rolePermissionRepo.delete({ role_id: id });
+    // xóa role_menu trước khi xóa role
+    await this.roleMenuRepo.delete({ role_id: id });
+
     await this.roleRepo.remove(role);
     return { message: 'Xoá role thành công' };
   }

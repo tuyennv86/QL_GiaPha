@@ -24,7 +24,6 @@ export class MenuController {
   constructor(private readonly menuService: MenuService) {}
 
   @Get()
-  @RequirePermissions('menu.view')
   findAll() {
     return this.menuService.findAll();
   }
@@ -32,30 +31,27 @@ export class MenuController {
   @Get('my-menu')
   getMyMenu(@Req() req: RequestWithUser) {
     //console.log('User login:', req.user);
-    return this.menuService.getMenuForUser(
-      req.user.permissions,
-      req.user.roles,
-    );
+    return this.menuService.getMenuForUser(req.user.roles);
   }
   // lấy danh sách menu xây dựng dang tree
   @Get('tree')
-  @RequirePermissions('menu.view')
   getTree() {
     return this.menuService.getTree();
   }
 
   @Get('not-router')
-  @RequirePermissions('menu.view')
   findNotRoter() {
     return this.menuService.getMenuNotRouter();
   }
+  @Get('menu-permissions')
+  async getMenuPermissions() {
+    return this.menuService.getMenuPermissions();
+  }
 
   @Get(':id')
-  @RequirePermissions('menu.view')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.menuService.findOne(id);
   }
-
   @Post()
   @RequirePermissions('menu.create')
   create(@Body() dto: CreateMenuItemDto) {
@@ -63,7 +59,6 @@ export class MenuController {
   }
 
   @Patch(':id')
-  @RequirePermissions('menu.edit')
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateMenuItemDto,
@@ -72,7 +67,6 @@ export class MenuController {
   }
 
   @Delete(':id')
-  @RequirePermissions('menu.delete')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.menuService.remove(id);
   }

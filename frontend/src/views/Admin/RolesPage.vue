@@ -59,12 +59,14 @@
                             </td>
                             <td>
                                 <div class="flex gap-4">
-                                    <button class="btn btn-ghost btn-xs text-gold" @click.prevent="openEdit(user)"> <i
-                                            class="fas fa-pen"></i> </button>
-                                    <!-- <button class="btn btn-ghost btn-xs text-green" @click.prevent="openView(user)"> <i
-                                            class="fas fa-eye"></i> </button> -->
-                                    <button class="btn btn-danger btn-xs" @click.prevent="deleteUser(user.id)"><i
-                                            class="fas fa-trash"></i></button>
+                                    <button class="btn btn-ghost btn-xs text-gold" @click.prevent="openEdit(role)"
+                                        title="Sửa vai trò"> <i class="fas fa-pen"></i> </button>
+                                    <button class="btn btn-ghost btn-xs text-green"
+                                        @click.prevent="openPermission(role)" title="Cập nhật quyến"> <i
+                                            class="fas fa-user-shield"></i>
+                                    </button>
+                                    <button class="btn btn-danger btn-xs" @click.prevent="deleteRole(role.id)"
+                                        title="Xóa vai trò"><i class="fas fa-trash"></i></button>
                                 </div>
                             </td>
                         </tr>
@@ -74,7 +76,7 @@
 
         </div>
 
-        <div class="card mb-16">
+        <!-- <div class="card mb-16">
             <div class="card-head">
                 <div class="card-title">📋 Ma Trận Quyền Hạn</div>
             </div>
@@ -101,62 +103,126 @@
                     </tbody>
                 </table>
             </div>
-        </div>
+        </div> -->
     </div>
+    <AddRole v-model="viewModel" :role="selectRole" @save="handSave"></AddRole>
 
+    <AddRolePermission v-model="viewModelPermission" :role="selectRolePermission" :menus="menuPermissions"
+        :role-menus="roleMenus" :role-permissions="rolePermissions" @save="handSavePermission">
+    </AddRolePermission>
+
+    <ToastCompo></ToastCompo>
+    <ConfirmDialog></ConfirmDialog>
 </template>
 <script setup>
 import { onMounted, ref, watch } from "vue";
+import AddRole from "@/components/SildePanel/Role/AddRole.vue";
+import AddRolePermission from "@/components/SildePanel/Role/AddRolePermission.vue";
 import { useRoleStore } from "@/stores/role.store";
 import { useMenuStore } from "@/stores/menu.store";
-import { usePermissionStore } from "@/stores/permissions.store";
+import ToastCompo from '@/components/Toast/ToastCompo.vue';
+import { useToast } from '@/components/Toast/useToast';
+import ConfirmDialog from '@/components/confirm/ConfirmDialog.vue';
+import { useConfirm } from '@/components/confirm/useConfirm';
+import { useRoleMenuStore } from "@/stores/role-menu.store";
+import { useRolePermissionStore } from "@/stores/role-permission.store";
 
 const roleStore = useRoleStore();
 const menuStore = useMenuStore();
-const permissionsStore = usePermissionStore();
+const { showToast } = useToast()
+const { showConfirm } = useConfirm();
+const roleMenuStore = useRoleMenuStore();
+const rolePermissionStore = useRolePermissionStore();
 
-const menuList = ref([]);
-const permisstions = ref([]);
+
+const viewModel = ref(false);
+const selectRole = ref(null);
+
+const viewModelPermission = ref(false);
+const selectRolePermission = ref(null);
+const menuPermissions = ref([]);
+const roleMenus = ref([]);
+const rolePermissions = ref([]);
+
 
 const search = ref("");
 
 const loadData = async () => {
     await roleStore.rolesWithUserCount(search.value);
 };
-const loadMenu = async () => {
-    menuList.value = await menuStore.getNotRoter();
-    permisstions.value = await permissionsStore.getAll();
-};
+
 
 onMounted(async () => {
     await loadData();
-    await loadMenu();
 });
 
 watch(search, () => {
     loadData();
 });
 
-const hasPermission = (menuId, permissionId) => {
-    // Kiểm tra nếu menu đã có quyền này
-    // const menu = menuList.value.find((m) => m.id === menuId);
-    // return menu && menu.permissions.some((p) => p.id === permissionId);
+const openAdd = () => {
+    selectRole.value = null;
+    viewModel.value = true;
+};
+const openEdit = (role) => {
+    selectRole.value = role;
+    viewModel.value = true;
 };
 
-const togglePermission = async (menuId, permissionId) => {
-    // const menu = menuList.value.find((m) => m.id === menuId);
-    // if (!menu) return;
+const handSave = ({ form, isEdit }) => {
+    const { id, ...payload } = form;
+    try {
+        if (isEdit) {
+            roleStore.updateRole(id, payload);
+            showToast({ title: 'Cập nhật vai trò!', sub: "Cập nhật vai trò thành công", type: 'success' })
+        } else {
+            roleStore.addRole(payload);
+            showToast({ title: 'Tạo mới vai trò!', sub: "Thêm mới vai trò thành công", type: 'success' })
+        }
+    } catch (error) {
+        showToast({ title: 'Đã có lỗi', sub: 'Lỗi :' + error, type: 'error' })
+    }
+};
 
-    // const hasPerm = hasPermission(menuId, permissionId);
-    // if (hasPerm) {
-    //     // Gỡ bỏ quyền
-    //     await menuStore.revokePermission(menuId, permissionId);
-    // } else {
-    //     // Cấp quyền
-    //     await menuStore.grantPermission(menuId, permissionId);
-    // }
-    // // Cập nhật lại danh sách menu sau khi thay đổi quyền
-    // await loadMenu();
+const deleteRole = async (id) => {
+    const ok = await showConfirm({ title: 'Xóa quyền', desc: 'Bạn có chắc muốn xóa VAI TRÒ này không?', icon: '<i class="fas fa-trash-alt"></i>', btn: 'Xóa' })
+
+    if (ok) {
+        try {
+            await roleStore.deleteRole(id);
+            showToast({ title: 'Xóa quyền!', sub: "Xóa vai trò thành công", type: 'success' })
+        } catch (error) {
+            showToast({ title: 'Đã có lỗi', sub: 'Lỗi :' + error, type: 'error' })
+        }
+    }
+};
+
+const openPermission = async (role) => {
+    menuPermissions.value = await menuStore.getMenuPermissions();
+    roleMenus.value = await roleMenuStore.getRoleMenusByRoleId(role.id);
+    rolePermissions.value = await rolePermissionStore.getRolePermissionsByRoleId(role.id);
+    selectRolePermission.value = role;
+    viewModelPermission.value = true;
+};
+
+const handSavePermission = async ({ roleId, menuIds, permissionIds }) => {
+    try {
+        const payloadRoleMenus = {
+            role_id: roleId,
+            menu_ids: menuIds
+        };
+        roleMenuStore.saveRoleMenus(payloadRoleMenus);
+        const payloadRolePermissions = {
+            role_id: roleId,
+            permission_ids: permissionIds
+        };
+        rolePermissionStore.saveRolePermissions(payloadRolePermissions);
+        showToast({ title: 'Cập nhật!', sub: "Cập nhật thành công", type: 'success' })
+    } catch (error) {
+        showToast({ title: 'Đã có lỗi', sub: 'Lỗi :' + error, type: 'error' })
+    }
+    console.log("Saving permissions for roleId:", roleId, "menuIds:", menuIds, "permissionIds:", permissionIds);
+
 };
 
 </script>

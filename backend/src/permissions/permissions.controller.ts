@@ -34,6 +34,16 @@ export class PermissionsController {
     return this.permissionsService.findBySearch(search);
   }
 
+  @Get('search-pageding')
+  @RequirePermissions('permission.view')
+  findBySearchWithPaging(
+    @Query('search') search: string,
+    @Query('page') page = 1,
+    @Query('limit') limit = 10,
+  ) {
+    return this.permissionsService.findSearchPageding(search, page, limit);
+  }
+
   @Get(':id')
   @RequirePermissions('permission.view')
   findOne(@Param('id', ParseIntPipe) id: number) {

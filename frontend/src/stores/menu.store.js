@@ -7,6 +7,7 @@ export const useMenuStore = defineStore('menu', () => {
   const error = ref(null)
 
   const menus = ref([])
+  // const menuPermissions = ref([])
 
   const getMyMenu = async () => {
     loading.value = true
@@ -31,8 +32,7 @@ export const useMenuStore = defineStore('menu', () => {
     catch (err) {
       error.value = err.message;
     }
-    finally
-    {
+    finally {
       loading.value = false;
     }
   }
@@ -47,8 +47,7 @@ export const useMenuStore = defineStore('menu', () => {
     catch (err) {
       error.value = err.message;
     }
-    finally
-    {
+    finally {
       loading.value = false;
     }
   }
@@ -58,22 +57,39 @@ export const useMenuStore = defineStore('menu', () => {
     error.value = null;
     try {
       const res = await menuService.getNotRoter();
+      // console.log('menu store no root',res.data);
       return res.data;
     } catch (err) {
-      error.value = err.message;      
+      error.value = err.message;
+    }
+    finally {
+      loading.value = false;
+    }
+  }
+  
+  const getMenuPermissions = async () => {
+    loading.value = true;
+    error.value = null;
+    try {
+      const res = await menuService.getMenuPermissions();
+      return res.data;
+    } catch (err) {
+      error.value = err.message;
     }
     finally {
       loading.value = false;
     }
   }
 
+
   return {
     loading,
     error,
-    menus,
+    menus,    
     getMyMenu,
     getMenuTree,
     getAll,
-    getNotRoter
+    getNotRoter,
+    getMenuPermissions
   }
 })

@@ -21,10 +21,30 @@
                         <input class="f-input" v-model="form.permission_name" />
                         <small v-if="errors.permission_name">{{ errors.permission_name }}</small>
                     </div>
-
                     <div class="f-group">
-                        <label class="f-label">Mã quyền <span class="f-req">*</span></label>
-                        <input class="f-input" v-model="form.permission_code" />
+                        <label class="f-label">Module <span class="f-req">*</span></label>
+                        <select class="f-select" v-model="form.module">
+                            <option v-for="menu in menus" :key="menu.id" :value="menu.module_name">
+                                {{ menu.menu_name }}
+                            </option>
+                        </select>
+                        <small>{{ form.module }}</small>
+                        <small v-if="errors.module">{{ errors.module }}</small>
+                    </div>
+                    <div class="f-group">
+                        <label class="f-label">Quyền<span class="f-req">*</span></label>
+                        <!-- lấy phần cuối sau dấu . -->
+                        <select class="f-select" v-model="actionSelect">
+                            <option value="view">Xem</option>
+                            <option value="create">Thêm</option>
+                            <option value="edit">Sửa</option>
+                            <option value="delete">Xóa</option>
+                            <option value="export">Export</option>
+                            <option value="import">Import</option>
+                            <option value="assign">Phân quyền</option>
+                            <option value="approve">Duyệt</option>
+                        </select>
+                        <small>{{ form.permission_code }}</small>
                         <small v-if="errors.permission_code">{{ errors.permission_code }}</small>
                     </div>
 
@@ -32,15 +52,6 @@
                         <label class="f-label">Mô tả<span class="f-req">*</span></label>
                         <input class="f-input" v-model="form.description" />
                         <small v-if="errors.description">{{ errors.description }}</small>
-                    </div>
-                    <div class="f-group">
-                        <label class="f-label">Kiểu</label>
-                        <select class="f-select" v-model="form.scope">
-                            <option :value="null">-- Không chọn --</option>
-                            <option v-for="item in PERMISSION_SCOPE_OPTIONS" :key="item.value" :value="item.value">
-                                {{ item.label }}
-                            </option>
-                        </select>
                     </div>
                 </div>
                 <div class="form-row form-row-1">
@@ -60,15 +71,16 @@
 </template>
 
 <script setup>
-import { reactive, watch, computed } from "vue";
+import { reactive, watch, computed, ref } from "vue";
 import SlidePanel from "../SlidePanel.vue";
-import { PERMISSION_SCOPE_OPTIONS } from "@/constants/permission-scope-option.js"
 
 
 const props = defineProps({
     modelValue: Boolean,
     permission: Object,
+    menus: Array
 });
+const actionSelect = ref("");
 
 const emit = defineEmits(["update:modelValue", "save"]);
 
@@ -84,8 +96,21 @@ const form = reactive({
     permission_code: null,
     permission_name: null,
     description: null,
-    scope: null
+    module: null
 });
+
+watch(
+    () => [form.module, actionSelect.value],
+    ([newModule, newAction]) => {
+        if (newModule && newAction) {
+            form.permission_code = `${newModule}.${newAction}`;
+        } else if (newAction) {
+            form.permission_code = newAction; // Nếu chưa chọn module thì tạm thời lấy action
+        } else {
+            form.permission_code = null;
+        }
+    }
+);
 
 
 const errors = reactive({});
@@ -97,7 +122,7 @@ const resetForm = () => {
         permission_code: null,
         permission_name: null,
         description: null,
-        scope: null
+        module: null
     });
 
     Object.keys(errors).forEach((k) => delete errors[k]);
@@ -110,10 +135,10 @@ watch(
         if (val) {
             Object.assign(form, {
                 id: val.id,
-                permission_code: val.permission_code,
+                permission_code: val.module + '.' + val.permission_code.split('.').pop(),
                 permission_name: val.permission_name,
                 description: val.description,
-                scope: val.scope,
+                module: val.module,
             });
         } else {
             resetForm();
@@ -136,6 +161,7 @@ const validate = () => {
     if (!form.permission_name) errors.permission_name = "Tên quyền không được bỏ trống!";
     if (!form.permission_code) errors.permission_code = "Mã quyền không được bỏ trống!";
     if (!form.description) errors.description = "Mô tả không được bỏ trống!";
+    if (!form.module) errors.module = "Module không được bỏ trống!";
     return Object.keys(errors).length === 0;
 };
 
@@ -147,7 +173,9 @@ const handleSubmit = () => {
         form: { ...form },
         isEdit: isEdit.value
     });
-    close();
+    if (isEdit.value) {
+        close();
+    }
     resetForm();
 };
 

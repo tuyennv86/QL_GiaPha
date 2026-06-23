@@ -50,9 +50,9 @@
                             <th style="width: 40px;"><input type="checkbox" style="cursor: pointer;" ref="checkAllRef"
                                     :checked="isAllChecked" @change="handleCheckAll"></th>
                             <th>Tên quyền</th>
+                            <th>Module</th>
                             <th>Mã Code</th>
                             <th>Mô tả</th>
-                            <th>Khu vực</th>
                             <th>Thao Tác</th>
                         </tr>
                     </thead>
@@ -64,13 +64,14 @@
                             <td>
                                 {{ permission.permission_name }}
                             </td>
+                            <td>{{ permission.module }}</td>
                             <td>
                                 {{ permission.permission_code }}
                             </td>
                             <td>
                                 {{ permission.description }}
                             </td>
-                            <td>{{ permission.scope }}</td>
+
                             <td>
                                 <div class="flex gap-4">
                                     <button class="btn btn-ghost btn-xs text-gold"
@@ -83,31 +84,42 @@
                         </tr>
                     </tbody>
                 </table>
+                <BasePagination v-model:currentPage="page" :totalItems="permissionStore.total" :pageSize="limit"
+                    @change="onPageChange" :delta="4"></BasePagination>
             </div>
 
         </div>
 
     </div>
-    <AddPermission v-model="viewModel" :permission="selectPermission" @save="handSave"></AddPermission>
+    <AddPermission v-model="viewModel" :permission="selectPermission" :menus="menuList" @save="handSave">
+    </AddPermission>
     <ToastCompo></ToastCompo>
     <ConfirmDialog></ConfirmDialog>
 </template>
 <script setup>
 import { usePermissionStore } from '@/stores/permissions.store';
 import { onMounted, ref, watch, computed } from 'vue';
+import BasePagination from '@/components/BasePagination.vue';
 import ToastCompo from '@/components/Toast/ToastCompo.vue';
 import { useToast } from '@/components/Toast/useToast';
 import ConfirmDialog from '@/components/confirm/ConfirmDialog.vue';
 import { useConfirm } from '@/components/confirm/useConfirm';
 import AddPermission from '@/components/SildePanel/Permission/AddPermission.vue';
+import { useMenuStore } from '@/stores/menu.store';
 
 const permissionStore = usePermissionStore();
+const menuStore = useMenuStore();
+
 const { showToast } = useToast()
 const { showConfirm } = useConfirm();
 
 const search = ref('');
 const viewModel = ref(false);
 const selectPermission = ref(null);
+const menuList = ref([]);
+
+const page = ref(1);
+const limit = ref(15);// tổng số trang trên 1 bản ghi
 
 // check all checkbox
 
@@ -150,7 +162,7 @@ const handUncheckAll = () => {
 //end check all checkbox
 
 const loadData = () => {
-    permissionStore.getBySearch(search.value);
+    permissionStore.getSearchPage(search.value, page.value, limit.value);
 };
 
 onMounted(() => {
@@ -158,19 +170,26 @@ onMounted(() => {
 });
 
 watch(search, () => {
+    page.value = 1;
     loadData();
 }
 );
 
-const openAdd = () => {
-    viewModel.value = true;
-    selectPermission.value = null;
+const onPageChange = (newPage) => {
+    page.value = newPage;
+    loadData();
 };
 
-const openEdit = (permission) => {
-    console.log('permission gửi lên', permission);
+const openAdd = async () => {
+    viewModel.value = true;
+    selectPermission.value = null;
+    menuList.value = await menuStore.getNotRoter();
+};
+
+const openEdit = async (permission) => {
     viewModel.value = true;
     selectPermission.value = permission;
+    menuList.value = await menuStore.getNotRoter();
 };
 
 const handSave = async ({ form, isEdit }) => {
@@ -203,7 +222,7 @@ const deletePermission = async (id) => {
 };
 
 const handDeleteAllCheck = async () => {
-    console.log(selected.value);
+    // console.log(selected.value);
     const ok = await showConfirm({ title: 'Xóa quyền', desc: `Bạn có chắc muốn Xóa ${selected.value.length} quyền này không?`, icon: '<i class="fas fa-trash-alt"></i>', btn: 'Xóa' })
     if (ok) {
         try {

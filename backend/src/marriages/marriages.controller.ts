@@ -7,13 +7,17 @@ import {
   Param,
   Delete,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { MarriagesService } from './marriages.service';
 import { CreateMarriageDto } from './dto/create-marriage.dto';
 import { UpdateMarriageDto } from './dto/update-marriage.dto';
 import { PersonType } from 'src/person/enum/person-type.enum';
+import { PermissionsGuard } from 'src/permissions/permissions.guard';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @Controller('marriages')
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class MarriagesController {
   constructor(private readonly marriagesService: MarriagesService) {}
 

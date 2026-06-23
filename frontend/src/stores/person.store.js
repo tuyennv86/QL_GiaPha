@@ -71,7 +71,7 @@ export const usePersonStore = defineStore('person', () => {
     try {
       const newPerson = await personService.create(person, imageFile)
       persons.value.push(newPerson)
-      // total.value++
+      total.value++
     } catch (err) {
       error.value = err.message
     } finally {

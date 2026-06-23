@@ -8,8 +8,8 @@ import { In, Repository } from 'typeorm';
 import { Permission } from './entities/permission.entity';
 import { CreatePermissionDto } from './dto/create-permission.dto';
 import { UpdatePermissionDto } from './dto/update-permission.dto';
-import { RolePermission } from 'src/roles/entities/role-permission.entity';
-import { MenuPermission } from 'src/menu/entities/menu-permission.entity';
+import { RolePermission } from 'src/role-permission/entities/role-permission.entity';
+import { PermissionListResponse } from './response/permission.list.response';
 
 @Injectable()
 export class PermissionsService {
@@ -18,8 +18,6 @@ export class PermissionsService {
     private readonly permRepo: Repository<Permission>,
     @InjectRepository(RolePermission)
     private readonly rolePermRepo: Repository<RolePermission>,
-    @InjectRepository(MenuPermission)
-    private readonly menuPermRepo: Repository<MenuPermission>,
   ) {}
 
   async findAll(): Promise<Permission[]> {
@@ -37,6 +35,31 @@ export class PermissionsService {
       })
       .orderBy('perm.id', 'ASC')
       .getMany();
+  }
+
+  async findSearchPageding(
+    search: string,
+    page: number,
+    limit: number,
+  ): Promise<PermissionListResponse> {
+    const db = this.permRepo
+      .createQueryBuilder('perm')
+      .where('LOWER( perm.permission_code) LIKE LOWER(:search)', {
+        search: `%${search}%`,
+      })
+      .orWhere('LOWER(perm.permission_name) LIKE LOWER(:search)', {
+        search: `%${search}%`,
+      });
+
+    const total = await db.getCount();
+
+    const items = await db
+      .orderBy('perm.id', 'ASC')
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getMany();
+
+    return { items, total, page, limit };
   }
 
   async findOne(id: number): Promise<Permission> {
@@ -78,8 +101,7 @@ export class PermissionsService {
     }
     // xóa permission khỏi tất cả role trước khi xóa permission
     await this.rolePermRepo.delete({ permission_id: id });
-    //xóa permission khỏi tất cả menu trước khi xóa permission
-    await this.menuPermRepo.delete({ permission_id: id });
+
     await this.permRepo.remove(perm);
     return { message: 'Xoá permission thành công' };
   }
@@ -88,41 +110,11 @@ export class PermissionsService {
     try {
       // xóa permission khỏi tất cả role trước khi xóa permission
       await this.rolePermRepo.delete({ permission_id: In(ids) });
-      //xóa permission khỏi tất cả menu trước khi xóa permission
-      await this.menuPermRepo.delete({ permission_id: In(ids) });
+
       await this.permRepo.delete({ id: In(ids) });
       return { message: 'Xoá permissions thành công' };
     } catch (error) {
       throw new NotFoundException('Lỗi :' + error);
     }
-  }
-
-  // mở rộng quyền: nếu có create/edit/delete thì tự động thêm view
-  expand(perms: string[]): string[] {
-    const result = new Set(perms);
-
-    for (const perm of perms) {
-      const parts = perm.split('.');
-      if (parts.length !== 2) continue;
-
-      const [resource, action] = parts;
-
-      if (['create', 'edit', 'delete'].includes(action)) {
-        result.add(`${resource}.view`);
-      }
-    }
-
-    return Array.from(result);
-  }
-
-  async getScopesByCodes(codes: string[]): Promise<string[]> {
-    if (!codes?.length) return [];
-
-    const perms = await this.permRepo.find({
-      where: { permission_code: In(codes) },
-      select: ['scope'],
-    });
-
-    return perms.map((p) => p.scope);
   }
 }

@@ -6,12 +6,16 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { FamilybrannchesService } from './familybrannches.service';
 import { CreateFamilybrannchDto } from './dto/create-familybrannch.dto';
 import { UpdateFamilybrannchDto } from './dto/update-familybrannch.dto';
+import { PermissionsGuard } from 'src/permissions/permissions.guard';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @Controller('familybrannches')
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class FamilybrannchesController {
   constructor(
     private readonly familybrannchesService: FamilybrannchesService,

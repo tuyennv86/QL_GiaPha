@@ -15,7 +15,7 @@ import { StringValue } from 'ms';
 
 import { User } from '../users/entities/user.entity';
 import { UserRole } from '../users/entities/user-role.entity';
-import { RolePermission } from '../roles/entities/role-permission.entity';
+import { RolePermission } from '../role-permission/entities/role-permission.entity';
 import { UserBranchRoles } from '../users/entities/user-branch-roles.entity';
 import { RefreshToken } from './entities/refresh-token.entity';
 

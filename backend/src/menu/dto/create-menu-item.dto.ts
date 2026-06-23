@@ -24,8 +24,28 @@ export class CreateMenuItemDto {
   @IsInt()
   sort_order?: number;
 
+  @IsString()
+  @IsOptional()
+  @MaxLength(200)
+  icon: string;
+
+  @IsString()
+  @IsOptional()
+  @MaxLength(200)
+  module_name: string;
+
+  @IsString()
+  @IsOptional()
+  @MaxLength(300)
+  component_path: string;
+
+  @IsString()
+  @IsOptional()
+  @MaxLength(20)
+  menu_type: string;
+
   @IsOptional()
   @IsArray()
   @IsInt({ each: true, message: 'permission_ids phải là mảng số nguyên' })
-  permission_ids?: number[];
+  role_ids?: number[];
 }

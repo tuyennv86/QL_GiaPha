@@ -5,7 +5,7 @@ import permissionsService from "@/api/services/permissions.service";
 export const usePermissionStore = defineStore('permission', () => {
     const error = ref(null)    
     const loading = ref(false);
-
+    const total = ref(0)
     const permissions = ref([])
 
     const getAll = async () => {
@@ -35,13 +35,29 @@ export const usePermissionStore = defineStore('permission', () => {
             loading.value = false;
         }
     }
+    
+    const getSearchPage = async (page, limit, search) => {
+        loading.value = true;
+        error.value = null;
+        try {
+            const data = await permissionsService.getSerachPageding(page, limit, search);
+            total.value = data.total;
+            permissions.value = data.items;
+        } catch (err) {
+            error.value = err.message;
+        }
+        finally {
+            loading.value = false;
+        }
+    }
 
     const deletePermission = async (id) => {
         loading.value = true;
         error.value = null;
         try {
            const message = await permissionsService.deletePermission(id);
-            permissions.value = permissions.value.filter((p) => p.id !== id)      
+            permissions.value = permissions.value.filter((p) => p.id !== id)     
+            total.value -= 1;
             return message;
         } catch (err) {
             error.value = err.message;
@@ -56,7 +72,8 @@ export const usePermissionStore = defineStore('permission', () => {
         error.value = null;
         try {
            const message = await permissionsService.deleteMultiple(ids);
-            permissions.value = permissions.value.filter((p) => !ids.includes(p.id))      
+            permissions.value = permissions.value.filter((p) => !ids.includes(p.id))  
+            total.value -= ids.length;
             return message;
         } catch (err) {
             error.value = err.message;
@@ -72,7 +89,8 @@ export const usePermissionStore = defineStore('permission', () => {
         error.value = null;
         try {
             const data = await permissionsService.addPermission(permission);
-             permissions.value.push(data)      
+            permissions.value.push(data)   
+            total.value += 1;
         } catch (err) {
             error.value = err.message;
         }
@@ -102,8 +120,10 @@ export const usePermissionStore = defineStore('permission', () => {
         error,
         loading,
         permissions,
+        total,
 
         getBySearch,
+        getSearchPage,
         getAll,
         deletePermission,
         addPermission,

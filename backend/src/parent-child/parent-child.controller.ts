@@ -6,12 +6,16 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { ParentChildService } from './parent-child.service';
 import { CreateParentChildDto } from './dto/create-parent-child.dto';
 import { UpdateParentChildDto } from './dto/update-parent-child.dto';
+import { PermissionsGuard } from 'src/permissions/permissions.guard';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @Controller('parent-child')
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class ParentChildController {
   constructor(private readonly parentChildService: ParentChildService) {}
 

@@ -1,3 +1,4 @@
+import { Role } from 'src/roles/entities/role.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -5,10 +6,7 @@ import {
   ManyToOne,
   OneToMany,
   JoinColumn,
-  ManyToMany,
-  JoinTable,
 } from 'typeorm';
-import { Permission } from '../../permissions/entities/permission.entity';
 
 @Entity('menu_items')
 export class MenuItem {
@@ -27,8 +25,17 @@ export class MenuItem {
   @Column({ nullable: true })
   sort_order: number;
 
-  @Column({ nullable: false })
+  @Column({ nullable: true })
   icon: string;
+
+  @Column({ nullable: true })
+  module_name: string;
+
+  @Column({ nullable: true })
+  component_path: string;
+
+  @Column({ nullable: true })
+  menu_type: string;
 
   // TREE
   @ManyToOne(() => MenuItem, (m) => m.children, {
@@ -41,18 +48,6 @@ export class MenuItem {
   @OneToMany(() => MenuItem, (m) => m.parent)
   children: MenuItem[];
 
-  // QUAN TRỌNG NHẤT
-  @ManyToMany(() => Permission, (p) => p.menus)
-  @JoinTable({
-    name: 'menu_permissions',
-    joinColumn: {
-      name: 'menu_id',
-      referencedColumnName: 'id',
-    },
-    inverseJoinColumn: {
-      name: 'permission_id',
-      referencedColumnName: 'id',
-    },
-  })
-  permissions: Permission[];
+  @OneToMany(() => Role, (r) => r.roleMenus)
+  roles: Role[];
 }

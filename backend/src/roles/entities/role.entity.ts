@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 import { UserRole } from 'src/users/entities/user-role.entity';
-import { RolePermission } from './role-permission.entity';
+import { RoleMenu } from 'src/role-menus/entities/role-menu.entity';
+import { RolePermission } from 'src/role-permission/entities/role-permission.entity';
 
 @Entity('roles')
 export class Role {
@@ -18,4 +19,10 @@ export class Role {
 
   @OneToMany(() => RolePermission, (rp) => rp.role)
   role_permissions: RolePermission[];
+
+  // @ManyToMany(() => Role, (r) => r.menus)
+  // menus: MenuItem[];
+
+  @OneToMany(() => RoleMenu, (rm) => rm.role)
+  roleMenus: RoleMenu[];
 }

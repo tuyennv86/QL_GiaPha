@@ -276,7 +276,9 @@ const handleSubmit = () => {
         form: { ...form },
         isEdit: isEdit.value
     });
-    close();
+    if (isEdit.value) {
+        close();
+    }
     resetForm();
 };
 

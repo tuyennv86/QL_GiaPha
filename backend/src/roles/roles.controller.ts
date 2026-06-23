@@ -70,7 +70,7 @@ export class RolesController {
   }
 
   @Post(':id/permissions')
-  @RequirePermissions('role.assign-permission')
+  @RequirePermissions('role.assign')
   assignPermissions(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: AssignPermissionsDto,

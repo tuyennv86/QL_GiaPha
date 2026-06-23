@@ -2,12 +2,13 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { MenuItem } from 'src/menu/entities/menu-item.entity';
-import { MenuPermission } from 'src/menu/entities/menu-permission.entity';
+
 import { CreateMenuItemDto } from './dto/create-menu-item.dto';
 import { UpdateMenuItemDto } from './dto/update-menu-item.dto';
 import { TreeUtil } from './tree-builder.util';
-import { PermissionsService } from 'src/permissions/permissions.service';
-import { PermissionScope } from 'src/permissions/require-permissions.decorator';
+import { Role } from 'src/roles/entities/role.entity';
+import { MenuPermissionResponse } from './response/menu.permission.response';
+import { RoleMenu } from 'src/role-menus/entities/role-menu.entity';
 
 type MenuNode = MenuItem & { children: MenuNode[] };
 
@@ -16,10 +17,8 @@ export class MenuService {
   constructor(
     @InjectRepository(MenuItem)
     private readonly menuRepo: Repository<MenuItem>,
-
-    @InjectRepository(MenuPermission)
-    private readonly menuPermRepo: Repository<MenuPermission>,
-    private readonly permissionService: PermissionsService,
+    @InjectRepository(RoleMenu)
+    private readonly roleMenuRepo: Repository<RoleMenu>,
   ) {}
 
   findAll(): Promise<MenuItem[]> {
@@ -36,101 +35,67 @@ export class MenuService {
     const items = await this.menuRepo.find({ order: { sort_order: 'ASC' } });
     return TreeUtil.buildTree(items);
   }
-
-  async getMenuForUser(
-    permissionCodes: string[],
-    roles: string[],
-  ): Promise<MenuItem[]> {
-    const isAdmin = roles?.some((r) => r?.toLowerCase() === 'admin');
-    const isBranchAdmin = roles?.some(
-      (r) => r?.toLowerCase() === 'branch admin',
-    );
-
-    // load full menu + permissions
-    const menus = await this.menuRepo.find({
-      relations: ['permissions'],
-      order: { sort_order: 'ASC' },
-    });
-
-    // ADMIN → full
-    if (isAdmin) {
-      return TreeUtil.buildTree(menus);
-    }
-
-    // Nếu có các quyền nào đó → mở rộng ra full list quyền (ví dụ: có 'user.create' → thêm quyền 'user.view')
-    const userPerms = new Set(
-      this.permissionService.expand(permissionCodes ?? []),
-    );
-
-    // FILTER
-    const filtered = menus.filter((menu) => {
-      // menu public
-      if (!menu.permissions || menu.permissions.length === 0) {
-        return true;
-      }
-
-      // BRANCH ADMIN: chặn global
-      if (isBranchAdmin) {
-        const hasGlobal = menu.permissions.some(
-          (p) => p.scope === PermissionScope.GLOBAL,
-        );
-
-        if (hasGlobal) return false;
-
-        // branch admin có full branch → không cần check permissionCodes
-        return true;
-      }
-
-      // USER thường → phải có permission
-      return menu.permissions.some((p) => userPerms.has(p.permission_code));
-    });
-
-    return TreeUtil.buildTree(filtered);
+  // lấy dánh sách menu theo role của user (dùng để render menu động ở frontend)
+  async getMenuForUser(roles: string[]): Promise<MenuItem[]> {
+    const menus = await this.menuRepo
+      .createQueryBuilder('menu')
+      .innerJoin(RoleMenu, 'rm', 'rm.menu_id = menu.id')
+      .innerJoin(Role, 'role', 'role.id = rm.role_id')
+      .where('role.role_name IN (:...roleNames)', {
+        roleNames: roles,
+      })
+      .orderBy('menu.sort_order', 'ASC')
+      .distinct(true)
+      .getMany();
+    return TreeUtil.buildTree(menus);
   }
 
   async getMenuNotRouter(): Promise<MenuItem[]> {
     return await this.menuRepo
       .createQueryBuilder('menu')
-      .where('menu.route is not null')
-      .andWhere("menu.route <> ''")
+      .where('menu.menu_type = :type', { type: 'page' })
       .orderBy('menu.sort_order', 'ASC')
       .getMany();
   }
 
+  async getMenuPermissions(): Promise<MenuPermissionResponse[]> {
+    const menus: any[] = await this.menuRepo.query(`
+      SELECT m.id, m.menu_name, m.route, m.parent_id, m.sort_order, m.icon, m.module_name, m.component_path, m.menu_type,
+          COALESCE(
+              json_agg(
+                  json_build_object(
+                      'id', p.id,
+                      'permission_code', p.permission_code,
+                      'permission_name', p.permission_name,
+                      'description', p.description
+                  )
+              ) FILTER (WHERE p.id IS NOT NULL),
+              '[]'
+          ) AS permissions
+      FROM menu_items m
+      LEFT JOIN permissions p
+          ON p.module = m.module_name
+    
+      GROUP BY m.id, m.menu_name, m.route, m.parent_id, m.sort_order, m.icon, m.module_name, m.component_path, m.menu_type
+      ORDER BY m.sort_order ASC;`);
+
+    return menus as MenuPermissionResponse[];
+  }
+
   async create(dto: CreateMenuItemDto): Promise<MenuItem> {
-    const { permission_ids, ...menuData } = dto;
-    const item = await this.menuRepo.save(this.menuRepo.create(menuData));
-
-    if (permission_ids?.length) {
-      const perms = permission_ids.map((permission_id) =>
-        this.menuPermRepo.create({ menu_id: item.id, permission_id }),
-      );
-      await this.menuPermRepo.save(perms);
-    }
-
-    return item;
+    return this.menuRepo.save(this.menuRepo.create(dto));
   }
 
   async update(id: number, dto: UpdateMenuItemDto): Promise<MenuItem> {
-    await this.findOne(id);
-    const { permission_ids, ...menuData } = dto;
-    await this.menuRepo.update(id, menuData);
-
-    if (permission_ids !== undefined) {
-      await this.menuPermRepo.delete({ menu_id: id });
-      if (permission_ids.length) {
-        const perms = permission_ids.map((permission_id) =>
-          this.menuPermRepo.create({ menu_id: id, permission_id }),
-        );
-        await this.menuPermRepo.save(perms);
-      }
-    }
-
-    return this.findOne(id);
+    const item = await this.findOne(id);
+    const updatedItem = Object.assign(item, dto);
+    return this.menuRepo.save(updatedItem);
   }
 
   async remove(id: number): Promise<{ message: string }> {
     const item = await this.findOne(id);
+    // xóa tất cả menu_roles
+    await this.roleMenuRepo.delete({ menu_id: id });
     await this.menuRepo.remove(item);
     return { message: 'Xoá menu item thành công' };
   }

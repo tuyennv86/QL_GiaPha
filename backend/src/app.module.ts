@@ -20,6 +20,8 @@ import { FamilybrannchesModule } from './familybrannches/familybrannches.module'
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { ParentChildModule } from './parent-child/parent-child.module';
+import { RoleMenusModule } from './role-menus/role-menus.module';
+import { RolePermissionModule } from './role-permission/role-permission.module';
 
 @Module({
   imports: [
@@ -52,6 +54,8 @@ import { ParentChildModule } from './parent-child/parent-child.module';
     PersonModule,
     FamilybrannchesModule,
     ParentChildModule,
+    RoleMenusModule,
+    RolePermissionModule,
   ],
 
   // controllers: [AppController],

@@ -92,7 +92,7 @@ export class UsersController {
   }
 
   @Post(':id/roles')
-  @RequirePermissions('user.assign-role')
+  @RequirePermissions('user.assign')
   assignRoles(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: AssignRolesDto,

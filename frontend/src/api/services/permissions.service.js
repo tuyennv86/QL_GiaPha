@@ -14,6 +14,17 @@ const getBySearch = async (search) => {
     return res.data;
 }
 
+const getSerachPageding = async (search, page, limit) => {
+    const res = await http.get(`permissions/search-pageding`, {
+        params: {
+            search,
+            page,
+            limit
+        }
+    });
+    return res.data;
+}
+
 //gọi api xóa permission
 const deletePermission = async (id) => {
     const res = await http.delete(`permissions/${id}`);
@@ -42,6 +53,7 @@ const updatePermission = async (id, permission) => {
 export default {
     getAll,
     getBySearch,
+    getSerachPageding,
     deletePermission,
     addPermission,
     updatePermission,
