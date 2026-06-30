@@ -22,6 +22,7 @@ import { join } from 'path';
 import { ParentChildModule } from './parent-child/parent-child.module';
 import { RoleMenusModule } from './role-menus/role-menus.module';
 import { RolePermissionModule } from './role-permission/role-permission.module';
+import { UserBranchRoleModule } from './user-branch-role/user-branch-role.module';
 
 @Module({
   imports: [
@@ -56,6 +57,7 @@ import { RolePermissionModule } from './role-permission/role-permission.module';
     ParentChildModule,
     RoleMenusModule,
     RolePermissionModule,
+    UserBranchRoleModule,
   ],
 
   // controllers: [AppController],

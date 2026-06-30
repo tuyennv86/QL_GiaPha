@@ -140,8 +140,8 @@
 import { reactive, watch, computed, ref } from "vue";
 import SlidePanel from "../SlidePanel.vue";
 import ToggleSwitch from "@/components/common/ToggleSwitch.vue";
-import { PERSON_TYPE_OPTIONS } from "@/constants/person-type-options";
 import { VueDatePicker } from "@vuepic/vue-datepicker";
+import { PERSON_TYPE_OPTIONS } from "@/constants/person-type-options";
 import "@vuepic/vue-datepicker/dist/main.css";
 import { vi } from "date-fns/locale";
 

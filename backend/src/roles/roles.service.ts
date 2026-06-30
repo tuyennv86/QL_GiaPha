@@ -14,6 +14,7 @@ import { RoleMapper } from './mapper/role.mapper';
 import { RoleMenu } from 'src/role-menus/entities/role-menu.entity';
 import { UserRole } from 'src/users/entities/user-role.entity';
 import { RolePermission } from 'src/role-permission/entities/role-permission.entity';
+import { UserBranchRole } from 'src/user-branch-role/entities/user-branch-role.entity';
 
 @Injectable()
 export class RolesService {
@@ -29,6 +30,8 @@ export class RolesService {
     private readonly roleMenuRepo: Repository<RoleMenu>,
     @InjectRepository(UserRole)
     private readonly userRoleRepo: Repository<UserRole>,
+    @InjectRepository(UserBranchRole)
+    private readonly userBranchRoleRepo: Repository<UserBranchRole>,
   ) {}
 
   async findAll(): Promise<Role[]> {
@@ -135,6 +138,8 @@ export class RolesService {
     await this.rolePermissionRepo.delete({ role_id: id });
     // xóa role_menu trước khi xóa role
     await this.roleMenuRepo.delete({ role_id: id });
+    // xóa user_branch_role trước khi xóa role
+    await this.userBranchRoleRepo.delete({ role_id: id });
 
     await this.roleRepo.remove(role);
     return { message: 'Xoá role thành công' };

@@ -1,14 +1,21 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import authService from '@/api/services/auth.service'
+import { addMenuRoutes } from '@/router/dynamic-router'
+import router from '@/router'
+import { useMenuStore } from '@/stores/menu.store'
 
-export const useAuthStore = defineStore('auth', () => {
+export const useAuthStore = defineStore('auth', () => {  
+  const menuStore = useMenuStore()
   const loginError = ref(null)
 
   const accessToken = ref(localStorage.getItem('access_token'))
   const refreshToken = ref(localStorage.getItem('refresh_token'))
   const user = ref(null)
   const currentBranchId = ref(null)
+
+  //biến menus để load router từ menu động
+  const menusRouter = ref([]);
 
   const roles = computed(() => user.value?.roles || [])
   const permissions = computed(() => user.value?.permissions || [])
@@ -32,6 +39,16 @@ export const useAuthStore = defineStore('auth', () => {
     if (!branchRole) return false
     return branchRole.role_name === 'Branch Admin'
   }
+  
+  const loadMenusRouter = async () => {
+    try {      
+      await menuStore.getMyMenuRouters();
+      menusRouter.value = menuStore.menuRouters; // Lấy menu router từ store
+      addMenuRoutes(router, menusRouter.value)
+    } catch (err) {
+      console.error('Failed to load menus:', err)
+    }
+  }
 
   const login = async (payload) => {
     loginError.value = null
@@ -44,6 +61,8 @@ export const useAuthStore = defineStore('auth', () => {
       if (data.user.branch_permissions?.length) {
         currentBranchId.value = data.user.branch_permissions[0].branch_id
       }
+      
+      await loadMenusRouter();// load lại menu router sau khi login thành công     
 
       localStorage.setItem('access_token', data.access_token)
       localStorage.setItem('refresh_token', data.refresh_token)
@@ -97,7 +116,9 @@ export const useAuthStore = defineStore('auth', () => {
 
       if (data.branch_permissions?.length) {
         currentBranchId.value = data.branch_permissions[0].branch_id
-      }
+      }        
+      await loadMenusRouter(); // load lại menu router sau khi refresh token thành công
+
     } catch (err) {
       const status = err?.response?.status
       const hasRefresh = !!(refreshToken.value ?? storedRefresh)
@@ -112,7 +133,8 @@ export const useAuthStore = defineStore('auth', () => {
 
             if (data.branch_permissions?.length) {
               currentBranchId.value = data.branch_permissions[0].branch_id
-            }
+            }                   
+            await loadMenusRouter(); // load lại menu router sau khi refresh token thành công
           } catch (e2) {
             const s2 = e2?.response?.status
             if (s2 === 401 || s2 === 403) {
@@ -150,6 +172,9 @@ export const useAuthStore = defineStore('auth', () => {
   const setBranch = (branchId) => {
     currentBranchId.value = branchId
   }
+  const hasMenu = ( menuId) => {
+    return menusRouter.value.some( x => x.id === menuId)
+  }
 
   return {
     accessToken,
@@ -161,6 +186,7 @@ export const useAuthStore = defineStore('auth', () => {
     currentBranchId,
     isSuperAdmin,
     loginError,
+    menusRouter,
 
     login,
     refresh,
@@ -172,5 +198,6 @@ export const useAuthStore = defineStore('auth', () => {
     hasPermission,
     hasBranchPermission,
     hasBranchRole,
+    hasMenu,
   }
 })

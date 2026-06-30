@@ -50,6 +50,22 @@ export class MenuService {
     return TreeUtil.buildTree(menus);
   }
 
+  // lấy menu page (dùng để render menu động ở frontend)
+  async getMenuPageForUser(roles: string[]): Promise<MenuItem[]> {
+    const menus = await this.menuRepo
+      .createQueryBuilder('menu')
+      .innerJoin(RoleMenu, 'rm', 'rm.menu_id = menu.id')
+      .innerJoin(Role, 'role', 'role.id = rm.role_id')
+      .where('role.role_name IN (:...roleNames)', {
+        roleNames: roles,
+      })
+      .andWhere('menu.menu_type = :type', { type: 'page' })
+      .orderBy('menu.sort_order', 'ASC')
+      .distinct(true)
+      .getMany();
+    return menus;
+  }
+
   async getMenuNotRouter(): Promise<MenuItem[]> {
     return await this.menuRepo
       .createQueryBuilder('menu')

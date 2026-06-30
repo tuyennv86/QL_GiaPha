@@ -20,9 +20,16 @@ const getNotRoter = async () => {
   return await http.get('menu/not-router')
 }
 
+const getMyMenuPage = async () => {
+  const res = await http.get('menu/my-menu-page')
+  // console.log('getMyMenuPage res.data', res.data)
+  return res.data
+}
+
 
 export default {
   getMyMenu,
+  getMyMenuPage,
   getTreeMnu,
   getAll,
   getNotRoter,

@@ -43,23 +43,23 @@ const validationSchema = toTypedSchema(
     })
 );
 
-// import { ref } from 'vue';
+
 const router = useRouter();
 
 const authStore = useAuthStore();
-// const credentials = ref({
-//     username: '',
-//     password: '',
-// });
 
 const handleLogin = async (values) => {
+
     try {
+
         authStore.loginError = null;
         await authStore.login(values);
-        router.push('/admin/dashboard')
+        await router.replace('/admin/dashboard');
+
     } catch (error) {
+
         authStore.loginError = error.message;
     }
-};
 
+};
 </script>

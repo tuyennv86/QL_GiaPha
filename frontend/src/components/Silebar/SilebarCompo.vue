@@ -51,11 +51,8 @@ onMounted(async () => {
     if (!menuStore.menus.length) {
         await menuStore.getMyMenu();
     }
+    // console.log('menu on sidebar mount:', menuStore.menus);
 })
-// onMounted(() => {
-//     console.log('User info on sidebar mount:');
-//     console.log(authStore.user)
-// })
 
 const handleLogout = async () => {
     // Xử lý đăng xuất ở đây

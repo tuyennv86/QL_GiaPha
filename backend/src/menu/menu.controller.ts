@@ -33,6 +33,10 @@ export class MenuController {
     //console.log('User login:', req.user);
     return this.menuService.getMenuForUser(req.user.roles);
   }
+  @Get('my-menu-page')
+  getMyMenuPage(@Req() req: RequestWithUser) {
+    return this.menuService.getMenuPageForUser(req.user.roles);
+  }
   // lấy danh sách menu xây dựng dang tree
   @Get('tree')
   getTree() {

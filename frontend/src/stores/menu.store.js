@@ -7,7 +7,7 @@ export const useMenuStore = defineStore('menu', () => {
   const error = ref(null)
 
   const menus = ref([])
-  // const menuPermissions = ref([])
+  const menuRouters = ref([])  
 
   const getMyMenu = async () => {
     loading.value = true
@@ -22,6 +22,18 @@ export const useMenuStore = defineStore('menu', () => {
     }
   }
 
+  const getMyMenuRouters = async () => {
+    loading.value = true
+    error.value = null
+    try {
+      const data = await menuService.getMyMenuPage()
+      menuRouters.value = data      
+    } catch (err) {
+      error.value = err.message
+    } finally {
+      loading.value = false
+    }
+  }
   const getMenuTree = async () => {
     loading.value = true;
     error.value = null
@@ -86,10 +98,12 @@ export const useMenuStore = defineStore('menu', () => {
     loading,
     error,
     menus,    
+    menuRouters,
     getMyMenu,
     getMenuTree,
     getAll,
     getNotRoter,
-    getMenuPermissions
+    getMenuPermissions,
+    getMyMenuRouters
   }
 })
