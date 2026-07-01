@@ -9,7 +9,7 @@
                         Ma trận quyền hạn cho từng vai trò trong hệ thống
                     </div>
                 </div>
-                <button class="btn btn-primary btn-sm" @click="openAdd">
+                <button class="btn btn-primary btn-sm" @click="openAdd" v-permission="'permission.create'">
                     <i class="fas fa-calendar-plus"></i> Thêm mới quyền
                 </button>
             </div>
@@ -34,7 +34,8 @@
                 <div class="card-body" style="padding: 12px 20px">
                     <div class="flex-center gap-12">
                         <span class="text-gold fw-6">{{ selected.length }} đã chọn</span>
-                        <button class="btn btn-danger btn-sm" @click.prevent="handDeleteAllCheck">
+                        <button class="btn btn-danger btn-sm" @click.prevent="handDeleteAllCheck"
+                            v-permission="'permission.delete'">
                             <i class="fas fa-trash"></i> Xoá Chọn
                         </button>
                         <button class="btn btn-ghost btn-sm" @click.prevent="handUncheckAll">
@@ -74,11 +75,11 @@
 
                             <td>
                                 <div class="flex gap-4">
-                                    <button class="btn btn-ghost btn-xs text-gold"
-                                        @click.prevent="openEdit(permission)"> <i class="fas fa-pen"></i> </button>
+                                    <button class="btn btn-ghost btn-xs text-gold" @click.prevent="openEdit(permission)"
+                                        v-permission="'permission.edit'"> <i class="fas fa-pen"></i> </button>
                                     <button class="btn btn-danger btn-xs"
-                                        @click.prevent="deletePermission(permission.id)"><i
-                                            class="fas fa-trash"></i></button>
+                                        @click.prevent="deletePermission(permission.id)"
+                                        v-permission="'permission.delete'"><i class="fas fa-trash"></i></button>
                                 </div>
                             </td>
                         </tr>

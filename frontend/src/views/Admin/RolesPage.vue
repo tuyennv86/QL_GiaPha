@@ -8,7 +8,7 @@
                     <div class="ph-title">Quản lý vai Trò</div>
                     <div class="ph-sub">Ma trận quyền hạn cho từng vai trò trong hệ thống</div>
                 </div>
-                <button class="btn btn-primary btn-sm" @click="openAdd">
+                <button class="btn btn-primary btn-sm" @click="openAdd" v-permission="'role.create'">
                     <i class="fas fa-plus-circle"></i> Thêm vai trò
                 </button>
             </div>
@@ -60,13 +60,15 @@
                             <td>
                                 <div class="flex gap-4">
                                     <button class="btn btn-ghost btn-xs text-gold" @click.prevent="openEdit(role)"
-                                        title="Sửa vai trò"> <i class="fas fa-pen"></i> </button>
-                                    <button class="btn btn-ghost btn-xs text-green"
+                                        v-permission="'role.edit'" title="Sửa vai trò"> <i class="fas fa-pen"></i>
+                                    </button>
+                                    <button class="btn btn-ghost btn-xs text-green" v-permission="'role.edit'"
                                         @click.prevent="openPermission(role)" title="Cập nhật quyến"> <i
                                             class="fas fa-user-shield"></i>
                                     </button>
                                     <button class="btn btn-danger btn-xs" @click.prevent="deleteRole(role.id)"
-                                        title="Xóa vai trò"><i class="fas fa-trash"></i></button>
+                                        v-permission="'role.delete'" title="Xóa vai trò"><i
+                                            class="fas fa-trash"></i></button>
                                 </div>
                             </td>
                         </tr>
@@ -75,35 +77,6 @@
             </div>
 
         </div>
-
-        <!-- <div class="card mb-16">
-            <div class="card-head">
-                <div class="card-title">📋 Ma Trận Quyền Hạn</div>
-            </div>
-            <div class="card-body" style="padding: 0; overflow-x: auto">
-                <table class="perm-matrix">
-                    <thead>
-                        <tr>
-                            <th style="width: 200px">Chức Năng</th>
-                            <th v-for="permission in permisstions" :key="permission.id">
-                                {{ permission.permission_name }}
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="menu in menuList" :key="menu.id">
-                            <td style="text-align: left; font-weight: 500; color: var(--text-primary)">
-                                {{ menu.menu_name }}
-                            </td>
-                            <td v-for="permission in permisstions" :key="permission.id">
-                                <input type="checkbox" :checked="hasPermission(menu.id, permission.id)"
-                                    @change="togglePermission(menu.id, permission.id)" />
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div> -->
     </div>
     <AddRole v-model="viewModel" :role="selectRole" @save="handSave"></AddRole>
 

@@ -11,10 +11,11 @@
                     </div>
                 </div>
                 <div class="flex gap-8">
-                    <button class="btn btn-secondary btn-sm" @click.prevent="handExportAll">
+                    <button class="btn btn-secondary btn-sm" @click.prevent="handExportAll"
+                        v-permission="'person.export'">
                         <i class="far fa-file-excel text-red"></i>⬇ Xuất Excel
                     </button>
-                    <label class="import-btn">
+                    <label class="import-btn" v-permission="'person.import'">
                         <i class="fas fa-file-import"></i>
                         <span>Import Excel</span>
                         <input type="file" accept=".xlsx,.xls" @change="handleImport" hidden />
@@ -23,7 +24,8 @@
                     <div v-if="personStore.loading">
                         Đang import...
                     </div>
-                    <button class="btn btn-primary btn-sm" @click.prevent="handAddPerson">
+                    <button class="btn btn-primary btn-sm" @click.prevent="handAddPerson"
+                        v-permission="'person.create'">
                         <i class="fas fa-id-badge"></i> Thêm Thành Viên
                     </button>
                 </div>
@@ -72,10 +74,11 @@
             <div class="card-body" style="padding: 12px 20px">
                 <div class="flex-center gap-12">
                     <span class="text-gold fw-6">{{ selected.length }} đã chọn</span>
-                    <button class="btn btn-secondary btn-sm" @click.prevent="handExportExcell"><i
-                            class="far fa-file-excel"></i> Xuất
+                    <button class="btn btn-secondary btn-sm" @click.prevent="handExportExcell"
+                        v-permission="'person.export'"><i class="far fa-file-excel"></i> Xuất
                         Chọn</button>
-                    <button class="btn btn-danger btn-sm" @click.prevent="handDeleteAllCheck">
+                    <button class="btn btn-danger btn-sm" @click.prevent="handDeleteAllCheck"
+                        v-permission="'person.delete'">
                         <i class="fas fa-trash"></i> Xoá Chọn
                     </button>
                     <button class="btn btn-ghost btn-sm" @click.prevent="handUncheckAll">
@@ -154,13 +157,15 @@
                         </td>
                         <td>
                             <button class="btn btn-ghost btn-xs text-pink" @click.prevent="openRelationship(person)"
-                                title="Sửa mối quan hệ"><i class="fas fa-users-cog"></i></button>
+                                v-permission="'person.edit'" title="Sửa mối quan hệ"><i
+                                    class="fas fa-users-cog"></i></button>
                             <button class="btn btn-ghost btn-xs text-gold" @click.prevent="openEdit(person)"
-                                title="Sử thông tin"> <i class="fas fa-pen"></i> </button>
+                                v-permission="'person.edit'" title="Sử thông tin"> <i class="fas fa-pen"></i>
+                            </button>
                             <button class="btn btn-ghost btn-xs text-green" @click.prevent="openView(person)"> <i
                                     class="fas fa-eye"></i> </button>
-                            <button class="btn btn-danger btn-xs" @click.prevent="deletePerson(person.id)"><i
-                                    class="fas fa-trash"></i></button>
+                            <button class="btn btn-danger btn-xs" @click.prevent="deletePerson(person.id)"
+                                v-permission="'person.delete'"><i class="fas fa-trash"></i></button>
                         </td>
                     </tr>
                 </tbody>

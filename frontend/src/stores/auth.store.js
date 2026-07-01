@@ -29,6 +29,12 @@ export const useAuthStore = defineStore('auth', () => {
     return permissions.value.includes(perm)
   }
 
+  const setBranch = (branchId) => {
+    currentBranchId.value = branchId
+  }
+  const hasMenu = ( menuId) => {
+    return menusRouter.value.some( x => x.id === menuId)
+  }
   const hasBranchRole = (branchId, roleName) =>
     branchPermissions.value.some((b) => b.branch_id === branchId && b.role_name === roleName)
 
@@ -167,14 +173,7 @@ export const useAuthStore = defineStore('auth', () => {
       localStorage.removeItem('refresh_token')
       window.location.replace('/auth/login')
     }
-  }
-
-  const setBranch = (branchId) => {
-    currentBranchId.value = branchId
-  }
-  const hasMenu = ( menuId) => {
-    return menusRouter.value.some( x => x.id === menuId)
-  }
+  }  
 
   return {
     accessToken,

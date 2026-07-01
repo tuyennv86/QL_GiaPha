@@ -42,7 +42,8 @@
         <!-- FOOTER -->
         <template #footer>
             <button class="btn btn-ghost" @click="close">Hủy</button>
-            <button class="btn btn-primary" @click="handleSubmit">💾 Lưu phân quyền</button>
+            <button class="btn btn-primary" @click="handleSubmit" v-permission="['role.edit', 'role.create']">💾 Lưu
+                phân quyền</button>
         </template>
     </SlidePanel>
 </template>
@@ -103,9 +104,10 @@ watch(
 );
 /* LOAD ROLE PERMISSIONS */
 
-watch(() => props.rolePermissions, (val) => {
-    selectedPermissions.value = (val || []).map(item => item.permission_id);
-},
+watch(
+    () => props.rolePermissions, (val) => {
+        selectedPermissions.value = (val || []).map(item => item.permission_id);
+    },
     {
         immediate: true
     }

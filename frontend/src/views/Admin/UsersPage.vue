@@ -10,7 +10,7 @@
                         Quản lý quyền truy cập và vai trò hệ thống
                     </div>
                 </div>
-                <button class="btn btn-primary btn-sm" @click="openAdd">
+                <button class="btn btn-primary btn-sm" @click="openAdd" v-permission="'user.create'">
                     <i class="fas fa-user-plus"></i> Tạo Tài Khoản
                 </button>
             </div>
@@ -68,7 +68,7 @@
                                 v-for="role in user.roles" :key="role.id">{{
                                     role.role_name }} </span></td>
                         <td class="text-secondary"><span v-if="user.family">{{ user.family.family_name }}</span></td>
-                        <td @click.prevent="updateActive(user.id)">
+                        <td v-permission:click="'user.edit'" @click="updateActive(user.id)">
                             <div class="flex-center gap-6" v-if="user.is_active">
                                 <div class="status-dot sd-green"></div><span class="text-sm text-green">Hoạt
                                     động</span>
@@ -82,12 +82,12 @@
                         <td class="font-mono text-sm text-secondary">{{ formatDate(user.created_at) }}</td>
                         <td>
                             <div class="flex gap-4">
-                                <button class="btn btn-ghost btn-xs text-gold" @click.prevent="openEdit(user)"> <i
-                                        class="fas fa-pen"></i> </button>
+                                <button class="btn btn-ghost btn-xs text-gold" @click.prevent="openEdit(user)"
+                                    v-permission="'user.edit'"> <i class="fas fa-pen"></i> </button>
                                 <button class="btn btn-ghost btn-xs text-green" @click.prevent="openView(user)"> <i
                                         class="fas fa-eye"></i> </button>
-                                <button class="btn btn-danger btn-xs" @click.prevent="deleteUser(user.id)"><i
-                                        class="fas fa-trash"></i></button>
+                                <button class="btn btn-danger btn-xs" @click.prevent="deleteUser(user.id)"
+                                    v-permission="'user.delete'"><i class="fas fa-trash"></i></button>
                             </div>
                         </td>
                     </tr>

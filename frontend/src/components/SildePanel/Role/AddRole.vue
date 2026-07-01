@@ -37,7 +37,8 @@
         <!-- FOOTER -->
         <template #footer>
             <button type="button" class="btn btn-ghost" @click="close">Hủy</button>
-            <button type="button" class="btn btn-primary" @click="handleSubmit">
+            <button type="button" class="btn btn-primary" @click="handleSubmit"
+                v-permission="['role.edit', 'role.create']">
                 💾 {{ isEdit ? "Cập nhật" : "Thêm mới" }}
             </button>
         </template>

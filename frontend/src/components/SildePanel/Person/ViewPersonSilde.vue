@@ -175,7 +175,8 @@
         <!-- FOOTER -->
         <template #footer>
             <button type="button" class="btn btn-ghost" @click="close">Đóng</button>
-            <button type="button" class="btn btn-primary" @click.prevent="openEdit(person)">
+            <button type="button" class="btn btn-primary" @click.prevent="openEdit(person)"
+                v-permission="'person.edit'">
                 <i class="fas fa-pen"></i> Chỉnh sửa
             </button>
         </template>

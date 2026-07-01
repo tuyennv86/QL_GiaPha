@@ -8,11 +8,14 @@ import router from './router'
 
 import { useAuthStore } from '@/stores/auth.store'
 import { setupInterceptors } from '@/api/http.api'
+import permission from './directives/permission'
 
 async function bootstrap() {
   const app = createApp(App)
   const pinia = createPinia()
-
+  
+  app.directive('permission', permission)
+  
   app.use(pinia)
 
   const authStore = useAuthStore()

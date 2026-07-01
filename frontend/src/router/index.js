@@ -46,10 +46,26 @@ const routes = [
     },
 
     {
-        path: "/403",
+       path: "/403",
         component: () => import("@/views/Admin/403Page.vue")
     },
-
+   {
+    path: "/admin",
+    component: AdminLayout,
+    meta: {
+        requiresAuth: true
+    },
+        children: [
+            {
+                path: "403",
+                name: "Admin403",
+                component: () => import("@/views/Admin/403Page.vue"),
+                meta: {
+                    title: "Không có quyền truy cập"
+                }
+            }
+        ]
+    },
     {
         path: "/:pathMatch(.*)*",
         redirect: "/"
@@ -85,6 +101,13 @@ router.beforeEach((to) => {
       if (!auth.hasMenu(to.meta.menuId)) {
         return '/admin/403'
       }
+  }
+   // kiểm tra quyền xem nếu không có thì chuyển về admin/403
+    if (to.meta.module) {
+        const permission = `${to.meta.module}.view`;
+        if (!auth.hasPermission(permission)) {
+            return '/admin/403';
+        }
     }
 
    

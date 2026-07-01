@@ -43,7 +43,7 @@
                         </div>
                     </div>
                     <div class="form-row form-row-1">
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" class="btn btn-primary" v-permission="['person.edit', 'person.create']">
                             💾 Cập nhật
                         </button>
                     </div>
@@ -96,11 +96,13 @@
                         </div>
 
                         <div class="marriage-card__actions">
-                            <button class="btn btn-ghost btn-xs text-gold" @click="editMarriage(marriage)">
+                            <button class="btn btn-ghost btn-xs text-gold" @click="editMarriage(marriage)"
+                                v-permission="'person.edit'">
                                 <i class="fas fa-pen"></i> Sửa
                             </button>
 
-                            <button class="btn btn-danger btn-xs" @click="deleteMarriage(marriage.id)">
+                            <button class="btn btn-danger btn-xs" @click="deleteMarriage(marriage.id)"
+                                v-permission="'person.delete'">
                                 <i class="fas fa-trash"></i> Xóa
                             </button>
                         </div>
@@ -175,7 +177,7 @@
                             Làm mới
                         </button>
 
-                        <button class="btn btn-primary" type="submit">
+                        <button class="btn btn-primary" type="submit" v-permission="['person.edit', 'person.create']">
                             💾 Lưu hôn nhân
                         </button>
                     </div>
