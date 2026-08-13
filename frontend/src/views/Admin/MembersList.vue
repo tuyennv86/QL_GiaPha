@@ -149,7 +149,7 @@
                         </td>
                         <td class="font-mono text-sm">{{ formatDate(person.birth_date) }}</td>
                         <td class="font-mono text-sm">{{ formatDate(person.death_date) }}</td>
-                        <td class="text-secondary">{{ person.place_of_brith }}</td>
+                        <td class="text-secondary">{{ person.place_of_birth }}</td>
                         <td>
                             <span class="badge b-green" v-if="person.is_alive"><i class="fas fa-heart"></i>Còn
                                 sống</span>
@@ -272,6 +272,7 @@ const loadFamily = async () => {
 
 const loadPersons = async () => {
     await personStore.searchPersons(page.value, limit.value, gender.value, generation.value, is_alive.value, person_type.value, search.value);
+    // console.log('persons', personStore.persons);
 };
 
 const getGeneration = async () => {
