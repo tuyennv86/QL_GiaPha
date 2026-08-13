@@ -156,6 +156,9 @@
                             <span class="badge b-gray" v-else><i class="fas fa-skull"></i>Đã mất</span>
                         </td>
                         <td>
+                            <button class="btn btn-ghost btn-xs text-red" v-if="!person.is_alive"
+                                @click.prevent="openGraveLocation(person)" v-permission="'person.edit'"
+                                title="Vị mộ phần"> <i class="fa-solid fa-map-pin"></i></button>
                             <button class="btn btn-ghost btn-xs text-pink" @click.prevent="openRelationship(person)"
                                 v-permission="'person.edit'" title="Sửa mối quan hệ"><i
                                     class="fas fa-users-cog"></i></button>
@@ -189,6 +192,11 @@
         @deleteMarriage="handDeleteMarriage">
     </EditPersonRelationship>
 
+    <AddGraveLocations v-model="viewGraveLocation" :person="personGrave" :graveLocal="graveLocal" @save="handSaveGravel"
+        @onDeleteImg="handDeleteImgGrave">
+    </AddGraveLocations>
+
+
     <ToastCompo></ToastCompo>
     <ConfirmDialog></ConfirmDialog>
 </template>
@@ -205,6 +213,7 @@ import { formatDate } from '@/utils/formatDate';
 import ViewPersonSilde from '@/components/SildePanel/Person/ViewPersonSilde.vue';
 import AddPersonSilde from '@/components/SildePanel/Person/AddPersonSilde.vue';
 import EditPersonRelationship from '@/components/SildePanel/Person/EditPersonRelationship.vue';
+import AddGraveLocations from '@/components/SildePanel/Person/AddGraveLocations.vue';
 
 import { useFamilyStore } from '@/stores/family.store';
 import { useBranchStore } from '@/stores/branch.store';
@@ -212,6 +221,7 @@ import { PERSON_TYPE_LABEL } from '@/constants/person-type-label';
 import { useParentChildStore } from '@/stores/parent-child.store';
 import { useMarriagesStore } from '@/stores/marriages.store';
 import { PersonType } from '@/enum/person-type.enum';
+import { useGraveLocationStore } from '@/stores/grave-location.store';
 
 const IMG_URL = import.meta.env.VITE_URL;
 
@@ -222,6 +232,7 @@ const familyStore = useFamilyStore();
 const branchStore = useBranchStore();
 const parentChildStore = useParentChildStore();
 const marriagesStore = useMarriagesStore();
+const graveLocationStore = useGraveLocationStore();
 
 const page = ref(1);
 const limit = ref(20);// tổng số trang trên 1 bản ghi
@@ -246,6 +257,11 @@ const personWomen = ref([]);
 const viewRelationshipPanel = ref(false);
 const selectedRelationshipPerson = ref(null);
 const personMarriages = ref([]);
+
+// grave-localtion
+const viewGraveLocation = ref(false);
+const personGrave = ref(null);
+const graveLocal = ref(null);
 
 const loadBranchByFamily = async (family_id) => {
     await branchStore.getBranchByFamily(family_id);
@@ -471,8 +487,9 @@ const handleChangeFamily = async (familyId) => {
 
 }
 
+//Quản lý các mối quan hệ cha mẹ con cái và vợ chồng
+
 const handSaveRelationship = async (parent) => {
-    // console.log('save relationship', parent);
     try {
         const payload = {
             father_id: parent.father_id,
@@ -549,6 +566,46 @@ const handDeleteMarriage = async (marriageId) => {
     }
 }
 
+// quản lý mộ phần
+
+const openGraveLocation = async (person) => {
+    personGrave.value = person;
+    graveLocal.value = await graveLocationStore.getByPersonId(person.id);
+    viewGraveLocation.value = true;
+}
+
+const handSaveGravel = async ({ imageFile, form, isEdit }) => {
+    console.log('save grave location');
+    console.log(imageFile, form, isEdit);
+    if (isEdit) {
+        try {
+            await graveLocationStore.update(form.id, form, imageFile);
+            showToast({ title: 'Cập nhật mộ phần thành công', type: 'success' });
+        } catch (error) {
+            showToast({ title: 'Đã có lỗi', sub: 'Lỗi :' + error, type: 'error' });
+        }
+    } else {
+        try {
+            await graveLocationStore.create(form, imageFile);
+            showToast({ title: 'Tạo mộ phần thành công', type: 'success' });
+        } catch (error) {
+            showToast({ title: 'Đã có lỗi', sub: 'Lỗi :' + error, type: 'error' });
+        }
+    }
+
+}
+
+const handDeleteImgGrave = async (id) => {
+    const ok = await showConfirm({ title: 'Xóa ảnh mộ phần', desc: 'Bạn có chắc muốn Xóa ảnh mộ phần không?', icon: '<i class="fa-solid fa-filter-circle-xmark"></i>', btn: 'Xóa' })
+    if (ok) {
+        try {
+            const message = await graveLocationStore.deleteImage(id);
+            showToast({ title: message.message, type: 'success' });
+        } catch (error) {
+            showToast({ title: 'Đã có lỗi', sub: 'Lỗi :' + error, type: 'error' });
+        }
+    }
+}
 </script>
 
 <style scoped>

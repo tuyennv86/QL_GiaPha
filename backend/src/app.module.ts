@@ -1,3 +1,4 @@
+import { FileUploadModule } from './common/file-upload/file-upload.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -23,9 +24,11 @@ import { ParentChildModule } from './parent-child/parent-child.module';
 import { RoleMenusModule } from './role-menus/role-menus.module';
 import { RolePermissionModule } from './role-permission/role-permission.module';
 import { UserBranchRoleModule } from './user-branch-role/user-branch-role.module';
+import { GraveLocationModule } from './grave-location/grave-location.module';
 
 @Module({
   imports: [
+    FileUploadModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath:
@@ -58,6 +61,7 @@ import { UserBranchRoleModule } from './user-branch-role/user-branch-role.module
     RoleMenusModule,
     RolePermissionModule,
     UserBranchRoleModule,
+    GraveLocationModule,
   ],
 
   // controllers: [AppController],

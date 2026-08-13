@@ -1,6 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import * as ExcelJS from 'exceljs';
-import { promises as fs } from 'fs';
 import { Response } from 'express';
 import { CreatePersonDto } from './dto/create-person.dto';
 import { UpdatePersonDto } from './dto/update-person.dto';
@@ -13,8 +12,8 @@ import { ExcelHelper } from 'src/common/helper/excel.helper';
 import { ObjectHelper } from 'src/common/helper/object.helper';
 import { Family } from 'src/family/entities/family.entity';
 import { FamilyBranch } from 'src/familybrannches/entities/family-branch.entity';
-import path from 'path';
 import { PersonType } from './enum/person-type.enum';
+import { FileUploadService } from 'src/common/file-upload/file-upload.service';
 
 @Injectable()
 export class PersonService {
@@ -27,6 +26,8 @@ export class PersonService {
 
     @InjectRepository(FamilyBranch)
     private readonly branchRepo: Repository<FamilyBranch>,
+
+    private readonly fileUploadService: FileUploadService,
   ) {}
 
   async findAll(): Promise<Person[]> {
@@ -187,53 +188,11 @@ export class PersonService {
     let avatarUrl = createPersonDto.avatar || '';
     if (file) {
       // lưu file và lấy url vào thư mục uploads và trả về url là /uploads/filename
-      avatarUrl = await this.uploadImage(file);
+      avatarUrl = await this.fileUploadService.uploadImage(file);
     }
     createPersonDto.avatar = avatarUrl;
 
     return await this.personRepo.save(createPersonDto);
-  }
-
-  async uploadImage(file: Express.Multer.File) {
-    if (!file) {
-      throw new BadRequestException('File không tồn tại');
-    }
-    const allowMimeTypes = [
-      'image/jpeg',
-      'image/jpg',
-      'image/png',
-      'image/webp',
-      'image/gif',
-    ];
-    if (!allowMimeTypes.includes(file.mimetype)) {
-      throw new BadRequestException('Chỉ được phép upload file ảnh');
-    }
-
-    const maxSize = 5 * 1024 * 1024; // 5MB
-
-    if (file.size > maxSize) {
-      throw new BadRequestException('Dung lượng ảnh tối đa 5MB');
-    }
-    const now = new Date();
-    // yyyy/mm/dd
-    const year = now.getFullYear().toString();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    // uploads/2026/05/14
-    const uploadDir = path.join(process.cwd(), 'uploads', year, month, day);
-    // tạo thư mục nếu chưa tồn tại
-    await fs.mkdir(uploadDir, {
-      recursive: true,
-    });
-
-    // tạo tên file
-    const fileName = `${Date.now()}-${file.originalname}`;
-    // full path
-    const filePath = path.join(uploadDir, fileName);
-    // lưu file
-    await fs.writeFile(filePath, file.buffer);
-    // path lưu DB
-    return `/uploads/${year}/${month}/${day}/${fileName}`;
   }
 
   async update(
@@ -258,15 +217,10 @@ export class PersonService {
     if (file) {
       // xoá avatar cũ nếu có
       if (person.avatar) {
-        const oldFilePath = path.join(process.cwd(), person.avatar);
-        try {
-          await fs.unlink(oldFilePath);
-        } catch (err) {
-          console.error('Lỗi xoá file cũ:', err);
-        }
+        await this.fileUploadService.deleteImage(person.avatar);
       }
       // lưu file mới và lấy url
-      const avatarUrl = await this.uploadImage(file);
+      const avatarUrl = await this.fileUploadService.uploadImage(file);
       updatePersonDto.avatar = avatarUrl;
     }
     return await this.personRepo.save({
@@ -282,12 +236,7 @@ export class PersonService {
     }
     // xóa ảnh nếu có
     if (person.avatar) {
-      const filePath = path.join(process.cwd(), person.avatar);
-      try {
-        await fs.unlink(filePath);
-      } catch (err) {
-        console.error('Lỗi xoá file:', err);
-      }
+      await this.fileUploadService.deleteImage(person.avatar);
     }
     const fullName = person.full_name;
     await this.personRepo.remove(person);
@@ -305,12 +254,7 @@ export class PersonService {
     // xóa ảnh nếu có
     for (const person of persons) {
       if (person.avatar) {
-        const filePath = path.join(process.cwd(), person.avatar);
-        try {
-          await fs.unlink(filePath);
-        } catch (err) {
-          console.error('Lỗi xoá file:', err);
-        }
+        await this.fileUploadService.deleteImage(person.avatar);
       }
     }
     await this.personRepo.remove(persons);
@@ -328,12 +272,7 @@ export class PersonService {
       return { message: 'Người này không có avatar' };
     }
     // xoá file
-    const filePath = path.join(process.cwd(), person.avatar);
-    try {
-      await fs.unlink(filePath);
-    } catch (err) {
-      console.error('Lỗi xoá file:', err);
-    }
+    await this.fileUploadService.deleteImage(person.avatar);
     // xoá url trong DB
     person.avatar = '';
     await this.personRepo.save(person);
