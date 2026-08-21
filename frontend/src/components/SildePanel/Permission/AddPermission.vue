@@ -34,7 +34,7 @@
                     <div class="f-group">
                         <label class="f-label">Quyền<span class="f-req">*</span></label>
                         <!-- lấy phần cuối sau dấu . -->
-                        <select class="f-select" v-model="actionSelect">
+                        <select class="f-select" v-model="form.actionSelect">
                             <option value="view">Xem</option>
                             <option value="create">Thêm</option>
                             <option value="edit">Sửa</option>
@@ -72,7 +72,7 @@
 </template>
 
 <script setup>
-import { reactive, watch, computed, ref } from "vue";
+import { reactive, watch, computed } from "vue";
 import SlidePanel from "../SlidePanel.vue";
 
 
@@ -81,7 +81,7 @@ const props = defineProps({
     permission: Object,
     menus: Array
 });
-const actionSelect = ref("");
+//const actionSelect = ref("");
 
 const emit = defineEmits(["update:modelValue", "save"]);
 
@@ -97,11 +97,12 @@ const form = reactive({
     permission_code: null,
     permission_name: null,
     description: null,
-    module: null
+    module: null,
+    actionSelect: null
 });
 
 watch(
-    () => [form.module, actionSelect.value],
+    () => [form.module, form.actionSelect],
     ([newModule, newAction]) => {
         if (newModule && newAction) {
             form.permission_code = `${newModule}.${newAction}`;
@@ -123,7 +124,8 @@ const resetForm = () => {
         permission_code: null,
         permission_name: null,
         description: null,
-        module: null
+        module: null,
+        actionSelect: null
     });
 
     Object.keys(errors).forEach((k) => delete errors[k]);
@@ -140,6 +142,7 @@ watch(
                 permission_name: val.permission_name,
                 description: val.description,
                 module: val.module,
+                actionSelect: val.permission_code.split('.').pop()
             });
         } else {
             resetForm();
@@ -169,9 +172,17 @@ const validate = () => {
 /* SUBMIT */
 const handleSubmit = () => {
     if (!validate()) return;
-
+    const payload = {
+        id: form.id,
+        permission_code: form.permission_code,
+        permission_name: form.permission_name,
+        description: form.description,
+        module: form.module
+    };
     emit("save", {
-        form: { ...form },
+        form: {
+            ...payload
+        },
         isEdit: isEdit.value
     });
     if (isEdit.value) {
