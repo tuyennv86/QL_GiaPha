@@ -103,12 +103,12 @@
                                                 </div>
 
                                                 <div class="branch-actions">
-                                                    <button class="btn btn-ghost btn-xs text-gold"
+                                                    <button class="btn btn-ghost btn-xs text-gold" title="Sửa chi / họ"
                                                         @click.prevent="openEditBranch(branch, family)">
                                                         <i class="fas fa-pen"></i>
                                                     </button>
 
-                                                    <button class="btn btn-danger btn-xs"
+                                                    <button class="btn btn-danger btn-xs" title="Xóa chi / họ"
                                                         @click.prevent="deletebranch(branch.id)">
                                                         <i class="fas fa-trash"></i>
                                                     </button>
