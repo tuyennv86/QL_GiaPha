@@ -6,7 +6,7 @@
             <div class="ph-row">
                 <div>
                     <div class="ph-title">Quản lý vai Trò</div>
-                    <div class="ph-sub">Ma trận quyền hạn cho từng vai trò trong hệ thống</div>
+                    <div class="ph-sub">Gán từng quyền hạn cho các vai trò</div>
                 </div>
                 <button class="btn btn-primary btn-sm" @click="openAdd" v-permission="'role.create'">
                     <i class="fas fa-plus-circle"></i> Thêm vai trò

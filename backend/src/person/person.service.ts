@@ -34,10 +34,13 @@ export class PersonService {
     return await this.personRepo.find();
   }
 
-  async findGeneration() {
+  async findGeneration(family_id?: number | null): Promise<string[]> {
     const generations = await this.personRepo
       .createQueryBuilder('persons')
       .select('DISTINCT persons.generation', 'generation')
+      .where(family_id != null ? 'persons.family_id = :family_id' : '1=1', {
+        family_id,
+      })
       .orderBy('persons.generation', 'ASC')
       .getRawMany();
 
@@ -52,6 +55,7 @@ export class PersonService {
     is_alive: number,
     person_type?: PersonType,
     search?: string,
+    family_id?: number | null,
   ): Promise<PersonResponseList> {
     const query = this.personRepo
       .createQueryBuilder('persons')
@@ -84,6 +88,9 @@ export class PersonService {
       query.andWhere('persons.person_type = :person_type', {
         person_type,
       });
+    }
+    if (family_id) {
+      query.andWhere('persons.family_id = :family_id', { family_id });
     }
 
     const [entities, total] = await query
@@ -129,52 +136,62 @@ export class PersonService {
     return await this.personRepo.findOne({ where: { id } });
   }
 
-  async findByGender(gender: number, generation: number) {
+  async findByGender(
+    gender: number,
+    generation: number,
+    family_id?: number | null,
+  ): Promise<Person[]> {
     return await this.personRepo.find({
-      where: { gender: gender, generation: generation },
+      where: {
+        gender: gender,
+        generation: generation,
+        ...(family_id != null && { family_id }),
+      },
     });
   }
   //lấy danh sách người có cùng thế hệ và
   //nếu người đó là con trai thì lấy con dâu,
   //nếu là con gái thì lấy con rể,
   //nếu con rể thì lấy con gái, nếu con dâu thì lấy con trai
-  async findByMarriage(personId: number): Promise<Person[]> {
+  async findByMarriage(
+    personId: number,
+    family_id?: number | null,
+  ): Promise<Person[]> {
     const person = await this.findOne(personId);
     if (!person) {
       throw new BadRequestException('Không tìm thấy người này');
     }
+
+    let targetPersonType: PersonType | null = null;
     switch (person.person_type) {
       case PersonType.SON:
-        return await this.personRepo.find({
-          where: {
-            generation: person.generation,
-            person_type: PersonType.DAUGHTER_IN_LAW,
-          },
-        });
+        targetPersonType = PersonType.DAUGHTER_IN_LAW;
+        break;
+
       case PersonType.DAUGHTER:
-        return await this.personRepo.find({
-          where: {
-            generation: person.generation,
-            person_type: PersonType.SON_IN_LAW,
-          },
-        });
+        targetPersonType = PersonType.SON_IN_LAW;
+        break;
+
       case PersonType.SON_IN_LAW:
-        return await this.personRepo.find({
-          where: {
-            generation: person.generation,
-            person_type: PersonType.DAUGHTER,
-          },
-        });
+        targetPersonType = PersonType.DAUGHTER;
+        break;
+
       case PersonType.DAUGHTER_IN_LAW:
-        return await this.personRepo.find({
-          where: {
-            generation: person.generation,
-            person_type: PersonType.SON,
-          },
-        });
+        targetPersonType = PersonType.SON;
+        break;
+
       default:
         return [];
     }
+    const where = {
+      generation: person.generation,
+      person_type: targetPersonType,
+      ...(family_id != null && { family_id }),
+    };
+
+    return await this.personRepo.find({
+      where,
+    });
   }
 
   async create(createPersonDto: CreatePersonDto, file?: Express.Multer.File) {

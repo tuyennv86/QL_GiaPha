@@ -1,8 +1,11 @@
+import { Family } from 'src/family/entities/family.entity';
 import { Person } from 'src/person/entities/person.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -29,4 +32,8 @@ export class FamilyBranch {
 
   @OneToMany(() => Person, (person) => person.branch)
   persons: Person[];
+
+  @ManyToOne(() => Family, (family) => family.branches)
+  @JoinColumn({ name: 'family_id' })
+  family: Family;
 }

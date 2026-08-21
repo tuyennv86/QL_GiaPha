@@ -917,6 +917,10 @@ body {
   background: #3d3d3d;
   color: var(--text-primary);
 }
+.btn-xl {
+  padding: 8px 18px;
+  font-size: 18px;
+}
 .btn-sm {
   padding: 6px 12px;
   font-size: 12px;
@@ -1172,9 +1176,9 @@ body {
   color: var(--text-primary);
 }
 .sp-sub {
-  font-size: 12px;
-  color: var(--text-dim);
-  margin-top: 2px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-top: 5px;
 }
 .sp-body {
   flex: 1;

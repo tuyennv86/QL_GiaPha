@@ -120,7 +120,7 @@ const selectPermission = ref(null);
 const menuList = ref([]);
 
 const page = ref(1);
-const limit = ref(15);// tổng số trang trên 1 bản ghi
+const limit = ref(30);// tổng số trang trên 1 bản ghi
 
 // check all checkbox
 

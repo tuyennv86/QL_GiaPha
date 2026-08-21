@@ -158,17 +158,22 @@
                         <td>
                             <button class="btn btn-ghost btn-xs text-red" v-if="!person.is_alive"
                                 @click.prevent="openGraveLocation(person)" v-permission="'person.edit'"
-                                title="Vị mộ phần"> <i class="fa-solid fa-map-pin"></i></button>
+                                title="Vị trí mộ phần"> <i class="fa-solid fa-map-pin"></i></button>
+
                             <button class="btn btn-ghost btn-xs text-pink" @click.prevent="openRelationship(person)"
                                 v-permission="'person.edit'" title="Sửa mối quan hệ"><i
                                     class="fas fa-users-cog"></i></button>
+
                             <button class="btn btn-ghost btn-xs text-gold" @click.prevent="openEdit(person)"
                                 v-permission="'person.edit'" title="Sử thông tin"> <i class="fas fa-pen"></i>
                             </button>
-                            <button class="btn btn-ghost btn-xs text-green" @click.prevent="openView(person)"> <i
-                                    class="fas fa-eye"></i> </button>
+
+                            <button class="btn btn-ghost btn-xs text-green" title="Xem thông tin chi tiết"
+                                @click.prevent="openView(person)"> <i class="fas fa-eye"></i> </button>
+
                             <button class="btn btn-danger btn-xs" @click.prevent="deletePerson(person.id)"
-                                v-permission="'person.delete'"><i class="fas fa-trash"></i></button>
+                                title="Xóa thành viên dòng họ" v-permission="'person.delete'"><i
+                                    class="fas fa-trash"></i></button>
                         </td>
                     </tr>
                 </tbody>
@@ -417,9 +422,10 @@ const openRelationship = async (person) => {
 
     //console.log('marriages', marriagesStore.marriagesList);
 
+    //lấy danh sách những người có đời bằng đời person để chọn làm vợ chồng nếu muốn sửa mối quan hệ
     // lấy toàn bộ con dâu hoặc con rể có đời bằng đời person để chọn làm con nếu muốn sửa mối quan hệ
     personMarriages.value = await personStore.getMarriage(person.id);
-    //console.log('parentChild', parentChildStore.parentChild);
+
     viewRelationshipPanel.value = true;
     selectedRelationshipPerson.value = person;
 };

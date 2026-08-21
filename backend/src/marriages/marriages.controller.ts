@@ -15,6 +15,8 @@ import { UpdateMarriageDto } from './dto/update-marriage.dto';
 import { PersonType } from 'src/person/enum/person-type.enum';
 import { PermissionsGuard } from 'src/permissions/permissions.guard';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { CurrentUser } from 'src/common/decorators/current-user.decorator';
+import type { JwtPayload } from 'src/common/interfaces/request-with-user.interface';
 
 @Controller('marriages')
 @UseGuards(JwtAuthGuard, PermissionsGuard)
@@ -38,10 +40,15 @@ export class MarriagesController {
 
   @Get('person/:personId')
   findByPerson1Id(
+    @CurrentUser() user: JwtPayload,
     @Param('personId') personId: string,
     @Query('personType') personType: PersonType,
   ) {
-    return this.marriagesService.findByPersonId(+personId, personType);
+    return this.marriagesService.findByPersonId(
+      +personId,
+      personType,
+      user.family_id,
+    );
   }
 
   @Patch(':id')

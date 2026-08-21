@@ -7,6 +7,7 @@ import {
 } from 'typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { Person } from 'src/person/entities/person.entity';
+import { FamilyBranch } from 'src/familybrannches/entities/family-branch.entity';
 
 @Entity('families')
 export class Family {
@@ -33,4 +34,7 @@ export class Family {
 
   @OneToMany(() => Person, (person) => person.family)
   persons: Person[];
+
+  @OneToMany(() => FamilyBranch, (branch) => branch.family)
+  branches: FamilyBranch[];
 }

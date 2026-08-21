@@ -22,6 +22,8 @@ import { ExportPersonDto } from './dto/export-person.dto';
 import type { Response } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { PersonType } from './enum/person-type.enum';
+import { CurrentUser } from 'src/common/decorators/current-user.decorator';
+import type { JwtPayload } from 'src/common/interfaces/request-with-user.interface';
 
 @Controller('person')
 export class PersonController {
@@ -36,6 +38,7 @@ export class PersonController {
   @RequirePermissions('person.view')
   @UseGuards(JwtAuthGuard)
   search(
+    @CurrentUser() user: JwtPayload,
     @Query('page') page: string = '1',
     @Query('limit') limit: string = '10',
     @Query('gender') gender: string = '-1',
@@ -44,6 +47,8 @@ export class PersonController {
     @Query('person_type') person_type?: PersonType,
     @Query('search') search?: string,
   ) {
+    const family_id = user.family_id;
+
     return this.personService.findSearch(
       Number(page),
       Number(limit),
@@ -52,31 +57,36 @@ export class PersonController {
       Number(is_alive),
       person_type,
       search,
+      family_id,
     );
   }
 
   @Get('generation')
   @RequirePermissions('person.view')
   @UseGuards(JwtAuthGuard)
-  findGeneration() {
-    return this.personService.findGeneration();
+  findGeneration(@CurrentUser() user: JwtPayload) {
+    return this.personService.findGeneration(user.family_id);
   }
 
   @Get('gender/:gender/generation/:generation')
   @RequirePermissions('person.view')
   @UseGuards(JwtAuthGuard)
   findGender(
+    @CurrentUser() user: JwtPayload,
     @Param('gender', ParseIntPipe) gender: number,
     @Param('generation', ParseIntPipe) generation: number,
   ) {
-    return this.personService.findByGender(gender, generation);
+    return this.personService.findByGender(gender, generation, user.family_id);
   }
 
   @Get('marriage/:id')
   @RequirePermissions('person.view')
   @UseGuards(JwtAuthGuard)
-  findMarriage(@Param('id', ParseIntPipe) id: number) {
-    return this.personService.findByMarriage(id);
+  findMarriage(
+    @CurrentUser() user: JwtPayload,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    return this.personService.findByMarriage(id, user.family_id);
   }
 
   @Get(':id')
@@ -94,8 +104,8 @@ export class PersonController {
     @Body() createPersonDto: CreatePersonDto,
     @UploadedFile() avatar?: Express.Multer.File,
   ) {
-    console.log('Creating person with data:', createPersonDto);
-    console.log('Received avatar file:', avatar);
+    // console.log('Creating person with data:', createPersonDto);
+    // console.log('Received avatar file:', avatar);
     return this.personService.create(createPersonDto, avatar);
   }
 

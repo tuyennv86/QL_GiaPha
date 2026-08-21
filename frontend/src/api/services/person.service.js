@@ -18,6 +18,7 @@ const search = async (page, limit, gender, generation, is_alive, person_type, se
 
 const getByGender = async (gender, generation) => {
   const res = await http.get(`person/gender/${gender}/generation/${generation}`);
+  //console.log(`person/gender/${gender}/generation/${generation}`);
   return res.data
 }
 

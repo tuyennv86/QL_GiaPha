@@ -25,6 +25,7 @@ export class MarriagesService {
   async findByPersonId(
     personId: number,
     personType: PersonType,
+    familyId?: number | null,
   ): Promise<MarriagesResponse[] | []> {
     const query = this.marriageRepository
       .createQueryBuilder('marriage')
@@ -47,6 +48,12 @@ export class MarriagesService {
       query.where('marriage.person1_id = :personId', { personId });
     } else {
       query.where('marriage.person2_id = :personId', { personId });
+    }
+    if (familyId) {
+      query.andWhere(
+        'person1.family_id = :familyId OR person2.family_id = :familyId',
+        { familyId },
+      );
     }
     query.orderBy('marriage.marriage_order', 'ASC');
     const marriages = await query.getMany();

@@ -11,9 +11,6 @@ export class FamilybrannchesService {
     @InjectRepository(FamilyBranch)
     private readonly familybrannchesRepo: Repository<FamilyBranch>,
   ) {}
-  create(createFamilybrannchDto: CreateFamilybrannchDto) {
-    return this.familybrannchesRepo.save(createFamilybrannchDto);
-  }
 
   findAll() {
     return this.familybrannchesRepo.find();
@@ -27,11 +24,37 @@ export class FamilybrannchesService {
     return this.familybrannchesRepo.findOne({ where: { id } });
   }
 
-  update(id: number, updateFamilybrannchDto: UpdateFamilybrannchDto) {
-    return this.familybrannchesRepo.update(id, updateFamilybrannchDto);
+  async create(
+    createFamilybrannchDto: CreateFamilybrannchDto,
+  ): Promise<FamilyBranch> {
+    const branch = this.familybrannchesRepo.create(createFamilybrannchDto);
+    return await this.familybrannchesRepo.save(branch);
   }
 
-  remove(id: number) {
-    return this.familybrannchesRepo.delete(id);
+  async update(
+    id: number,
+    updateFamilybrannchDto: UpdateFamilybrannchDto,
+  ): Promise<FamilyBranch | null> {
+    const branch = await this.familybrannchesRepo.findOne({ where: { id } });
+    if (!branch) {
+      return null;
+    }
+    Object.assign(branch, updateFamilybrannchDto);
+    return await this.familybrannchesRepo.save(branch);
+  }
+
+  async remove(id: number): Promise<{ message: string }> {
+    const familybrannch = await this.familybrannchesRepo.findOne({
+      where: { id },
+    });
+    if (!familybrannch) {
+      return { message: 'Không tìm thấy nhánh này' };
+    }
+    return this.familybrannchesRepo.remove(familybrannch).then(() => {
+      return {
+        message:
+          'Xóa chi / nhánh :' + familybrannch.branch_name + ' thành công',
+      };
+    });
   }
 }

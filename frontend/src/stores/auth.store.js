@@ -20,12 +20,12 @@ export const useAuthStore = defineStore('auth', () => {
   const roles = computed(() => user.value?.roles || [])
   const permissions = computed(() => user.value?.permissions || [])
   const branchPermissions = computed(() => user.value?.branch_permissions || [])
-  const isSuperAdmin = computed(() => roles.value.includes('Admin'))
+  //const isSuperAdmin = computed(() => roles.value.includes('Admin'))
 
   const hasRole = (role) => roles.value.includes(role)
 
   const hasPermission = (perm) => {
-    if (isSuperAdmin.value) return true
+    // if (isSuperAdmin.value) return true
     return permissions.value.includes(perm)
   }
 
@@ -39,11 +39,11 @@ export const useAuthStore = defineStore('auth', () => {
     branchPermissions.value.some((b) => b.branch_id === branchId && b.role_name === roleName)
 
   const hasBranchPermission = (perm, branchId = currentBranchId.value) => {
-    if (isSuperAdmin.value) return true
+    // if (isSuperAdmin.value) return true
     if (permissions.value.includes(perm)) return true
     const branchRole = branchPermissions.value.find((b) => b.branch_id === branchId)
     if (!branchRole) return false
-    return branchRole.role_name === 'Branch Admin'
+    // return branchRole.role_name === 'Branch Admin'
   }
   
   const loadMenusRouter = async () => {
@@ -183,7 +183,7 @@ export const useAuthStore = defineStore('auth', () => {
     permissions,
     branchPermissions,
     currentBranchId,
-    isSuperAdmin,
+    //isSuperAdmin,
     loginError,
     menusRouter,
 
