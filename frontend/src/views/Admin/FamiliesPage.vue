@@ -182,7 +182,6 @@ onMounted(async () => {
 });
 
 watch(search, () => {
-    console.log("search changed:", search.value);
     loadData();
 });
 
@@ -196,7 +195,6 @@ const openEdit = (family) => {
 };
 
 const handSave = ({ form, isEdit }) => {
-    console.log("handSave called with form:", form, "isEdit:", isEdit);
     const { id, ...payload } = form;
     try {
         if (isEdit) {
