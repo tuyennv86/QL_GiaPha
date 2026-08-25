@@ -40,6 +40,12 @@
                         <span style="color: var(--text-dim)">🔍</span>
                         <input placeholder="Tìm kiếm tên, quê quán..." v-model="search" />
                     </div>
+                    <select class="f-select" style="width: auto; padding: 8px 12px" v-model="familySelected">
+                        <option :value="0">Tất cả dòng họ</option>
+                        <option v-for="family in familyStore.families" :key="family.id" :value="family.id"> {{
+                            family.family_name }}</option>
+                    </select>
+
                     <select class="f-select" style="width: auto; padding: 8px 12px" v-model="generation">
                         <option :value="0">Tất cả đời</option>
                         <option v-for="gen in personStore.generations" :key="gen" :value="gen">Đời {{ gen }}</option>
@@ -243,6 +249,7 @@ const page = ref(1);
 const limit = ref(20);// tổng số trang trên 1 bản ghi
 const search = ref("");
 const gender = ref("-1");
+const familySelected = ref(0);
 const generation = ref("0");
 const is_alive = ref("-1");
 const person_type = ref(null)
@@ -276,7 +283,7 @@ const loadFamily = async () => {
 };
 
 const loadPersons = async () => {
-    await personStore.searchPersons(page.value, limit.value, gender.value, generation.value, is_alive.value, person_type.value, search.value);
+    await personStore.searchPersons(page.value, limit.value, gender.value, generation.value, is_alive.value, person_type.value, familySelected.value, search.value);
     // console.log('persons', personStore.persons);
 };
 
@@ -290,7 +297,6 @@ const getGeneration = async () => {
 
 onMounted(() => {
     loadPersons();
-
     getGeneration();
     loadFamily();
 

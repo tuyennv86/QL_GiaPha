@@ -37,11 +37,11 @@ export const usePersonStore = defineStore('person', () => {
     }
   }
 
-  const searchPersons = async (page, limit, gender, generation, is_alive, person_type, search) => {
+  const searchPersons = async (page, limit, gender, generation, is_alive, person_type, familyId, search) => {
     loading.value = true
     error.value = null
     try {
-      const response = await personService.search(page, limit, gender, generation, is_alive, person_type, search)
+      const response = await personService.search(page, limit, gender, generation, is_alive, person_type, familyId, search)
       total.value = response.total
       persons.value = response.items
     } catch (err) {
@@ -226,7 +226,7 @@ export const usePersonStore = defineStore('person', () => {
 
     try {
       const res = await personService.importExcel(file)
-      await searchPersons(1, 20, '-1', '0', '-1', '') // Tải lại danh sách sau khi nhập thành công
+      await searchPersons(1, 20, '-1', '0', '-1', '0,','0','') // Tải lại danh sách sau khi nhập thành công
       return res
     } catch (err) {
       error.value = err.message

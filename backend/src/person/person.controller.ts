@@ -45,6 +45,7 @@ export class PersonController {
     @Query('generation') generation: string = '0',
     @Query('is_alive') is_alive: string = '-1',
     @Query('person_type') person_type?: PersonType,
+    @Query('familyId') familyId: string = '0',
     @Query('search') search?: string,
   ) {
     const family_id = user.family_id;
@@ -57,6 +58,7 @@ export class PersonController {
       Number(is_alive),
       person_type,
       search,
+      Number(familyId),
       family_id,
     );
   }

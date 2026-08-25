@@ -24,7 +24,7 @@
                             <span style="color: var(--text-dim)">🔍</span>
                             <input placeholder="Nhập thông tin tìm kiếm..." v-model="search" />
                         </div>
-                        <button class="btn btn-danger btn-sm" @click="loadData">
+                        <button class="btn btn-danger btn-sm" @click.prevent="loadData">
                             <i class="fas fa-search"></i> Tìm kiếm
                         </button>
                     </div>
@@ -35,7 +35,7 @@
                     <thead>
                         <tr>
                             <th>Chức vụ</th>
-                            <th>Vai trò</th>
+                            <th>Thứ tự</th>
                             <th>Mô tả</th>
                             <th>Thao Tác</th>
                         </tr>

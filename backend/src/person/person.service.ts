@@ -55,6 +55,7 @@ export class PersonService {
     is_alive: number,
     person_type?: PersonType,
     search?: string,
+    familyId?: number,
     family_id?: number | null,
   ): Promise<PersonResponseList> {
     const query = this.personRepo
@@ -91,6 +92,8 @@ export class PersonService {
     }
     if (family_id) {
       query.andWhere('persons.family_id = :family_id', { family_id });
+    } else if (familyId !== 0) {
+      query.andWhere('persons.family_id = :familyId', { familyId });
     }
 
     const [entities, total] = await query

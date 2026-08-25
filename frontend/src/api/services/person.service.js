@@ -9,9 +9,9 @@ const getById = async (id) => {
   return res.data
 }
 
-const search = async (page, limit, gender, generation, is_alive, person_type, search) => {
+const search = async (page, limit, gender, generation, is_alive, person_type, familyId, search) => {
   const res = await http.get(`/person/search`, {
-    params: { page, limit, gender, generation, is_alive, person_type, search },
+    params: { page, limit, gender, generation, is_alive, person_type, familyId, search },
   })
   return res.data
 }
