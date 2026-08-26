@@ -121,7 +121,17 @@
                                     style="width: 28px; height: 28px;">{{ person.full_name.split(' ').slice(-1)[0][0] }}
                                 </div>
                                 <div>
-                                    <div class="tbl-name-val">{{ person.full_name }}</div>
+                                    <div class="tbl-name-val">{{ person.full_name }}
+                                        <template v-if="person.personTitles.length > 0">
+                                            <template v-for="title in person.personTitles" :key="title.id">
+                                                <span class="badge b-gold" style="margin-left: 4px;">{{ title.title_name
+                                                }}</span>
+                                                <span :class="title.is_active ? 'text-gold' : 'text-secondary'">
+                                                    <i class="fa-solid fa-crown"></i>
+                                                </span>
+                                            </template>
+                                        </template>
+                                    </div>
                                     <div class="tbl-name-sub">{{ person.biography }}</div>
                                 </div>
                             </div>
@@ -162,7 +172,11 @@
                             <span class="badge b-gray" v-else><i class="fas fa-skull"></i>Đã mất</span>
                         </td>
                         <td>
-                            <button class="btn btn-ghost btn-xs text-red" v-if="!person.is_alive"
+                            <button class="btn btn-ghost btn-sm text-gold" v-permission="'person.edit'"
+                                @click.prevent="openEditTitle(person)" title="Chỉnh sửa chức vụ"><i
+                                    class="fa-regular fa-chess-king"></i></button>
+
+                            <button class="btn btn-ghost btn-sm text-red" v-if="!person.is_alive"
                                 @click.prevent="openGraveLocation(person)" v-permission="'person.edit'"
                                 title="Vị trí mộ phần"> <i class="fa-solid fa-map-pin"></i></button>
 
@@ -207,6 +221,9 @@
         @onDeleteImg="handDeleteImgGrave">
     </AddGraveLocations>
 
+    <AddPersonTitle v-model="showTitlePanel" :person="selectedPersonTitle" :titles="titles" @save="handSaveTitle"
+        @deleteTitle="handDeleteTitle"></AddPersonTitle>
+
 
     <ToastCompo></ToastCompo>
     <ConfirmDialog></ConfirmDialog>
@@ -225,6 +242,7 @@ import ViewPersonSilde from '@/components/SildePanel/Person/ViewPersonSilde.vue'
 import AddPersonSilde from '@/components/SildePanel/Person/AddPersonSilde.vue';
 import EditPersonRelationship from '@/components/SildePanel/Person/EditPersonRelationship.vue';
 import AddGraveLocations from '@/components/SildePanel/Person/AddGraveLocations.vue';
+import AddPersonTitle from '@/components/SildePanel/titles/AddPersonTitle.vue';
 
 import { useFamilyStore } from '@/stores/family.store';
 import { useBranchStore } from '@/stores/branch.store';
@@ -233,6 +251,7 @@ import { useParentChildStore } from '@/stores/parent-child.store';
 import { useMarriagesStore } from '@/stores/marriages.store';
 import { PersonType } from '@/enum/person-type.enum';
 import { useGraveLocationStore } from '@/stores/grave-location.store';
+import { useTitlesStore } from '@/stores/titles.store';
 
 const IMG_URL = import.meta.env.VITE_URL;
 
@@ -244,6 +263,7 @@ const branchStore = useBranchStore();
 const parentChildStore = useParentChildStore();
 const marriagesStore = useMarriagesStore();
 const graveLocationStore = useGraveLocationStore();
+const titleStore = useTitlesStore();
 
 const page = ref(1);
 const limit = ref(20);// tổng số trang trên 1 bản ghi
@@ -275,6 +295,12 @@ const viewGraveLocation = ref(false);
 const personGrave = ref(null);
 const graveLocal = ref(null);
 
+
+//peron-title
+const showTitlePanel = ref(false);
+const selectedPersonTitle = ref(null);
+const titles = ref([]);
+
 const loadBranchByFamily = async (family_id) => {
     await branchStore.getBranchByFamily(family_id);
 };
@@ -284,7 +310,7 @@ const loadFamily = async () => {
 
 const loadPersons = async () => {
     await personStore.searchPersons(page.value, limit.value, gender.value, generation.value, is_alive.value, person_type.value, familySelected.value, search.value);
-    // console.log('persons', personStore.persons);
+    //console.log('persons', personStore.persons);
 };
 
 const getGeneration = async () => {
@@ -619,6 +645,34 @@ const handDeleteImgGrave = async (id) => {
         }
     }
 }
+
+//person-title
+
+const openEditTitle = async (person) => {
+    selectedPersonTitle.value = person;
+    titles.value = await titleStore.getAll();
+    showTitlePanel.value = true;
+}
+
+const handSaveTitle = async ({ form, isEdit }) => {
+    console.log('save person title', form, isEdit);
+    // try {
+    //     await personStore.savePersonTitle(personId, titleId, is_active);
+    //     showToast({ title: 'Cập nhật chức vụ thành công', type: 'success' });
+    // } catch (error) {
+    //     showToast({ title: 'Đã có lỗi', sub: 'Lỗi :' + error, type: 'error' });
+    // }
+}
+const handDeleteTitle = async (id) => {
+    console.log('delete person title', id);
+    // try {
+    //     await personStore.deletePersonTitle(personId, titleId);
+    //     showToast({ title: 'Xóa chức vụ thành công', type: 'success' });
+    // } catch (error) {
+    //     showToast({ title: 'Đã có lỗi', sub: 'Lỗi :' + error, type: 'error' });
+    // }
+}
+
 </script>
 
 <style scoped>

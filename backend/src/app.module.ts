@@ -26,6 +26,7 @@ import { RolePermissionModule } from './role-permission/role-permission.module';
 import { UserBranchRoleModule } from './user-branch-role/user-branch-role.module';
 import { GraveLocationModule } from './grave-location/grave-location.module';
 import { TitlesModule } from './titles/titles.module';
+import { PersonTitlesModule } from './person-titles/person-titles.module';
 
 @Module({
   imports: [
@@ -64,6 +65,7 @@ import { TitlesModule } from './titles/titles.module';
     UserBranchRoleModule,
     GraveLocationModule,
     TitlesModule,
+    PersonTitlesModule,
   ],
 
   // controllers: [AppController],

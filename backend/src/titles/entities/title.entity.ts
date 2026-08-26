@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { PersonTitle } from 'src/person-titles/entities/person-title.entity';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('titles')
 export class Title {
@@ -13,4 +14,7 @@ export class Title {
 
   @Column({ nullable: true, length: 500 })
   description: string;
+
+  @OneToMany(() => PersonTitle, (personTitle) => personTitle.title)
+  personTitles: PersonTitle[];
 }

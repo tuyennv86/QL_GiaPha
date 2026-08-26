@@ -61,7 +61,9 @@ export class PersonService {
     const query = this.personRepo
       .createQueryBuilder('persons')
       .leftJoinAndSelect('persons.family', 'family')
-      .leftJoinAndSelect('persons.branch', 'branch');
+      .leftJoinAndSelect('persons.branch', 'branch')
+      .leftJoinAndSelect('persons.personTitles', 'personTitles')
+      .leftJoinAndSelect('personTitles.title', 'title');
 
     if (search) {
       query.andWhere(
@@ -119,6 +121,14 @@ export class PersonService {
 
         'branch.id',
         'branch.branch_name',
+
+        'personTitles.id',
+        'personTitles.title_id',
+        'title.title_name',
+        'personTitles.branch_id',
+        'personTitles.start_date',
+        'personTitles.end_date',
+        'personTitles.is_active',
       ])
       .orderBy('persons.id', 'ASC')
       .skip((page - 1) * limit)

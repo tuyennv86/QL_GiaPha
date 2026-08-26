@@ -28,6 +28,16 @@ export class PersonMapper {
       branch: entity.branch
         ? { id: entity.branch.id, branch_name: entity.branch.branch_name }
         : null,
+      personTitles:
+        entity.personTitles?.map((pt) => ({
+          id: pt.id,
+          title_id: pt.title_id,
+          title_name: pt.title?.title_name,
+          branch_id: pt.branch_id,
+          start_date: pt.start_date,
+          end_date: pt.end_date,
+          is_active: pt.is_active,
+        })) ?? [],
     };
   }
 }

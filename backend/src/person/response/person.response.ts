@@ -18,6 +18,15 @@ export class PersonResponse {
   person_type: PersonType;
   family?: { id: number; family_name: string } | null;
   branch?: { id: number; branch_name: string } | null;
+  personTitles?: {
+    id: number;
+    title_id: number;
+    title_name: string;
+    branch_id: number;
+    start_date: Date;
+    end_date: Date;
+    is_active: boolean;
+  }[];
 }
 
 export class PersonResponseList {

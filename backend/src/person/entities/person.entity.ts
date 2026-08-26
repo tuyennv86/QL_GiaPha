@@ -6,10 +6,12 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { PersonType } from '../enum/person-type.enum';
+import { PersonTitle } from 'src/person-titles/entities/person-title.entity';
 
 @Entity('persons')
 export class Person {
@@ -78,4 +80,7 @@ export class Person {
   })
   @JoinColumn({ name: 'branch_id' })
   branch: FamilyBranch;
+
+  @OneToMany(() => PersonTitle, (pt) => pt.person)
+  personTitles: PersonTitle[];
 }

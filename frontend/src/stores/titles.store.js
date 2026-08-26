@@ -12,7 +12,7 @@ export const useTitlesStore = defineStore('titles', () => {
         error.value = null;
         try {
             const data = await titleService.getAll();
-            titles.value = data;
+            return data;
         } catch (err) {
             error.value = err.message;
         } finally {
