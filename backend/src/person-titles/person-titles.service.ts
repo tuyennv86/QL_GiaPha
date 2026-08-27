@@ -29,6 +29,7 @@ export class PersonTitlesService {
     const result = await query
       .select([
         'person_title.id',
+        'person_title.person_id',
         'person_title.title_id',
         'title.title_name',
         'person_title.branch_id',
@@ -42,7 +43,8 @@ export class PersonTitlesService {
 
   async update(id: number, updatePersonTitleDto: UpdatePersonTitleDto) {
     await this.personTitleRepo.update(id, updatePersonTitleDto);
-    return await this.findOne(id);
+    const result = await this.findOne(id);
+    return result;
   }
 
   async remove(id: number) {

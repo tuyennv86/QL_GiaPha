@@ -1,4 +1,4 @@
-import { IsBoolean, IsNumber } from 'class-validator';
+import { IsBoolean, IsDateString, IsNumber, IsOptional } from 'class-validator';
 
 export class CreatePersonTitleDto {
   @IsNumber()
@@ -8,11 +8,16 @@ export class CreatePersonTitleDto {
   title_id: number;
 
   @IsNumber()
-  branch_id: number;
+  @IsOptional()
+  branch_id?: number;
 
-  start_date: Date;
+  @IsOptional()
+  @IsDateString()
+  start_date?: string;
 
-  end_date: Date;
+  @IsOptional()
+  @IsDateString()
+  end_date?: string;
 
   @IsBoolean()
   is_active: boolean;

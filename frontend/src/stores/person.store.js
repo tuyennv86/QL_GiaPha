@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import personService from '@/api/services/person.service'
+import personTitleService from '@/api/services/person-title.service'
+
 
 export const usePersonStore = defineStore('person', () => {
   const persons = ref([])
@@ -235,6 +237,78 @@ export const usePersonStore = defineStore('person', () => {
     }
   }
 
+  // person title service
+  const createPersonTitle = async (payload) => {
+  loading.value = true;
+  error.value = null;
+
+  try {
+    const newTitle = await personTitleService.createPersonTitle(payload);
+
+    const person = persons.value.find(p => p.id === newTitle.person_id);
+
+    if (person) {
+      person.personTitles.push({
+        ...newTitle,
+        title_name: newTitle.title?.title_name ?? newTitle.title_name,
+      });
+    }
+
+    return newTitle;
+  } catch (err) {
+    error.value = err.message;
+    throw err;
+  } finally {
+    loading.value = false;
+  }
+};
+
+  const updatePersonTitle = async (id, data) => {
+  loading.value = true;
+  error.value = null;
+
+  try {
+    const updatedTitle = await personTitleService.updatePersonTitle(id, data);
+    
+    const person = persons.value.find(p => p.id === updatedTitle.person_id);
+    if (person) {
+      const index = person.personTitles.findIndex(t => t.id === id);
+      if (index !== -1) {
+        Object.assign(person.personTitles[index], updatedTitle);
+      }
+    }
+  } catch (err) {
+    error.value = err.message;
+  } finally {
+    loading.value = false;
+  }
+};
+
+  const deletePersonTitle = async (id) => {
+  loading.value = true;
+  error.value = null;
+
+  try {
+    const message = await personTitleService.deletePersonTitle(id);
+
+    for (const person of persons.value) {
+      const titleIndex = person.personTitles.findIndex(t => t.id === id);
+
+      if (titleIndex !== -1) {
+        person.personTitles.splice(titleIndex, 1);
+        break;
+      }
+    }
+
+    return message;
+  } catch (err) {
+    error.value = err.message;
+    throw err;
+  } finally {
+    loading.value = false;
+  }
+};
+
   return {
     persons,
     generations,
@@ -258,5 +332,10 @@ export const usePersonStore = defineStore('person', () => {
     deletePerson,
     deleteMultiplePersons,
     deleteAvatar,
+
+    // person title service
+    createPersonTitle,
+    updatePersonTitle,
+    deletePersonTitle,
   }
 })

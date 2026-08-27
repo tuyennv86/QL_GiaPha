@@ -172,9 +172,10 @@
                             <span class="badge b-gray" v-else><i class="fas fa-skull"></i>Đã mất</span>
                         </td>
                         <td>
+                            <!-- phải là con trai thì mới được nhận chưc vụ -->
                             <button class="btn btn-ghost btn-sm text-gold" v-permission="'person.edit'"
-                                @click.prevent="openEditTitle(person)" title="Chỉnh sửa chức vụ"><i
-                                    class="fa-regular fa-chess-king"></i></button>
+                                v-if="person.person_type == PersonType.SON" @click.prevent="openEditTitle(person)"
+                                title="Chỉnh sửa chức vụ"><i class="fa-regular fa-chess-king"></i></button>
 
                             <button class="btn btn-ghost btn-sm text-red" v-if="!person.is_alive"
                                 @click.prevent="openGraveLocation(person)" v-permission="'person.edit'"
@@ -221,8 +222,8 @@
         @onDeleteImg="handDeleteImgGrave">
     </AddGraveLocations>
 
-    <AddPersonTitle v-model="showTitlePanel" :person="selectedPersonTitle" :titles="titles" @save="handSaveTitle"
-        @deleteTitle="handDeleteTitle"></AddPersonTitle>
+    <AddPersonTitle v-model="showTitlePanel" :person="selectedPersonTitle" :titles="titles" :branchs="branchs"
+        @save="handSaveTitle" @deleteTitle="handDeleteTitle"></AddPersonTitle>
 
 
     <ToastCompo></ToastCompo>
@@ -300,6 +301,7 @@ const graveLocal = ref(null);
 const showTitlePanel = ref(false);
 const selectedPersonTitle = ref(null);
 const titles = ref([]);
+const branchs = ref([]);
 
 const loadBranchByFamily = async (family_id) => {
     await branchStore.getBranchByFamily(family_id);
@@ -651,26 +653,39 @@ const handDeleteImgGrave = async (id) => {
 const openEditTitle = async (person) => {
     selectedPersonTitle.value = person;
     titles.value = await titleStore.getAll();
+    branchs.value = await branchStore.getBranchByFamily(person.family_id);
     showTitlePanel.value = true;
 }
 
-const handSaveTitle = async ({ form, isEdit }) => {
-    console.log('save person title', form, isEdit);
-    // try {
-    //     await personStore.savePersonTitle(personId, titleId, is_active);
-    //     showToast({ title: 'Cập nhật chức vụ thành công', type: 'success' });
-    // } catch (error) {
-    //     showToast({ title: 'Đã có lỗi', sub: 'Lỗi :' + error, type: 'error' });
-    // }
+const handSaveTitle = async ({ form, id }) => {
+    if (id) {
+        try {
+            await personStore.updatePersonTitle(id, form);
+            showToast({ title: 'Cập nhật chức vụ thành công', type: 'success' });
+        } catch (error) {
+            showToast({ title: 'Đã có lỗi', sub: 'Lỗi :' + error, type: 'error' });
+        }
+    } else {
+        try {
+            await personStore.createPersonTitle(form);
+            showToast({ title: 'Thêm chức vụ thành công', type: 'success' });
+        } catch (error) {
+            showToast({ title: 'Đã có lỗi', sub: 'Lỗi :' + error, type: 'error' });
+        }
+    }
+
 }
 const handDeleteTitle = async (id) => {
     console.log('delete person title', id);
-    // try {
-    //     await personStore.deletePersonTitle(personId, titleId);
-    //     showToast({ title: 'Xóa chức vụ thành công', type: 'success' });
-    // } catch (error) {
-    //     showToast({ title: 'Đã có lỗi', sub: 'Lỗi :' + error, type: 'error' });
-    // }
+    const ok = await showConfirm({ title: 'Xóa ảnh mộ phần', desc: 'Bạn có chắc muốn Xóa chức vụ này không?', icon: '<i class="fa-solid fa-trash-can"></i>', btn: 'Xóa' })
+    if (ok) {
+        try {
+            await personStore.deletePersonTitle(id);
+            showToast({ title: 'Xóa chức vụ thành công', type: 'success' });
+        } catch (error) {
+            showToast({ title: 'Đã có lỗi', sub: 'Lỗi :' + error, type: 'error' });
+        }
+    }
 }
 
 </script>

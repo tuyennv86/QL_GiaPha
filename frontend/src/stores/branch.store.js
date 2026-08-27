@@ -26,6 +26,7 @@ export const useBranchStore = defineStore('branch', () => {
     try {
       const data = await branchService.getBrancheByFamily(familyId)
       branches.value = data
+      return data;
     } catch (err) {
       error.value = err.message
     } finally {

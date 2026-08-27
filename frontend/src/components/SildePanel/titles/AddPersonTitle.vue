@@ -65,6 +65,7 @@
                                 {{ title.title_name }}
                             </option>
                         </select>
+                        <small v-if="errors.title_id">{{ errors.title_id }}</small>
 
                     </div>
                     <div class="f-group">
@@ -78,7 +79,7 @@
 
                     </div>
                     <div class="f-group">
-                        <label class="f-label">Từ ngày</label>
+                        <label class="f-label">Từ ngày <span class="f-req">*</span></label>
                         <VueDatePicker v-model="form.start_date" :year-range="[0, 9999]" dark teleport="body"
                             :formats="{ input: 'dd/MM/yyyy' }" :locale="vi" />
                         <small v-if="errors.start_date">{{ errors.start_date }}</small>
@@ -106,7 +107,7 @@
             <button type="button" class="btn btn-ghost" @click="close">Hủy</button>
             <button type="button" class="btn btn-primary" @click="handleSubmit"
                 v-permission="['titles.edit', 'titles.create']">
-                💾 {{ isEdit ? "Cập nhật" : "Thêm mới" }}
+                💾 {{ form.id ? "Cập nhật" : "Thêm mới" }}
             </button>
         </template>
     </SlidePanel>
@@ -135,11 +136,11 @@ const visible = computed({
     set: (val) => emit("update:modelValue", val),
 });
 
-const isEdit = computed(() => !!props.title?.id);
 
 const form = reactive({
     id: null,
     title_id: null,
+    person_id: null,
     title_name: '',
     branch_id: null,
     start_date: null,
@@ -154,6 +155,7 @@ const resetForm = () => {
     Object.assign(form, {
         id: null,
         title_id: null,
+        person_id: null,
         title_name: '',
         branch_id: null,
         start_date: null,
@@ -178,6 +180,7 @@ const validate = () => {
     Object.keys(errors).forEach((k) => delete errors[k]);
 
     if (!form.start_date) errors.start_date = "Ngày bắt đầu không được bỏ trống!";
+    if (!form.title_id) errors.title_id = "Hãy chọn chức vụ!";
     return Object.keys(errors).length === 0;
 };
 
@@ -197,14 +200,19 @@ const editTitle = (title) => {
 /* SUBMIT */
 const handleSubmit = () => {
     if (!validate()) return;
+    const id = form.id;
 
+    const payload = {
+        title_id: form.title_id,
+        person_id: props.person.id,
+        branch_id: form.branch_id,
+        start_date: form.start_date,
+        end_date: form.end_date,
+        is_active: form.is_active
+    };
     emit("save", {
-        form: { ...form },
-        isEdit: isEdit.value
+        form: { ...payload }, id
     });
-    if (isEdit.value) {
-        close();
-    }
     resetForm();
 };
 
