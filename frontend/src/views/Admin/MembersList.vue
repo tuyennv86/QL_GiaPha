@@ -125,7 +125,7 @@
                                         <template v-if="person.personTitles.length > 0">
                                             <template v-for="title in person.personTitles" :key="title.id">
                                                 <span class="badge b-gold" style="margin-left: 4px;">{{ title.title_name
-                                                }}</span>
+                                                    }}</span>
                                                 <span :class="title.is_active ? 'text-gold' : 'text-secondary'">
                                                     <i class="fa-solid fa-crown"></i>
                                                 </span>
@@ -676,7 +676,6 @@ const handSaveTitle = async ({ form, id }) => {
 
 }
 const handDeleteTitle = async (id) => {
-    console.log('delete person title', id);
     const ok = await showConfirm({ title: 'Xóa ảnh mộ phần', desc: 'Bạn có chắc muốn Xóa chức vụ này không?', icon: '<i class="fa-solid fa-trash-can"></i>', btn: 'Xóa' })
     if (ok) {
         try {
