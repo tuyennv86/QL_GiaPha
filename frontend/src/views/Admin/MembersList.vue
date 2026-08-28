@@ -125,7 +125,7 @@
                                         <template v-if="person.personTitles.length > 0">
                                             <template v-for="title in person.personTitles" :key="title.id">
                                                 <span class="badge b-gold" style="margin-left: 4px;">{{ title.title_name
-                                                    }}</span>
+                                                }}</span>
                                                 <span :class="title.is_active ? 'text-gold' : 'text-secondary'">
                                                     <i class="fa-solid fa-crown"></i>
                                                 </span>
@@ -209,7 +209,8 @@
     </AddPersonSilde>
 
     <ViewPersonSilde v-model="viewPanel" :person="viewPerson" :parentChild="parentChildStore.parentChild"
-        :marriages="marriagesStore.marriagesList" :childList="childList" @edit-person="handEditPerson">
+        :marriages="marriagesStore.marriagesList" :childList="childList" :gravePerson="viewGravePesionPanel"
+        @edit-person="handEditPerson">
     </ViewPersonSilde>
 
     <EditPersonRelationship v-model="viewRelationshipPanel" :person="selectedRelationshipPerson" :personMen="personMen"
@@ -277,6 +278,7 @@ const person_type = ref(null)
 
 const viewPanel = ref(false);
 const viewPerson = ref(null);
+const viewGravePesionPanel = ref(false);
 
 const showPanel = ref(false);
 const selectedPerson = ref(null);
@@ -475,6 +477,7 @@ const openView = async (person) => {
     await parentChildStore.getByChildId(person.id);
     await marriagesStore.getByPersonId(person.id, person.person_type);
     childList.value = await parentChildStore.getAllChildrenByParent(person.id);
+    viewGravePesionPanel.value = await graveLocationStore.getByPersonId(person.id);
 };
 
 const handSave = async ({ form, imageFile, isEdit }) => {

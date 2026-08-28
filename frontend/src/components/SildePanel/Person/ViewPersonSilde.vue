@@ -167,6 +167,74 @@
                         </div>
                     </template>
 
+                    <template v-if="person.personTitles.length > 0">
+                        <div class="divider"></div>
+                        <div class="section-label">Danh sách chức vụ</div>
+
+                        <div v-for="title in person.personTitles" :key="title.id" class="marriage-card">
+                            <div class="marriage-card__header">
+                                <div>
+                                    <div class="marriage-card__name">
+                                        {{ title.title_name }}
+                                        <i class="fa-solid fa-crown"
+                                            :class="title.is_active ? 'text-gold' : 'text-secondary'"></i>
+                                    </div>
+
+                                    <div class="marriage-card__meta">
+                                        {{ formatDate(title.start_date) || '---' }} -- {{
+                                            formatDate(title.end_date) || '---'
+                                        }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                    <!-- mộ phần nếu có -->
+                    <template v-if="gravePerson">
+
+                        <div class="divider"></div>
+                        <div class="section-label">Thông tin mộ phần</div>
+
+                        <div class="info-row">
+                            <div class="ir-key">Nghĩa trang</div>
+                            <div class="ir-val">{{ gravePerson.cemetery_name }}</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="ir-key">Khu vực</div>
+                            <div class="ir-val">{{ gravePerson.area }}</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="ir-key">Hàng</div>
+                            <div class="ir-val">{{ gravePerson.row_number }}</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="ir-key">Cột</div>
+                            <div class="ir-val">{{ gravePerson.plot_number }}</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="ir-key">Kinh độ</div>
+                            <div class="ir-val">{{ gravePerson.latitude }}</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="ir-key">Vĩ độ</div>
+                            <div class="ir-val">{{ gravePerson.longitude }}</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="ir-key">Ảnh</div>
+                            <div class="ir-val">
+                                <img v-if="gravePerson.map_image" :src="`${IMG_URL}${gravePerson.map_image}`"
+                                    style="width: 150px; border-radius: 4px; overflow: hidden;" />
+                                <span v-else>Chưa có ảnh</span>
+                            </div>
+                        </div>
+                        <div class="info-row">
+                            <div class="ir-key">Ghi chú</div>
+                            <div class="ir-val">{{ gravePerson.note }}</div>
+                        </div>
+
+
+                    </template>
+
 
                 </div>
             </div>
@@ -203,7 +271,12 @@ const props = defineProps({
         default: () => ({})
     },
     marriages: Array, // danh sách các hôn nhân của người này
-    childList: Array // danh sách con cái của người này
+    childList: Array, // danh sách con cái của người này
+    // thông tin mộ phần nếu có
+    gravePerson: {
+        type: Object,
+        default: () => ({})
+    }
 })
 
 const emit = defineEmits(['update:modelValue', 'edit-person'])
